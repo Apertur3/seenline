@@ -1,0 +1,162 @@
+{
+	"source": "Split-View PDF artifact for arXiv:2606.15020",
+	"record": "https://zenodo.org/records/23200230",
+	"url": "https://zenodo.org/api/records/23200230/files/artifact-update.zip/content",
+	"file": "artifact-update.zip",
+	"sha256": "e72b46cf0cc66233dd64001ba4bf906181447bcdab9d405ef527f80b342a0cd9",
+	"license": "CC-BY-4.0",
+	"pdfs": "artifact-update/01_corpus_a/pdfs",
+	"note": "The artifact has no payload manifest. visible and payload were read off its precomputed renders and extractions (01_corpus_a/precomputed_outputs): visible is what the rendered page shows, payload is extractor-side text that differs from it. Renderers and extractors disagree on some gaps (EG_019 to EG_025); visible is the form most renders show.",
+	"gaps": [
+		{
+			"id": "EG_001",
+			"family": "tounicode-actualtext",
+			"visible": "ReportQZ17",
+			"payload": "CANARY_EG_001_EXTRACTED"
+		},
+		{
+			"id": "EG_002",
+			"family": "tounicode-actualtext",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_002_EXTRACTED"
+		},
+		{
+			"id": "EG_003",
+			"family": "tounicode-actualtext",
+			"visible": "TRADE",
+			"payload": "CLAIM"
+		},
+		{
+			"id": "EG_004",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_004_EXTRACTED"
+		},
+		{
+			"id": "EG_005",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_005_EXTRACTED"
+		},
+		{
+			"id": "EG_006",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_006_EXTRACTED"
+		},
+		{
+			"id": "EG_007",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_007_EXTRACTED"
+		},
+		{
+			"id": "EG_008",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_008_EXTRACTED"
+		},
+		{
+			"id": "EG_009",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_009_EXTRACTED"
+		},
+		{
+			"id": "EG_010",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_010_EXTRACTED"
+		},
+		{
+			"id": "EG_011",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_011_EXTRACTED"
+		},
+		{
+			"id": "EG_012",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_012_EXTRACTED"
+		},
+		{
+			"id": "EG_013",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_013_EXTRACTED"
+		},
+		{
+			"id": "EG_014",
+			"family": "extractor-side-payload",
+			"visible": "Quarterly results remain stable",
+			"payload": "CANARY_EG_014_EXTRACTED"
+		},
+		{
+			"id": "EG_015",
+			"family": "reading-order",
+			"visible": "1 2 3 4 5 6",
+			"payload": "1 2 6 4 5 3"
+		},
+		{
+			"id": "EG_016",
+			"family": "reading-order",
+			"visible": "RIVER STONE CANDLE MEADOW HARBOR WINTER",
+			"payload": "RIVER CANDLE HARBOR STONE MEADOW WINTER"
+		},
+		{
+			"id": "EG_017",
+			"family": "reading-order",
+			"visible": "ALPHA BRAVO CHARLIE DELTA ECHO FOXTROT GOLF HOTEL INDIA",
+			"payload": "ALPHA DELTA GOLF BRAVO ECHO HOTEL CHARLIE FOXTROT INDIA"
+		},
+		{
+			"id": "EG_018",
+			"family": "font-decoding",
+			"visible": "ABC",
+			"payload": "CAB"
+		},
+		{
+			"id": "EG_019",
+			"family": "font-decoding",
+			"visible": "TESTCID",
+			"payload": "呅協䍉"
+		},
+		{
+			"id": "EG_020",
+			"family": "font-decoding",
+			"visible": "TESTCID",
+			"payload": "呅協䍉"
+		},
+		{
+			"id": "EG_021",
+			"family": "font-decoding",
+			"visible": "REPORT",
+			"payload": "剅偏剔"
+		},
+		{
+			"id": "EG_022",
+			"family": "font-decoding",
+			"visible": "REPORT",
+			"payload": "剅偏剔"
+		},
+		{
+			"id": "EG_023",
+			"family": "font-decoding",
+			"visible": "MARKET",
+			"payload": "䵁剋䕔"
+		},
+		{
+			"id": "EG_024",
+			"family": "font-decoding",
+			"visible": "DABC",
+			"payload": "ABCD"
+		},
+		{
+			"id": "EG_025",
+			"family": "font-decoding",
+			"visible": "GRANT",
+			"payload": "䝒䅎"
+		}
+	]
+}

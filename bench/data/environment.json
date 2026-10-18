@@ -1,0 +1,83 @@
+{
+	"python": "3.12",
+	"candidates": {
+		"plainview": {
+			"formats": [
+				"pdf",
+				"docx",
+				"pptx",
+				"xlsx",
+				"csv",
+				"tsv",
+				"html",
+				"htm",
+				"eml",
+				"msg",
+				"doc",
+				"rtf",
+				"vtt",
+				"srt",
+				"png",
+				"jpg",
+				"jpeg",
+				"heic",
+				"bmp",
+				"gif",
+				"webp"
+			],
+			"configuration": "convert() from src, no OCR callback (scans and images fail closed)"
+		},
+		"markitdown": {
+			"formats": ["pdf", "docx", "pptx", "xlsx", "csv", "html", "htm", "txt", "md"],
+			"requirements": ["markitdown[pdf,docx,pptx,xlsx]==0.1.8"],
+			"configuration": "stock; plugins disabled; no LLM"
+		},
+		"docling": {
+			"formats": ["pdf", "docx", "pptx", "xlsx", "csv", "html", "htm", "md", "png", "jpg"],
+			"requirements": ["docling==2.140.0"],
+			"configuration": "standard local layout, table and OCR; page metadata exported"
+		},
+		"unstructured": {
+			"formats": [
+				"pdf",
+				"docx",
+				"pptx",
+				"xlsx",
+				"csv",
+				"html",
+				"htm",
+				"eml",
+				"txt",
+				"md",
+				"png",
+				"jpg"
+			],
+			"requirements": ["unstructured[pdf,docx,pptx,xlsx]==0.27.28"],
+			"configuration": "auto strategy for PDFs; ocr_only for images; page metadata exported"
+		},
+		"marker": {
+			"formats": ["pdf", "docx", "pptx", "xlsx", "html", "htm", "png", "jpg"],
+			"requirements": ["marker-pdf[full]==2.0.0"],
+			"configuration": "stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time"
+		},
+		"tika": {
+			"formats": "*",
+			"requirements": [],
+			"jar": {
+				"url": "https://archive.apache.org/dist/tika/3.3.3/tika-app-3.3.3.jar",
+				"sha256": "f29d4e0d2cff1fc32396f6ac5ce436dfc7b19f9303d3b899e1f56fde85711c96"
+			},
+			"configuration": "tika-app 3.3.3 text output (-t); needs a Java runtime"
+		},
+		"pymupdf4llm": {
+			"formats": ["pdf"],
+			"requirements": ["pymupdf4llm==1.28.2"],
+			"configuration": "to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled"
+		},
+		"opendataloader": {
+			"formats": ["pdf"],
+			"requirements": ["opendataloader-pdf==2.5.13"],
+			"configuration": "markdown output, default content-safety filters (it strips hidden text); needs a Java runtime"
+		}
+	}
+}

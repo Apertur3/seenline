@@ -1,0 +1,44 @@
+[
+	{
+		"file": "clipped.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-CLIPPED"]
+	},
+	{
+		"file": "squeezed.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-SQUEEZED"]
+	},
+	{
+		"file": "clip-holds.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Clipped but inside the box."],
+		"hidden": []
+	},
+	{
+		"file": "unicode-tag-chars.html",
+		"html": "<p>Thanks for the review.</p><p>See you in two weeks.{tag}</p>",
+		"tag": "CANARY-UNI-TAG",
+		"facts": ["Thanks for the review."]
+	},
+	{
+		"file": "unicode-zero-width.html",
+		"html": "<p>Thanks for the review.</p><p>C​A​N​A​R​Y​-UNI-ZW</p>",
+		"facts": ["Thanks for the review."],
+		"hidden": ["CANARY-UNI-ZW"]
+	},
+	{
+		"file": "unicode-bidi.html",
+		"html": "<p>Thanks for the review.</p><p>‮CANARY-UNI-BIDI‬</p>",
+		"facts": ["Thanks for the review."],
+		"hidden": ["CANARY-UNI-BIDI"]
+	},
+	{
+		"file": "unicode-homoglyph.html",
+		"html": "<p>Thanks for the review.</p><p>СANARY-UNI-HOMOGLYPH</p>",
+		"facts": ["Thanks for the review."],
+		"hidden": ["СANARY-UNI-HOMOGLYPH"]
+	}
+]

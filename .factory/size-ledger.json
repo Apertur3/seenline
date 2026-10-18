@@ -1,6 +1,11 @@
 {
   "release": "adoption",
   "units": {
+    "bench": {
+      "bytes": 48172,
+      "files": 13,
+      "loc": 1191
+    },
     "config": {
       "bytes": 15217,
       "files": 10,

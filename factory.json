@@ -113,7 +113,10 @@
       ".ref/*",
       "test/golden/*",
       "test/fixtures/*",
-      "package-lock.json"
+      "package-lock.json",
+      "bench/data/*",
+      "bench/results.tsv",
+      "docs/BENCHMARK.md"
     ],
     "generated": [],
     "warn_lines": 400,
@@ -145,6 +148,9 @@
         "docs/*",
         "LICENSE",
         ".gitignore"
+      ],
+      "bench": [
+        "bench/*"
       ]
     },
     "exemptions": [],

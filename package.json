@@ -17,6 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@types/node": "26.6.5",
+    "js-tiktoken": "1.0.21",
     "typescript": "7.0.2"
   },
   "main": "./dist/index.js",
@@ -45,7 +46,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "pretest": "npm run build",
-    "test": "node --test test/*.test.ts test/injection/*.test.ts",
+    "test": "node --test test/*.test.ts test/injection/*.test.ts bench/*.test.ts",
     "check": "npm run types && npm run lint",
     "golden": "node scripts/make-golden.ts",
     "smoke": "node scripts/smoke.mjs",
@@ -54,6 +55,7 @@
     "types": "tsc --noEmit",
     "golden-check": "node --test test/golden.test.ts",
     "acceptance": "npm run build && npm run smoke && node --test test/cli.test.ts test/mcp.test.ts",
-    "pack-smoke": "sh scripts/pack-smoke.sh"
+    "pack-smoke": "sh scripts/pack-smoke.sh",
+    "bench": "node bench/run.ts"
   }
 }

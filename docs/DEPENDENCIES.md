@@ -6,6 +6,7 @@
 | fflate 0.8.3 | Runtime | Local ZIP decoding for DOCX, PPTX and XLSX, plus synthetic fixture generation. XML readers and extraction budgets live in this library. | MIT |
 | @modelcontextprotocol/sdk 1.32.1 | Runtime, MCP entry only | MCP tool registration, schemas and stdio transport. No HTTP or other network transport is started. | MIT |
 | zod 4.6.7 | Runtime, MCP entry only | Validate the MCP tool input and describe its structured output. | MIT |
+| js-tiktoken 1.0.21 | Dev only (`bench/`) | o200k token counts for the benchmark; the ranks ship in the package, so counting needs no network. Never shipped. | MIT |
 
 Node built-ins supply file handling, temporary directories, decompression and the test runner. OCR is a caller callback. Legacy `.doc` and `.rtf` use macOS `/usr/bin/textutil` and fail closed on other systems.
 
