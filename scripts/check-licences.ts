@@ -11,24 +11,22 @@ const ALLOWED = new Set([
 	"MPL-2.0",
 	"0BSD",
 ]);
-const tree = JSON.parse(
-	execFileSync("npm", ["ls", "--omit=dev", "--all", "--json", "--long"], { encoding: "utf8" }),
+// Enumerate physical packages: deduplicated JSON nodes can omit their path or
+// appear before the full subtree, which would skip transitive dependencies.
+const paths = new Set(
+	execFileSync("npm", ["ls", "--omit=dev", "--all", "--parseable"], { encoding: "utf8" })
+		.trim()
+		.split("\n")
+		.slice(1),
 );
 const bad: string[] = [];
-const seen = new Set<string>();
-function walk(deps: Record<string, { path?: string; dependencies?: object }> | undefined) {
-	for (const [name, node] of Object.entries(deps ?? {})) {
-		if (!node.path || seen.has(node.path)) continue;
-		seen.add(node.path);
-		const pkg = JSON.parse(readFileSync(`${node.path}/package.json`, "utf8"));
-		const licence = typeof pkg.license === "string" ? pkg.license : JSON.stringify(pkg.license);
-		if (!ALLOWED.has(licence)) bad.push(`${name}@${pkg.version}: ${licence}`);
-		walk(node.dependencies as never);
-	}
+for (const path of paths) {
+	const pkg = JSON.parse(readFileSync(`${path}/package.json`, "utf8"));
+	const licence = typeof pkg.license === "string" ? pkg.license : JSON.stringify(pkg.license);
+	if (!ALLOWED.has(licence)) bad.push(`${pkg.name}@${pkg.version}: ${licence}`);
 }
-walk(tree.dependencies);
 if (bad.length > 0) {
 	console.error(`Licences outside the allow-list:\n${bad.join("\n")}`);
 	process.exit(1);
 }
-console.log(`Licence check: ${seen.size} runtime packages, all allowed.`);
+console.log(`Licence check: ${paths.size} runtime packages, all allowed.`);
