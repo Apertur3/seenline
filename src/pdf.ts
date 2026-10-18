@@ -16,7 +16,7 @@ export interface PdfPage {
 	number: number;
 	/** Text a reader of the page sees, one string per line, in content-stream order. */
 	lines: string[];
-	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, hidden layer. */
+	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, clipped, squeezed, hidden layer. */
 	hidden: { text: string; why: string[] }[];
 }
 

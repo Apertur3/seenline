@@ -23,7 +23,10 @@ interface Saved {
 	stroke: string;
 	alpha: number;
 	mode: number;
+	hscale: number;
+	clip: Box | null;
 }
+type Box = [number, number, number, number];
 export interface Ops {
 	fnArray: number[];
 	argsArray: unknown[][];
@@ -33,6 +36,9 @@ const TINY_PT = 2;
 // A page with more text runs than this is not a document, and covering is quadratic in it.
 const MAX_RUNS = 100_000;
 const OFF_PAGE_PT = 5;
+// Horizontal scaling (Tz) outside this range makes the letters a smear or a line, not text.
+const MIN_HSCALE = 0.2;
+const MAX_HSCALE = 10;
 // A TJ adjustment this far back is a word space (typesetters write spaces as kerning).
 const SPACE_KERN = 200;
 
@@ -45,6 +51,15 @@ export const mul = (a: Matrix, b: Matrix): Matrix => [
 	a[4] * b[1] + a[5] * b[3] + b[5],
 ];
 const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
+const intersect = (a: Box, b: Box): Box => [
+	Math.max(a[0], b[0]),
+	Math.max(a[1], b[1]),
+	Math.min(a[2], b[2]),
+	Math.min(a[3], b[3]),
+];
+// A point just outside the box still counts as in: edges are only as exact as the rounding in the file.
+const within = ([x0, y0, x1, y1]: Box, x: number, y: number) =>
+	x >= x0 - 1 && x <= x1 + 1 && y >= y0 - 1 && y <= y1 + 1;
 
 // White is every channel at 0xf0 or more; an invisible mode is "neither fill nor stroke" (3) or clip only (7).
 function hiding(color: string, mode: number, size: number, x: number, y: number, v: Matrix) {
@@ -78,6 +93,10 @@ class Walker {
 	private stroke = "#000000";
 	private alpha = 1;
 	private mode = 0;
+	private hscale = 1;
+	// The bounding box of the clipping paths in force. pdfjs reports `W` before the path it clips to.
+	private clip: Box | null = null;
+	private clipping = false;
 	private tm = IDENTITY;
 	private tlm = IDENTITY;
 	private leading = 0;
@@ -96,8 +115,8 @@ class Walker {
 	step(fn: number, a: unknown[]): void {
 		const { OPS } = this;
 		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
-			const { ctm, fontSize, color, stroke, alpha, mode } = this;
-			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode });
+			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip } = this;
+			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip });
 			if (fn === OPS.paintFormXObjectBegin && a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
 		} else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd) {
 			Object.assign(this, this.saved.pop());
@@ -112,9 +131,15 @@ class Walker {
 			this.layers.push(a[0] === "OC" && !this.visible(a[1]));
 		} else if (fn === OPS.beginMarkedContent) this.layers.push(false);
 		else if (fn === OPS.endMarkedContent) this.layers.pop();
-		else if (fn === OPS.constructPath && FILLS.some((n) => OPS[n] === a[0])) {
+		else if (fn === OPS.clip || fn === OPS.eoClip) this.clipping = true;
+		else if (fn === OPS.constructPath) {
 			const box = a[2] as ArrayLike<number> | undefined;
-			if (box) this.cover(this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0]));
+			if (box) {
+				const b = this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0]);
+				if (this.clipping) this.clip = this.clip ? intersect(this.clip, b) : b;
+				if (FILLS.some((n) => OPS[n] === a[0])) this.cover(b);
+			}
+			this.clipping = false;
 		} else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
 			this.cover(this.corners([0, 0, 1, 1]));
 		} else this.text(fn, a);
@@ -168,6 +193,7 @@ class Walker {
 		else if (fn === OPS.setStrokeRGBColor) this.stroke = String(a[0]);
 		else if (fn === OPS.setGState) this.gstate(a[0] as [string, unknown][]);
 		else if (fn === OPS.setTextRenderingMode) this.mode = a[0] as number;
+		else if (fn === OPS.setHScale) this.hscale = (a[0] as number) / 100;
 		else if (fn === OPS.setLeading) this.leading = a[0] as number;
 		else if (fn === OPS.setTextMatrix) {
 			this.tm = this.tlm = Array.from(
@@ -191,7 +217,7 @@ class Walker {
 		const user = mul(this.tm, this.ctm);
 		const size = this.fontSize * Math.hypot(user[2], user[3]);
 		let text = "";
-		let advance = 0; // in text space
+		let advance = 0; // in text space, before horizontal scaling
 		for (const part of parts) {
 			if (typeof part === "number") {
 				if (-part >= SPACE_KERN && !text.endsWith(" ")) text += " ";
@@ -201,6 +227,7 @@ class Walker {
 				advance += (part.width / 1000) * this.fontSize;
 			}
 		}
+		advance *= this.hscale;
 		if (text.trim()) {
 			// An outline-only mode is painted in the stroke colour.
 			const ink = this.mode === 1 || this.mode === 5 ? this.stroke : this.color;
@@ -208,7 +235,10 @@ class Walker {
 			if (this.alpha < 0.05) why.push("transparent");
 			if (this.out.length >= MAX_RUNS) throw new Error("too much text");
 			if (this.layers.includes(true)) why.push("hidden layer");
+			if (this.hscale < MIN_HSCALE || this.hscale > MAX_HSCALE) why.push("squeezed");
 			const end = user[4] + advance * Math.hypot(user[0], user[1]);
+			if (this.clip && !within(this.clip, (user[4] + end) / 2, user[5] + 0.3 * size))
+				why.push("clipped");
 			this.out.push({ text, x: user[4], y: user[5], size, end, why });
 		}
 		this.tm = mul([1, 0, 0, 1, advance, 0], this.tm);
