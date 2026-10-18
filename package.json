@@ -5,7 +5,9 @@
   "description": "Local document-to-Markdown converter with built-in hidden-content flagging",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": ">=24.18" },
+  "engines": {
+    "node": ">=24.18"
+  },
   "dependencies": {
     "fflate": "0.8.3",
     "pdfjs-dist": "6.4.299"
@@ -14,5 +16,31 @@
     "@biomejs/biome": "2.5.15",
     "@types/node": "26.6.5",
     "typescript": "7.0.2"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./hidden": {
+      "types": "./dist/hidden.d.ts",
+      "import": "./dist/hidden.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test test/*.test.ts test/injection/*.test.ts",
+    "check": "tsc --noEmit && biome check",
+    "golden": "node scripts/make-golden.ts",
+    "smoke": "node scripts/smoke.mjs",
+    "licences": "node scripts/check-licences.ts"
   }
 }
