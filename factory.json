@@ -1,5 +1,5 @@
 {
-  "kit_version": "0.1.0",
+  "kit_version": "0.3.0",
   "default_branch": "main",
   "land_tier": "candidate",
   "tiers": {
@@ -133,9 +133,10 @@
         "tests/*"
       ],
       "kit": [
+        "*.md",
         ".githooks/*",
-        "factory.json",
-        "*.md"
+        "KIT_VERSION",
+        "factory.json"
       ],
       "config": [
         "*.json",

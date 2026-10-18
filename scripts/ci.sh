@@ -13,6 +13,19 @@ tier="${1:-fast}"
 command -v python3 >/dev/null 2>&1 || { echo "RED: python3 is missing; the kit needs it"; exit 1; }
 US=$(printf '\037')
 
+# Kit copy stamp: KIT_VERSION (the kit's) vs factory.json kit_version (the project's). Warn; red on a major mismatch.
+if [ -f KIT_VERSION ]; then
+	python3 - <<'PY' || exit 1
+import json
+kit = open("KIT_VERSION").read().strip()
+want = str(json.load(open("factory.json")).get("kit_version", ""))
+if want and want != kit:
+    print(f"WARN: kit copy is stale: v{kit} vs v{want} (KIT_VERSION vs factory.json kit_version)")
+    if want.split(".")[0] != kit.split(".")[0]:
+        raise SystemExit("RED: kit major version differs; re-copy the kit template")
+PY
+fi
+
 plan=$(python3 - "$tier" "$US" <<'PY'
 import json, sys
 tier, sep = sys.argv[1], sys.argv[2]

@@ -38,7 +38,7 @@ class Project(unittest.TestCase):
         shutil.rmtree(self.d)
 
     def save(self):
-        (self.d / "factory.json").write_text(json.dumps(self.cfg))
+        (self.d / "factory.json").write_text(json.dumps(self.cfg, indent=2))
 
     def write(self, path, text):
         p = self.d / path
