@@ -14,7 +14,9 @@
 			"!package-lock.json",
 			"!.claude",
 			"!.ref",
-			"!test/golden"
+			"!test/golden",
+			"!.factory",
+			"!factory.json"
 		]
 	},
 	"formatter": {

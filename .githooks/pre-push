@@ -1,0 +1,24 @@
+#!/bin/sh
+# Refuse a push to a guarded ref unless land.sh validates the evidence for the pushed SHA.
+# Guarded: the default_branch of the committed factory.json, the remote's HEAD branch and every tag.
+# Enable once per clone: git config core.hooksPath .githooks
+root=$(git rev-parse --show-toplevel)
+branch=$(git show HEAD:factory.json | python3 -c 'import json,sys; print(json.load(sys.stdin)["default_branch"])') \
+	|| { echo "pre-push: cannot read default_branch from the committed factory.json; refusing"; exit 1; }
+head=$(git ls-remote --symref "$1" HEAD) || { echo "pre-push: cannot read the HEAD of $1; refusing"; exit 1; }
+head=$(printf '%s\n' "$head" | sed -n 's|^ref: refs/heads/\([^[:space:]]*\)[[:space:]]*HEAD$|\1|p')
+while read -r _lref lsha rref rsha; do
+	case "$rref" in
+	refs/tags/* | "refs/heads/$branch") ;;
+	*) [ -n "$head" ] && [ "$rref" = "refs/heads/$head" ] || continue ;;
+	esac
+	case "$lsha" in
+	*[!0]*) ;;
+	*) echo "pre-push: refusing to delete $rref"; exit 1 ;;
+	esac
+	sh "$root/scripts/land.sh" validate "$lsha" "$rsha" </dev/null || {
+		echo "pre-push: refused, no valid evidence for $lsha on $rref (see scripts/land.sh)"
+		exit 1
+	}
+done
+exit 0

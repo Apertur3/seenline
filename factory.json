@@ -1,0 +1,153 @@
+{
+  "kit_version": "0.1.0",
+  "default_branch": "main",
+  "land_tier": "candidate",
+  "tiers": {
+    "fast": [
+      "lint",
+      "types",
+      "size",
+      "unit",
+      "golden",
+      "sweep",
+      "factory"
+    ],
+    "candidate": [
+      "lint",
+      "types",
+      "size",
+      "unit",
+      "golden",
+      "sweep",
+      "factory",
+      "acceptance"
+    ],
+    "integration": [
+      "lint",
+      "types",
+      "size",
+      "unit",
+      "golden",
+      "sweep",
+      "factory",
+      "acceptance",
+      "integration"
+    ],
+    "full": [
+      "lint",
+      "types",
+      "size",
+      "unit",
+      "golden",
+      "sweep",
+      "factory",
+      "acceptance",
+      "integration",
+      "licences"
+    ],
+    "release": [
+      "size",
+      "unit",
+      "golden",
+      "sweep",
+      "factory",
+      "acceptance",
+      "licences",
+      "artifacts"
+    ]
+  },
+  "checks": {
+    "lint": {
+      "cmd": "npm run lint",
+      "timeout": 120
+    },
+    "types": {
+      "cmd": "npm run types",
+      "timeout": 180
+    },
+    "size": {
+      "cmd": "python3 scripts/check-size",
+      "timeout": 60
+    },
+    "unit": {
+      "cmd": "npm test",
+      "timeout": 300
+    },
+    "golden": {
+      "cmd": "npm run golden-check",
+      "timeout": 120
+    },
+    "sweep": {
+      "cmd": "sh scripts/sweep.sh",
+      "timeout": 120
+    },
+    "factory": {
+      "cmd": "python3 -B -m unittest discover -s tests/factory",
+      "timeout": 120
+    },
+    "acceptance": {
+      "cmd": "npm run acceptance",
+      "timeout": 300
+    },
+    "integration": {
+      "cmd": "npm run pack-smoke",
+      "timeout": 600
+    },
+    "licences": {
+      "cmd": "npm run licences",
+      "timeout": 300
+    },
+    "artifacts": {
+      "cmd": "npm run pack-smoke",
+      "timeout": 600
+    }
+  },
+  "size": {
+    "include": [
+      "*"
+    ],
+    "exclude": [
+      ".factory/*",
+      "node_modules/*",
+      "dist/*",
+      ".ref/*",
+      "test/golden/*",
+      "test/fixtures/*",
+      "package-lock.json"
+    ],
+    "generated": [],
+    "warn_lines": 400,
+    "max_lines": 1000,
+    "baseline": ".factory/size-baseline.json",
+    "ledger": ".factory/size-ledger.json",
+    "unit_growth_pct": 10,
+    "units": {
+      "src": [
+        "src/*"
+      ],
+      "scripts": [
+        "scripts/*"
+      ],
+      "test": [
+        "test/*",
+        "tests/*"
+      ],
+      "kit": [
+        ".githooks/*",
+        "factory.json",
+        "*.md"
+      ],
+      "config": [
+        "*.json",
+        "*.jsonc",
+        ".github/*",
+        "docs/*",
+        "LICENSE",
+        ".gitignore"
+      ]
+    },
+    "exemptions": [],
+    "base64_min_chars": 200,
+    "max_line_chars": 2000
+  }
+}

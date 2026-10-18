@@ -37,7 +37,8 @@
   },
   "files": [
     "dist",
-    "docs",
+    "docs/DEPENDENCIES.md",
+    "docs/TESTING.md",
     "README.md",
     "LICENSE"
   ],
@@ -45,11 +46,14 @@
     "build": "tsc -p tsconfig.build.json",
     "pretest": "npm run build",
     "test": "node --test test/*.test.ts test/injection/*.test.ts",
-    "check": "tsc --noEmit && biome check && node scripts/check-size.ts",
+    "check": "npm run types && npm run lint",
     "golden": "node scripts/make-golden.ts",
     "smoke": "node scripts/smoke.mjs",
     "licences": "node scripts/check-licences.ts",
-    "size": "node scripts/check-size.ts",
-    "net-loc": "node scripts/net-loc.ts"
+    "lint": "biome check",
+    "types": "tsc --noEmit",
+    "golden-check": "node --test test/golden.test.ts",
+    "acceptance": "npm run build && npm run smoke && node --test test/cli.test.ts test/mcp.test.ts",
+    "pack-smoke": "sh scripts/pack-smoke.sh"
   }
 }

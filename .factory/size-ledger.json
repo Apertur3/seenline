@@ -1,0 +1,30 @@
+{
+  "release": "adoption",
+  "units": {
+    "config": {
+      "bytes": 15217,
+      "files": 10,
+      "loc": 452
+    },
+    "kit": {
+      "bytes": 14125,
+      "files": 6,
+      "loc": 279
+    },
+    "scripts": {
+      "bytes": 86282,
+      "files": 20,
+      "loc": 2043
+    },
+    "src": {
+      "bytes": 87809,
+      "files": 28,
+      "loc": 2372
+    },
+    "test": {
+      "bytes": 78519,
+      "files": 21,
+      "loc": 1932
+    }
+  }
+}
