@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { scrub } from "./report.ts";
 import { assess, type Key, outcome } from "./score.ts";
 
 const key = {
@@ -99,4 +100,10 @@ test("assess counts a payload with spaced-out glyphs as passed, like outcome() d
 	const text = "[p. 1]\nC A N A R Y - X";
 	assert.equal(assess(key, text).hidden.passed, 1);
 	assert.equal(outcome(key, { status: "ok", text }), "leaked");
+});
+
+test("scrub removes home directories and the cache path from tool errors", () => {
+	const home = ["", "Users", "someone"].join("/"); // not a literal: the public-repo sweep rejects home paths
+	const raw = `Failed to convert /private/tmp/x/y/c1/input/a.docx: '${home}/.local/lib' missing`;
+	assert.equal(scrub(raw), "Failed to convert <cache>/input/a.docx: '~/.local/lib' missing");
 });

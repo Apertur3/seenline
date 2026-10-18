@@ -67,7 +67,7 @@ function row(cache: string, candidate: string, entry: Entry, env: Env): Row {
 		return {
 			...bare,
 			status: "not-run",
-			error: env.reason ?? "no result file; the adapter was not run for this report",
+			error: scrub(env.reason ?? "no result file; the adapter was not run for this report"),
 		};
 	const run = read(file);
 	if (run.sha256 !== entry.sha256) throw new Error(`Input mismatch: ${candidate}/${entry.file}`);
@@ -84,7 +84,7 @@ function row(cache: string, candidate: string, entry: Entry, env: Env): Row {
 		score: [...pairs, ...hidden],
 		tokens: ok ? tokens(run.text) : null,
 		seconds: run.seconds,
-		error: String(run.error ?? "").replace(/[\t\r\n]+/g, " "),
+		error: scrub(String(run.error ?? "")),
 	};
 }
 
@@ -202,6 +202,13 @@ function provider(cache: string): string {
 		],
 	)}`;
 }
+
+/** One line, with home directories and the scratch cache path removed: tool errors quote absolute paths. */
+export const scrub = (text: string): string =>
+	text
+		.replace(/[\t\r\n]+/g, " ")
+		.replace(/(?:\/private)?\/tmp\/[^\s'"]*?\/(?=input\/|cache\/)/g, "<cache>/")
+		.replace(/\/(?:Users|home)\/[^/\s'"]+/g, "~");
 
 export function markdown(rs: Row[], cache: string): string {
 	const fid = tools(rs).map((t) => {
