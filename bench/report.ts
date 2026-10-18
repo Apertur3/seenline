@@ -3,8 +3,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { HIDDEN_BLOCK } from "../src/hidden.ts";
+import { anchorSection } from "./anchors.ts";
 import { corpus, data, type Entry, SPLITVIEW } from "./corpus.ts";
 import { assess, type Outcome, outcome } from "./score.ts";
+import { speedSection } from "./speed.ts";
 import { median, stats } from "./stats.ts";
 import { tokens } from "./tokens.ts";
 
@@ -210,6 +212,24 @@ export const scrub = (text: string): string =>
 		.replace(/(?:\/private)?\/tmp\/[^\s'"]*?\/(?=input\/|cache\/)/g, "<cache>/")
 		.replace(/\/(?:Users|home)\/[^/\s'"]+/g, "~");
 
+interface Limits {
+	leaked: { gap: string; reason: string }[];
+	failedClosedByFloor: { gaps: string[]; reason: string }[];
+}
+
+/** Known limits of Plainview on Set B, with the reason; the text lives in bench/data/limits.json. */
+function limits(): string {
+	const l = data<Limits>("limits.json");
+	return [
+		"### Known limits",
+		"",
+		...l.leaked.map((x) => `- ${x.gap}: leaked. ${x.reason}`),
+		...l.failedClosedByFloor.map((x) => `- ${x.gaps.join(", ")}: failed closed. ${x.reason}`),
+		"",
+		"Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.",
+	].join("\n");
+}
+
 export function markdown(rs: Row[], cache: string): string {
 	const fid = tools(rs).map((t) => {
 		const all = rs.filter((r) => r.candidate === t);
@@ -266,7 +286,7 @@ comparison that a reader working from text alone can just approximate; each miss
 
 ${outcomes(rs, "B", (e) => [e.gap ?? e.file, e.family ?? ""], ["gap", "family"])}
 
-${rs.some((r) => r.entry.set === "B") ? `Plainview leaks on: ${plainviewLeaks.length ? plainviewLeaks.join(", ") : "none of the files in this run"}.` : "Set B was not run (no `prepare`); no claim is made."}
+${rs.some((r) => r.entry.set === "B") ? `Plainview leaks on: ${plainviewLeaks.length ? plainviewLeaks.join(", ") : "none of the files in this run"}.\n\n${limits()}` : "Set B was not run (no `prepare`); no claim is made."}
 
 ## Set C: the repository's own injection and Unicode cases
 
@@ -298,5 +318,7 @@ ${byFormat(
 	(r) => r.seconds,
 	(xs) => median(xs).toFixed(3),
 )}
-`;
+
+${anchorSection(cache, rs)}
+${speedSection(cache, env.version ?? "?", `${env.os ?? "?"} ${env.arch ?? ""}, ${env.cores ?? "?"} cores, ${env.memoryGiB ?? "?"} GiB RAM`)}`;
 }

@@ -1,0 +1,27 @@
+{
+	"note": "Known limits of Plainview on the Split-View set, with the reason. Gaps not listed here are flagged or correct. The 10-letter page floor makes short pages (these canaries carry 3 to 8 letters) fail closed without OCR; a diagnostic that skips the floor and reads the text layer directly is the source of the 'text layer alone' column.",
+	"leaked": [
+		{
+			"gap": "EG_001",
+			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3."
+		},
+		{
+			"gap": "EG_016",
+			"reason": "Reading order. The payload is the order the text is stored in; the reader sees another order. Plainview follows stream order, so it cannot tell. Changing the order would change the anchor lines, which is a major version under the release contract."
+		},
+		{
+			"gap": "EG_017",
+			"reason": "Reading order, same as EG_016."
+		}
+	],
+	"failedClosedByFloor": [
+		{
+			"gaps": ["EG_003", "EG_015", "EG_018", "EG_019", "EG_020"],
+			"reason": "The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct, EG_015, EG_019 and EG_020 stripped, none leaked."
+		},
+		{
+			"gaps": ["EG_021", "EG_022", "EG_023", "EG_024", "EG_025"],
+			"reason": "Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. With a library OCR callback the page is read from its rendering instead."
+		}
+	]
+}

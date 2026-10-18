@@ -18,6 +18,8 @@ test("the corpus holds the fixtures once each, with the Unicode and PDF-hiding c
 	for (const f of [
 		"unicode-tag-chars.html",
 		"unicode-bidi.html",
+		"unicode-variation-bmp.html",
+		"unicode-variation-supp.html",
 		"inj-pdf-unicode.pdf",
 		"clipped.pdf",
 	])
@@ -43,7 +45,15 @@ test("Plainview leaks no hidden payload of the control set, and the report is co
 	assert.deepEqual(table[0]?.split("\t"), HEAD);
 	assert.ok(table.slice(1, -1).every((line) => line.split("\t").length === HEAD.length));
 	const doc = markdown(rs, cache);
-	for (const heading of ["## Tools run", "## Set B", "## Set C", "## Tokens", "## Speed"])
+	for (const heading of [
+		"## Tools run",
+		"## Set B",
+		"## Set C",
+		"## Tokens",
+		"## Speed",
+		"## Anchors",
+		"## Speed and size",
+	])
 		assert.ok(doc.includes(heading), heading);
 	assert.doesNotMatch(doc, /\b(first|only)\b/i);
 });

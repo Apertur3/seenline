@@ -2,6 +2,7 @@
 //   npm run bench                    manifest, ours, report: no network, no Python
 //   npm run bench -- prepare         download the pinned corpora (the only networked step)
 //   sh bench/run-adapters.sh <cache> run the competitor adapters in isolated uv environments
+//   npm run bench -- speed|anchors   sets F and D into the cache (speed packs and installs; --prefer-offline)
 //   npm run bench -- provider-tokens optional provider token counts (key read from the Keychain)
 // PLAINVIEW_BENCH_CACHE must be an absolute scratch directory outside the repository.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -40,11 +41,16 @@ if (command === "prepare") {
 	manifest();
 } else if (command === "provider-tokens") {
 	await (await import("./provider-tokens.ts")).providerTokens(cache, corpus(cache));
-} else if (command === "all") {
+} else if (command === "speed") await (await import("./speed.ts")).speed(cache);
+else if (command === "anchors") await (await import("./anchors.ts")).anchors(cache);
+else if (command === "all") {
 	manifest();
 	await ours(cache, corpus(cache));
 	report();
 } else if (command === "manifest") manifest();
 else if (command === "ours") await ours(cache, corpus(cache));
 else if (command === "report") report();
-else throw new Error("usage: run.ts [prepare | manifest | ours | report | provider-tokens]");
+else
+	throw new Error(
+		"usage: run.ts [prepare | manifest | ours | report | speed | anchors | provider-tokens]",
+	);

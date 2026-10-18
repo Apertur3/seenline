@@ -10,14 +10,14 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 0.0.0 | 2026-10-18 | 73/99 |  | convert() from src, no OCR callback (scans and images fail closed) |
-| markitdown | 0.1.8 | 2026-10-18 | 84/99 |  | stock; plugins disabled; no LLM |
-| docling | 2.140.0 | 2026-10-18 | 95/99 |  | standard local layout, table and OCR; page metadata exported |
-| unstructured | 0.27.28 | 2026-10-18 | 83/99 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
-| marker | 2.0.0 | 2026-10-18 | 69/99 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
-| tika | - | - | 0/99 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
-| pymupdf4llm | 1.28.2 | 2026-10-18 | 57/99 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
-| opendataloader | - | - | 0/99 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
+| plainview | 0.0.0 | 2026-10-18 | 75/101 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| markitdown | 0.1.8 | 2026-10-18 | 86/101 |  | stock; plugins disabled; no LLM |
+| docling | 2.140.0 | 2026-10-18 | 97/101 |  | standard local layout, table and OCR; page metadata exported |
+| unstructured | 0.27.28 | 2026-10-18 | 85/101 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
+| marker | 2.0.0 | 2026-10-18 | 69/101 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
+| tika | - | - | 0/101 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
+| pymupdf4llm | 1.28.2 | 2026-10-18 | 57/101 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
+| opendataloader | - | - | 0/101 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
 
 `unsupported` means the file's format is outside the tool's declared formats; such files are left out of its totals.
 
@@ -67,6 +67,16 @@ comparison that a reader working from text alone can just approximate; each miss
 
 Plainview leaks on: EG_001_canary.pdf, EG_016_canary.pdf, EG_017_canary.pdf.
 
+### Known limits
+
+- EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
+- EG_016: leaked. Reading order. The payload is the order the text is stored in; the reader sees another order. Plainview follows stream order, so it cannot tell. Changing the order would change the anchor lines, which is a major version under the release contract.
+- EG_017: leaked. Reading order, same as EG_016.
+- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct, EG_015, EG_019 and EG_020 stripped, none leaked.
+- EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. With a library OCR callback the page is read from its rendering instead.
+
+Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.
+
 ## Set C: the repository's own injection and Unicode cases
 
 Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
@@ -115,25 +125,27 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 | unicode-zero-width.html | flagged | correct | correct | correct | failed-closed | not-run | unsupported | unsupported |
 | unicode-bidi.html | flagged | flagged | leaked | flagged | failed-closed | not-run | unsupported | unsupported |
 | unicode-homoglyph.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
+| unicode-variation-bmp.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
+| unicode-variation-supp.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
 | **leaked** | 0 | 21 | 17 | 24 | 4 | 0 | 3 | 0 |
-| **flagged** | 35 | 4 | 2 | 4 | 0 | 0 | 1 | 0 |
+| **flagged** | 37 | 6 | 4 | 6 | 0 | 0 | 1 | 0 |
 | **stripped** | 0 | 6 | 16 | 6 | 19 | 0 | 12 | 0 |
-| **failed-closed** | 7 | 0 | 1 | 7 | 15 | 0 | 0 | 0 |
+| **failed-closed** | 7 | 0 | 1 | 7 | 17 | 0 | 0 | 0 |
 | **correct** | 0 | 3 | 4 | 1 | 2 | 0 | 3 | 0 |
-| **flagged by the tool itself** | 35 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **flagged by the tool itself** | 37 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Fidelity (facts, rows, order, anchors found, visible text counted)
 
 | tool | files read | facts | rows | order | anchors |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 73/99 | 105/113 | 21/21 | 8/10 | 51/51 |
-| markitdown | 84/99 | 102/125 | 20/26 | 9/11 | 20/38 |
-| docling | 95/99 | 117/136 | 22/25 | 9/11 | 25/36 |
-| unstructured | 83/99 | 102/117 | 16/21 | 9/10 | 15/45 |
-| marker | 69/99 | 66/81 | 11/11 | 5/5 | 13/13 |
-| tika | 0/99 | 0/0 | 0/0 | 0/0 | 0/0 |
-| pymupdf4llm | 57/99 | 44/67 | 5/10 | 3/5 | 12/13 |
-| opendataloader | 0/99 | 0/0 | 0/0 | 0/0 | 0/0 |
+| plainview | 75/101 | 107/115 | 21/21 | 8/10 | 51/51 |
+| markitdown | 86/101 | 104/127 | 20/26 | 9/11 | 20/38 |
+| docling | 97/101 | 119/138 | 22/25 | 9/11 | 25/36 |
+| unstructured | 85/101 | 104/119 | 16/21 | 9/10 | 15/45 |
+| marker | 69/101 | 66/81 | 11/11 | 5/5 | 13/13 |
+| tika | 0/101 | 0/0 | 0/0 | 0/0 | 0/0 |
+| pymupdf4llm | 57/101 | 44/67 | 5/10 | 3/5 | 12/13 |
+| opendataloader | 0/101 | 0/0 | 0/0 | 0/0 | 0/0 |
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
@@ -143,7 +155,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 | docx | 242 (120 to 252) | 38 (19 to 105) | 37 (19 to 78) | 37 (13 to 61) | - | - | - | - |
 | eml | 91 (72 to 136) | - | - | 13 (11 to 15) | - | - | - | - |
 | htm | 50 (50 to 50) | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | - | - | - |
-| html | 44 (15 to 1604) | 49 (14 to 1466) | 49 (17 to 900) | 43 (14 to 734) | - | - | - | - |
+| html | 71 (15 to 1040) | 70 (14 to 932) | 69 (18 to 576) | 68 (14 to 474) | - | - | - | - |
 | jpg | - | - | 36 (22 to 38) | - | 40 (23 to 46) | - | - | - |
 | pdf | 53 (35 to 120) | 16 (3 to 71) | 24 (11 to 100) | 20 (10 to 82) | 19 (11 to 104) | - | 19 (6 to 89) | - |
 | png | - | - | 19 (17 to 58) | - | 19 (19 to 59) | - | - | - |
@@ -157,12 +169,64 @@ Provider token counts of the native upload are a separate optional step (`provid
 | format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 0.000 | 0.002 | 0.001 | 0.001 | - | - | - | - |
-| docx | 0.023 | 0.089 | 0.008 | 0.006 | 0.015 | - | - | - |
+| docx | 0.022 | 0.089 | 0.008 | 0.006 | 0.015 | - | - | - |
 | eml | 0.000 | - | - | 0.002 | - | - | - | - |
 | htm | 0.000 | 0.003 | 0.002 | 0.001 | 0.023 | - | - | - |
-| html | 0.000 | 0.003 | 0.002 | 0.001 | 0.017 | - | - | - |
+| html | 0.000 | 0.003 | 0.001 | 0.001 | 0.017 | - | - | - |
 | jpg | 0.000 | - | 0.990 | 0.115 | 1.683 | - | - | - |
-| pdf | 0.002 | 0.004 | 0.081 | 0.002 | 0.096 | - | 0.153 | - |
+| pdf | 0.001 | 0.004 | 0.081 | 0.002 | 0.096 | - | 0.153 | - |
 | png | 0.000 | - | 1.414 | 0.100 | 1.533 | - | - | - |
 | pptx | 0.003 | 0.006 | 0.009 | 0.005 | 0.015 | - | - | - |
 | xlsx | 0.001 | 0.005 | 0.003 | 0.005 | 0.015 | - | - | - |
+
+## Anchors (set D)
+
+Anchor overhead is the share of o200k tokens in Plainview's output that the anchors account for (page, slide,
+sheet and row lines; the timestamp prefix of a cue). Median per file over the fixture documents and subtitle files;
+formats without anchors show 0.
+
+| format | files | anchor overhead of tokens |
+| --- | --- | --- |
+| csv | 1 | 33.3% |
+| doc | 1 | 0.0% |
+| docx | 3 | 0.0% |
+| eml | 3 | 0.0% |
+| htm | 1 | 0.0% |
+| html | 1 | 0.0% |
+| pdf | 6 | 5.1% |
+| pptx | 2 | 7.2% |
+| rtf | 1 | 0.0% |
+| srt | 1 | 43.4% |
+| vtt | 1 | 43.8% |
+| xlsx | 2 | 14.6% |
+
+Accuracy, on fixtures where the true location is known. PDFs: each fact sits under its own `[p. N]` anchor.
+Office and mail files: the structure labels (heading, slide, sheet, header) are present. Subtitles: each source cue
+appears with its own start and end time. A format whose fixture key states no location is not scored.
+
+| format | anchors correct |
+| --- | --- |
+| csv | 3/3 |
+| docx | 3/3 |
+| eml | 14/14 |
+| htm | 4/4 |
+| html | 7/7 |
+| pdf | 12/12 |
+| pptx | 3/3 |
+| xlsx | 5/5 |
+| srt and vtt cues | 7/7 |
+
+## Speed and size (set F)
+
+Plainview 0.0.0, 2026-10-18, Node v26.3.0. Hardware: darwin 25 arm64, 16 cores, 64 GiB RAM, CPU class Apple M3 Max. Measured on a clean install of the
+packed tarball (`npm pack`, then `npm install` into an empty directory), on `report.pdf` (3 pages), median of 3 runs.
+
+| measure | value |
+| --- | --- |
+| cold start, `node cli.js report.pdf`, spawn to exit | 0.285 s (runs: 0.677, 0.276, 0.285) |
+| peak memory (max resident set of that process, via /usr/bin/time -l) | 125.5 MiB |
+| warm conversion, in process, after one warm-up | 0.0075 s, 0.0025 s per page |
+| package tarball | 36.9 KiB |
+| clean install (all of node_modules, apparent bytes) | 77.5 MiB |
+
+The page count comes from the fixture's own anchors. The document is small, so read the per-page figure as a floor, not a throughput figure.

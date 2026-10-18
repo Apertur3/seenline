@@ -56,6 +56,8 @@ interface Control {
 	/** Literal document text, for cases that have no fixture file; {tag} becomes the tag-character payload. */
 	html?: string;
 	tag?: string;
+	/** Variation-selector payload: "bmp" spells it in U+FE00-FE0F nibbles, "supp" in U+E0100-E01EF bytes. */
+	vs?: { mode: "bmp" | "supp"; text: string };
 	facts?: string[];
 	hidden?: string[];
 }
@@ -65,6 +67,15 @@ const empty = { facts: [], rows: [], order: [], anchors: [], hidden: [] };
 // Tag characters spell ASCII at U+E0000 + the code point: the payload as the file holds it.
 const tagged = (s: string) =>
 	[...s].map((c) => String.fromCodePoint(0xe0000 + c.charCodeAt(0))).join("");
+
+const nibble = (n: number) => String.fromCodePoint(0xfe00 + n);
+const smuggled = (mode: "bmp" | "supp", s: string) =>
+	[...s]
+		.map((c) => {
+			const b = c.charCodeAt(0);
+			return mode === "bmp" ? nibble(b >> 4) + nibble(b & 15) : String.fromCodePoint(0xe0100 + b);
+		})
+		.join("");
 
 function add(entries: Entry[], file: string, path: string, key: Key): Entry {
 	const entry: Entry = {
@@ -118,9 +129,18 @@ function synthetic(entries: Entry[], cache: string): void {
 			// Unicode cases live in the data file; they are written out so every tool reads a real file.
 			path = join(cache, "synthetic", c.file);
 			mkdirSync(dirname(path), { recursive: true });
-			writeFileSync(path, c.html.replace("{tag}", tagged(c.tag ?? "")));
+			writeFileSync(
+				path,
+				c.html
+					.replace("{tag}", tagged(c.tag ?? ""))
+					.replace("{vs}", smuggled(c.vs?.mode ?? "bmp", c.vs?.text ?? "")),
+			);
 		}
-		const hidden = [...(c.hidden ?? []), ...(c.tag ? [tagged(c.tag)] : [])];
+		const hidden = [
+			...(c.hidden ?? []),
+			...(c.tag ? [tagged(c.tag)] : []),
+			...(c.vs ? [smuggled(c.vs.mode, c.vs.text)] : []),
+		];
 		const entry = add(entries, c.file, path, { ...empty, facts: c.facts ?? [], hidden });
 		if (c.html !== undefined) entry.source = "bench/data/control.json";
 	}

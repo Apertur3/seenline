@@ -1,103 +1,105 @@
 candidate	version	date	set	group	file	gap	sha256	status	outcome	facts	rows	order	anchors	flagged	passed	dropped	tokens	seconds	error
-plainview	0.0.0	2026-10-18	C	synthetic	report.pdf	-	e8154a0eba882bbf4e69c03412456c19e56a958babd4facbe741aea7f3480121	ok	-	6/6	2/2	0/0	6/6	0	0	0	205	0.0123	-
-plainview	0.0.0	2026-10-18	C	synthetic	two-column.pdf	-	47bc7e09c3763ca070f53b325fabd1e15941782ae90b6bc7d2783aececbe98d4	ok	-	2/2	0/0	1/1	0/0	0	0	0	341	0.0050	-
-plainview	0.0.0	2026-10-18	C	synthetic	slides.pdf	-	c6eacd7a5d0c81414d13ece0a85bd5826c30a962225e34aec58d0b5b509cb4d6	ok	-	4/4	0/0	1/1	4/4	0	0	0	85	0.0062	-
-plainview	0.0.0	2026-10-18	C	synthetic	invoice.pdf	-	c2982de80092dcc8532b97f65d43c9d2036ddfa7db46bd4c86551ca4482b514d	ok	-	3/3	2/2	0/0	0/0	0	0	0	125	0.0052	-
+plainview	0.0.0	2026-10-18	C	synthetic	report.pdf	-	e8154a0eba882bbf4e69c03412456c19e56a958babd4facbe741aea7f3480121	ok	-	6/6	2/2	0/0	6/6	0	0	0	205	0.0098	-
+plainview	0.0.0	2026-10-18	C	synthetic	two-column.pdf	-	47bc7e09c3763ca070f53b325fabd1e15941782ae90b6bc7d2783aececbe98d4	ok	-	2/2	0/0	1/1	0/0	0	0	0	341	0.0044	-
+plainview	0.0.0	2026-10-18	C	synthetic	slides.pdf	-	c6eacd7a5d0c81414d13ece0a85bd5826c30a962225e34aec58d0b5b509cb4d6	ok	-	4/4	0/0	1/1	4/4	0	0	0	85	0.0050	-
+plainview	0.0.0	2026-10-18	C	synthetic	invoice.pdf	-	c2982de80092dcc8532b97f65d43c9d2036ddfa7db46bd4c86551ca4482b514d	ok	-	3/3	2/2	0/0	0/0	0	0	0	125	0.0034	-
 plainview	0.0.0	2026-10-18	C	synthetic	scan.pdf	-	f13c6fcec822fe246ae20761cdc3c172a72e5ca63d4b99d89f4d751473d9b75d	error	-	0/3	0/1	0/0	0/0	-	-	-	-	0.0007	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	whiteboard.jpg	-	06113f6bded5f778c8f15bba1b7dbd37a283a301e8ece93c13ec04aa6b9ea2ab	error	-	0/3	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	screenshot.png	-	4ed704b462aa064f17995fd6bd68e0d797600cb1847f1b0a2f38c71a456bb169	error	-	0/3	0/1	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	dutch-minutes.pdf	-	0d8991f98f4a52b46dcfb0ff2a728d079cbfa6d01a0118bf32740a0d7c8d59bb	ok	-	4/4	0/0	0/0	0/0	0	0	0	95	0.0045	-
+plainview	0.0.0	2026-10-18	C	synthetic	dutch-minutes.pdf	-	0d8991f98f4a52b46dcfb0ff2a728d079cbfa6d01a0118bf32740a0d7c8d59bb	ok	-	4/4	0/0	0/0	0/0	0	0	0	95	0.0036	-
 plainview	0.0.0	2026-10-18	C	synthetic	dutch-letter.png	-	fb12a27617b7ed7994f2f0f275747a66715bb707a572cabc7eeefa4e91825c5e	error	-	0/3	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	hidden-text.pdf	-	865a65e139f933337f4b4b22360a3a98d5ac03d581a03f547db2bc19c343184c	ok	flagged	1/1	0/0	0/0	0/0	4	0	0	102	0.0027	-
+plainview	0.0.0	2026-10-18	C	synthetic	hidden-text.pdf	-	865a65e139f933337f4b4b22360a3a98d5ac03d581a03f547db2bc19c343184c	ok	flagged	1/1	0/0	0/0	0/0	4	0	0	102	0.0022	-
 plainview	0.0.0	2026-10-18	C	synthetic	whiteboard-hard.jpg	-	b286ba0f44ce089e569433cb0915699fbf9fd2e119fb6756ad2aed328eafb06d	error	-	0/3	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	scan-hard.pdf	-	5ba94703757309c03ba91df6c4c24e62b54c42c443a71f41918055487c61b9b1	error	-	0/4	0/1	0/0	0/0	-	-	-	-	0.0040	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	memo.docx	-	4a10ff62a69456cecc496643d5f88f42ab4b69672c1be397dc9a1b7ea57612d7	ok	-	3/3	2/2	0/0	0/0	0	0	0	264	0.0239	-
-plainview	0.0.0	2026-10-18	C	synthetic	deck.pptx	-	c1f5de56c9e3d5635fade024e12b62d1dcc45adc11e4935dc6d2b1e9f27ddfe9	ok	-	3/3	0/0	1/1	0/0	0	0	0	122	0.0032	-
+plainview	0.0.0	2026-10-18	C	synthetic	scan-hard.pdf	-	5ba94703757309c03ba91df6c4c24e62b54c42c443a71f41918055487c61b9b1	error	-	0/4	0/1	0/0	0/0	-	-	-	-	0.0045	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	C	synthetic	memo.docx	-	4a10ff62a69456cecc496643d5f88f42ab4b69672c1be397dc9a1b7ea57612d7	ok	-	3/3	2/2	0/0	0/0	0	0	0	264	0.0243	-
+plainview	0.0.0	2026-10-18	C	synthetic	deck.pptx	-	c1f5de56c9e3d5635fade024e12b62d1dcc45adc11e4935dc6d2b1e9f27ddfe9	ok	-	3/3	0/0	1/1	0/0	0	0	0	122	0.0028	-
 plainview	0.0.0	2026-10-18	C	synthetic	fleet.xlsx	-	880edcfdb6e02875d706b17e318d0059bfddb47fd1f7d3d35a9ed7c8a9e38bf7	ok	-	2/2	1/1	0/0	0/0	0	0	0	111	0.0006	-
 plainview	0.0.0	2026-10-18	C	synthetic	office-memo.docx	-	f5d8d67bbaf386c96c17de790b947db577a8d98f81322df2b75f9faa3d9637dc	ok	flagged	5/5	2/2	0/0	2/2	8	0	0	185	0.0003	-
 plainview	0.0.0	2026-10-18	C	synthetic	office-deck.pptx	-	5f46608de61606979a1f35a9acaf51f02878f87ecf5ba598e2d70587df76bdd8	ok	flagged	3/3	2/2	0/0	2/2	6	0	0	159	0.0005	-
-plainview	0.0.0	2026-10-18	C	synthetic	office-book.xlsx	-	c15355af9f7fb28141ce64594f5fb4a5c5bfa39cf49d56a48ba606d873c8899a	ok	flagged	3/3	2/2	0/0	4/4	7	0	0	246	0.0005	-
+plainview	0.0.0	2026-10-18	C	synthetic	office-book.xlsx	-	c15355af9f7fb28141ce64594f5fb4a5c5bfa39cf49d56a48ba606d873c8899a	ok	flagged	3/3	2/2	0/0	4/4	7	0	0	246	0.0003	-
 plainview	0.0.0	2026-10-18	C	synthetic	office-rows.csv	-	8b6f0d0e363727ae5515e42350af929bd37331297340b53b0fbb976df17afd7a	ok	-	3/3	1/1	0/0	2/2	0	0	0	24	0.0000	-
 plainview	0.0.0	2026-10-18	C	synthetic	office-dutch.docx	-	b10c58160f67b2121cc9b841e42acb50942d1b7996c7c476888a314c6f08f865	ok	-	3/3	0/0	0/0	1/1	0	0	0	23	0.0001	-
-plainview	0.0.0	2026-10-18	C	synthetic	mail-newsletter.html	-	d5cc635c9bc7866a4eae5c838c8cd93ac63b6396e69d522e324288d38b4ec5e2	ok	flagged	5/5	0/0	0/0	7/7	16	0	0	196	0.0002	-
-plainview	0.0.0	2026-10-18	C	synthetic	mail-dutch.htm	-	960de99fa3cc16f1a8f349cc530e59220cf4323daf7f3cbb623b6e64fe5aa7c0	ok	-	4/4	0/0	0/0	4/4	0	0	0	50	0.0002	-
+plainview	0.0.0	2026-10-18	C	synthetic	mail-newsletter.html	-	d5cc635c9bc7866a4eae5c838c8cd93ac63b6396e69d522e324288d38b4ec5e2	ok	flagged	5/5	0/0	0/0	7/7	16	0	0	196	0.0004	-
+plainview	0.0.0	2026-10-18	C	synthetic	mail-dutch.htm	-	960de99fa3cc16f1a8f349cc530e59220cf4323daf7f3cbb623b6e64fe5aa7c0	ok	-	4/4	0/0	0/0	4/4	0	0	0	50	0.0001	-
 plainview	0.0.0	2026-10-18	C	synthetic	mail-alternative.eml	-	a84922cd1918ee03877c71f954917b18f2404ca92761ca00b8df9d49953c6c09	ok	flagged	6/6	0/0	0/0	6/6	3	0	0	147	0.0002	-
 plainview	0.0.0	2026-10-18	C	synthetic	mail-encoded.eml	-	12585704323de156849628a5375706f523a8c6ce282de00ac734adeebdb948af	ok	-	2/2	0/0	0/0	3/3	0	0	0	67	0.0001	-
-plainview	0.0.0	2026-10-18	C	synthetic	mail-html.eml	-	5ec94d3f2023604c11dc9ec0c092765364b5c760766113960be0943f03df26cd	ok	flagged	2/2	0/0	0/0	5/5	1	0	0	91	0.0001	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-white.pdf	-	521b56e74fb9fba9cbb951b9a0968463271a1fbb6db82098e36c373d91e9fbfa	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0023	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-tiny.pdf	-	6c9eee011d980eb7a6b147d49f583b5741b1f760eef0da60e8203c5690ca965c	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0022	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-offpage.pdf	-	daf364c90899cfe1115e4e24a2a81d6a44829cd914c5d61895449cad1d620e31	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	57	0.0021	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-invisible-mode.pdf	-	c60c12ca8cd4bb060f1a018ce733a73284bc2a35346d235fafcda2d50b44a39b	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0017	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-transparent.pdf	-	c546ba03175dd90ec76779e1e57eb7c8cf954a1b80aa58d7964a384dd57d5a06	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0018	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-stroke-white.pdf	-	c6daf83ff0410fe8f7f1d138729ae33488d760bc7f5c387508e6afc28adbbef2	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	58	0.0016	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-covered.pdf	-	04f8edf24ef33eb4f48df2480bbb4b67a6f6da39cbe8d5b758d31df3f5199047	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0013	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-under-image.pdf	-	59211bf628420d894429e1d5b1e1d2181f37a71786cecf2f94b7449fe8ec6a4d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	57	0.0016	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-layer-off.pdf	-	55d85c7a862b796def6616502800feea1b47d71ec0bd5b71032339a3762ba58d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	58	0.0016	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-annotation.pdf	-	50e2a3d6e2f5db6969dae2e115fada14a5125d966eac0c1be7a3686e941316c5	ok	flagged	0/0	0/0	0/0	0/0	2	0	0	89	0.0024	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-form-field.pdf	-	661578a68f06d800f9843dfd15c89f0f8008c134dc24a35a7a976b015991b058	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0021	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-metadata.pdf	-	f6e70a3b547832f73947f19166cdb411b9054a2a4147639d943015270476af64	ok	flagged	0/0	0/0	0/0	0/0	4	0	0	144	0.0033	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-attachment.pdf	-	d38d8dc721184e8c844c8d6ab2f4cadaa1941cc1e38dd9e05d30b36e7b15fa9b	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	53	0.0015	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-javascript.pdf	-	7d8ca2836a5448d0a9e1c4e0af9f2828fdc21dcd621dd2d6d655ca8784e65cae	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	52	0.0012	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-ocr-layer.pdf	-	cbc373c3a780bece6fde6ffdb1979b0af1592f2b0b716580aa8d15e2c0442924	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0090	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-unicode.pdf	-	6be4027b160e580378b4ffbaae4c828e0307b27157c88ac4fd1667d1bd172a98	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	79	0.0032	-
+plainview	0.0.0	2026-10-18	C	synthetic	mail-html.eml	-	5ec94d3f2023604c11dc9ec0c092765364b5c760766113960be0943f03df26cd	ok	flagged	2/2	0/0	0/0	5/5	1	0	0	91	0.0000	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-white.pdf	-	521b56e74fb9fba9cbb951b9a0968463271a1fbb6db82098e36c373d91e9fbfa	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0027	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-tiny.pdf	-	6c9eee011d980eb7a6b147d49f583b5741b1f760eef0da60e8203c5690ca965c	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0025	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-offpage.pdf	-	daf364c90899cfe1115e4e24a2a81d6a44829cd914c5d61895449cad1d620e31	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	57	0.0018	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-invisible-mode.pdf	-	c60c12ca8cd4bb060f1a018ce733a73284bc2a35346d235fafcda2d50b44a39b	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	55	0.0014	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-transparent.pdf	-	c546ba03175dd90ec76779e1e57eb7c8cf954a1b80aa58d7964a384dd57d5a06	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0015	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-stroke-white.pdf	-	c6daf83ff0410fe8f7f1d138729ae33488d760bc7f5c387508e6afc28adbbef2	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	58	0.0015	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-covered.pdf	-	04f8edf24ef33eb4f48df2480bbb4b67a6f6da39cbe8d5b758d31df3f5199047	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0015	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-under-image.pdf	-	59211bf628420d894429e1d5b1e1d2181f37a71786cecf2f94b7449fe8ec6a4d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	57	0.0014	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-layer-off.pdf	-	55d85c7a862b796def6616502800feea1b47d71ec0bd5b71032339a3762ba58d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	58	0.0015	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-annotation.pdf	-	50e2a3d6e2f5db6969dae2e115fada14a5125d966eac0c1be7a3686e941316c5	ok	flagged	0/0	0/0	0/0	0/0	2	0	0	89	0.0016	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-form-field.pdf	-	661578a68f06d800f9843dfd15c89f0f8008c134dc24a35a7a976b015991b058	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	56	0.0013	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-metadata.pdf	-	f6e70a3b547832f73947f19166cdb411b9054a2a4147639d943015270476af64	ok	flagged	0/0	0/0	0/0	0/0	4	0	0	144	0.0015	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-attachment.pdf	-	d38d8dc721184e8c844c8d6ab2f4cadaa1941cc1e38dd9e05d30b36e7b15fa9b	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	53	0.0012	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-javascript.pdf	-	7d8ca2836a5448d0a9e1c4e0af9f2828fdc21dcd621dd2d6d655ca8784e65cae	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	52	0.0011	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-ocr-layer.pdf	-	cbc373c3a780bece6fde6ffdb1979b0af1592f2b0b716580aa8d15e2c0442924	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0098	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-unicode.pdf	-	6be4027b160e580378b4ffbaae4c828e0307b27157c88ac4fd1667d1bd172a98	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	79	0.0028	-
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-png-text.png	-	4a90d336c7c008f91c05b6c74fc1b357e598ff5af839ea3c947a3418e8c0bb7c	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-exif.jpg	-	8011919e90925a58623b1b593f7a182e1f09b60b0bdfda7c637cb72e838b81ce	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-qr.png	-	87a78e1eb32dbcc86d6caa2f711bc0d19f60df9efea8b3973a7427c06b10e066	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-tiny-corner.png	-	a8ebae004d31148ef3a08df8fe8698191677dd5707f28b23d146958716d29c34	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-visible.pdf	-	f89878962f4687e104eec8d38610d8b72691b4dda170a74165cd7ac878454ffa	ok	-	1/1	0/0	0/0	0/0	0	0	0	47	0.0031	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-fake-marker.pdf	-	b712d51bf80f4aa33bf31b75c6a577da41b104159e03ebbf88d9cf20639f4a8a	ok	-	1/1	0/0	0/0	0/0	0	0	0	53	0.0025	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-visible.pdf	-	f89878962f4687e104eec8d38610d8b72691b4dda170a74165cd7ac878454ffa	ok	-	1/1	0/0	0/0	0/0	0	0	0	47	0.0022	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pdf-fake-marker.pdf	-	b712d51bf80f4aa33bf31b75c6a577da41b104159e03ebbf88d9cf20639f4a8a	ok	-	1/1	0/0	0/0	0/0	0	0	0	53	0.0015	-
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-rotated.png	-	d658754ebaf711a2b7940fc27ce65263c5be4bdfe29e2e5152d66ea3e24f0480	error	-	0/1	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-hidden-run.docx	-	7af1e2f964111d994bc32dced4005916211f949747f67519b0aacd1ac1798c1d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	243	0.0240	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-tiny.docx	-	bd99999d7b44d35b5f59ab66717d26e081b272ed07cdcc46e0ac8aa04a05f197	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	242	0.0232	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-comment.docx	-	88f23409f16c8baabc4458bab50972865049fac6e9b6c3792af1d94f992e21ce	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	244	0.0245	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-notes.pptx	-	d79052daf6c0fee4b4a857ccee22367bc54251a5d6911d4963a87d8c07d7177f	ok	-	1/1	0/0	0/0	0/0	0	0	0	130	0.0044	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-hidden-slide.pptx	-	21bbb73ef7b8658b069d451b0aef46a40183c77945accdb55976d657f308f4fe	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	143	0.0027	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-tiny.pptx	-	bac273578416c3be84f832e584072d76ecbb41733f9d1d360a034f9ac0b0b807	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	135	0.0034	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-hidden-run.docx	-	7af1e2f964111d994bc32dced4005916211f949747f67519b0aacd1ac1798c1d	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	243	0.0221	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-tiny.docx	-	bd99999d7b44d35b5f59ab66717d26e081b272ed07cdcc46e0ac8aa04a05f197	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	242	0.0217	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-docx-comment.docx	-	88f23409f16c8baabc4458bab50972865049fac6e9b6c3792af1d94f992e21ce	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	244	0.0216	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-notes.pptx	-	d79052daf6c0fee4b4a857ccee22367bc54251a5d6911d4963a87d8c07d7177f	ok	-	1/1	0/0	0/0	0/0	0	0	0	130	0.0031	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-hidden-slide.pptx	-	21bbb73ef7b8658b069d451b0aef46a40183c77945accdb55976d657f308f4fe	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	143	0.0024	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-pptx-tiny.pptx	-	bac273578416c3be84f832e584072d76ecbb41733f9d1d360a034f9ac0b0b807	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	135	0.0026	-
 plainview	0.0.0	2026-10-18	C	synthetic	inj-xlsx-hidden-sheet.xlsx	-	ffd6e2a6caea2b3f296e8648661795174929295e2a10ec3d13904653d0a8e18a	ok	flagged	0/0	0/0	0/0	0/0	1	0	0	125	0.0005	-
-plainview	0.0.0	2026-10-18	C	synthetic	inj-xlsx-comment-hidden-row.xlsx	-	1e6e273ca704ec383450aeb43966e30fea3037e0644096513bd11ae29121cdb8	ok	flagged	0/0	0/0	0/0	0/0	2	0	0	152	0.0006	-
+plainview	0.0.0	2026-10-18	C	synthetic	inj-xlsx-comment-hidden-row.xlsx	-	1e6e273ca704ec383450aeb43966e30fea3037e0644096513bd11ae29121cdb8	ok	flagged	0/0	0/0	0/0	0/0	2	0	0	152	0.0005	-
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-lowcontrast.png	-	bdadd26c2289a74da1cabb233a235596357bbef9e1f1d4d20c9b4021a3aa6257	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	inj-img-mirrored.png	-	b0c7b667836baf727b42e52d88859b27042dcdbfe8bc87d8246d98209e8da376	error	failed-closed	0/0	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	C	synthetic	clipped.pdf	-	a9af7182cc2a1d2b4e9f89f5b537a27872a0bea264d5ceac8ca26724df3ae441	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	50	0.0013	-
 plainview	0.0.0	2026-10-18	C	synthetic	squeezed.pdf	-	d61c2e4772f9f8aa8380ff87810fcc63e5da1becb2413a0133a93d0a588b8f32	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	50	0.0014	-
-plainview	0.0.0	2026-10-18	C	synthetic	clip-holds.pdf	-	7e18b65a6a61bb084b23ac4b8020eabf5aafd3436940eab8277d73bd4560fd90	ok	-	2/2	0/0	0/0	0/0	0	0	0	25	0.0021	-
+plainview	0.0.0	2026-10-18	C	synthetic	clip-holds.pdf	-	7e18b65a6a61bb084b23ac4b8020eabf5aafd3436940eab8277d73bd4560fd90	ok	-	2/2	0/0	0/0	0/0	0	0	0	25	0.0012	-
 plainview	0.0.0	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986044c112e4249e2aa5feae86f590db79603b7876623eec9232b7	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	66	0.0000	-
 plainview	0.0.0	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	ok	flagged	1/1	0/0	0/0	0/0	0	0	1	22	0.0000	-
 plainview	0.0.0	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	13	0.0000	-
 plainview	0.0.0	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	16	0.0000	-
-plainview	0.0.0	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	flagged	1/2	1/1	0/1	1/1	1	0	0	59	0.0037	-
-plainview	0.0.0	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	error	-	0/5	0/3	0/1	0/1	-	-	-	-	0.0010	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	ok	-	5/6	2/2	1/1	0/0	0	0	0	220	0.0231	-
-plainview	0.0.0	2026-10-18	A	public	pptx_complex_layout.pptx	-	2a60e9203bb6a7692d987e1e128525f79a7de5dd85b43cc1d976cef8367cd458	ok	-	2/2	0/0	1/1	1/1	0	0	0	98	0.0048	-
-plainview	0.0.0	2026-10-18	A	public	test.xlsx	-	a867be6ece38a4224bcfe34312e5c296ed520a76a431e0454603ceb171fbd4af	ok	-	5/5	2/2	1/1	1/1	0	0	0	594	0.0018	-
+plainview	0.0.0	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	75	0.0000	-
+plainview	0.0.0	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	80	0.0000	-
+plainview	0.0.0	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	flagged	1/2	1/1	0/1	1/1	1	0	0	59	0.0027	-
+plainview	0.0.0	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	error	-	0/5	0/3	0/1	0/1	-	-	-	-	0.0008	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	ok	-	5/6	2/2	1/1	0/0	0	0	0	220	0.0217	-
+plainview	0.0.0	2026-10-18	A	public	pptx_complex_layout.pptx	-	2a60e9203bb6a7692d987e1e128525f79a7de5dd85b43cc1d976cef8367cd458	ok	-	2/2	0/0	1/1	1/1	0	0	0	98	0.0027	-
+plainview	0.0.0	2026-10-18	A	public	test.xlsx	-	a867be6ece38a4224bcfe34312e5c296ed520a76a431e0454603ceb171fbd4af	ok	-	5/5	2/2	1/1	1/1	0	0	0	594	0.0015	-
 plainview	0.0.0	2026-10-18	A	public	public-rows.csv	-	827bd504e8dab40c2836602284dea7059ed59f21cbeb5e70e9ddae19de6bf65c	ok	-	3/3	2/2	1/1	1/1	0	0	0	58	0.0000	-
 plainview	0.0.0	2026-10-18	A	public	public-image.png	-	b4fe1afe99634b779d4d282e07b8e3048c9534f8d5d5f6474b0520e9fa05aa91	error	-	0/1	0/0	0/0	0/0	-	-	-	-	0.0000	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	A	public	blog-case-study.html	-	a4668c9aa9e639a193a1582de35786239bd71d457dc534a2a32e642606ffa221	ok	-	0/3	0/0	0/1	0/0	0	0	0	3011	0.0015	-
-plainview	0.0.0	2026-10-18	A	public	public-injection.pdf	-	2822e2674c9fe8f90d233f9076951ea053571dc2f7b60049d0d57bf2c19bfac7	ok	flagged	2/2	0/0	1/1	1/1	5	0	0	229	0.0036	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_001_canary.pdf	EG_001	48dbd9f64e45521cc3ba06e4f499341b842acc20d636552592e6f60212c48141	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	38	0.0032	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_002_canary.pdf	EG_002	9d056f4767e91abfa89025e5b167ff10a619e0d7d49ba0c877d46fd59e769ea6	ok	correct	1/1	0/0	0/0	0/0	0	0	1	11	0.0015	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_003_canary.pdf	EG_003	993ed345927a4729ffdd69d62eb7e056689d94cb251acc06a1d435b9c7733db9	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0012	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_004_canary.pdf	EG_004	0261fcfba2703de4667ae5533e45aaaaae5b45977ac1b3b2a74f4a827ec1de2a	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0043	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_005_canary.pdf	EG_005	97010d7339cef286d5cd776106e2daa6e4ee62ecd2ebff61cbabd9fe5109d07f	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0017	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_006_canary.pdf	EG_006	de6a8bed70376c5975a34d6b9f1e6fc0457791418d5a78705422a65b0cd7d95c	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	36	0.0018	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_007_canary.pdf	EG_007	d7e15d8c88925ef2c5293eb3ca56cfd05e6ab3c3396d434c2fc413190d5d49a1	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0020	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_008_canary.pdf	EG_008	dd773d30143de745fe444ac7c3f9440cbef11db4930d9b54bec6c38c727a3531	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0018	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_009_canary.pdf	EG_009	266c044af118b4d44adf3d1cf8a6ea3c260da3c7d2dd8ae3861f93b8b6b82304	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0015	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_010_canary.pdf	EG_010	2453833081c4c74c3d2e5e5e16c71bb1f5f3b1357c833c842cb738cd08e92066	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0025	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_011_canary.pdf	EG_011	2e43d8e2ee78b91b13fd01846a8c4450a2b59972f01db900bd5bf3928f64ad88	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0022	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_012_canary.pdf	EG_012	b93a4276bda40b92368f4367fc24d78d48f3dce4f2c92699487dfd482a90f4d6	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0019	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_013_canary.pdf	EG_013	331b4c7c9153d695f34245805500deab14669f90b1f3eb579650b91cd2a3e9d6	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0019	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_014_canary.pdf	EG_014	5a5c024ba9d55da1a21b774f2913cefb9b7243dd806f03fb21de8e7ac64d09f1	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	36	0.0021	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_015_canary.pdf	EG_015	36d7971670ca3b9d4623d4bec5afc89c90e788a3699160146758682e5135105f	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0016	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_016_canary.pdf	EG_016	fac1093b7c616e7a7a87e7bd50ae80f519bc744622ed1b9455e3ea24eae7bfd2	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	23	0.0020	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_017_canary.pdf	EG_017	1daaff6c7c045e54b66c81d703d1170589fb24c94b2bdcb603f56eec8344cd17	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	35	0.0015	-
-plainview	0.0.0	2026-10-18	B	splitview	EG_018_canary.pdf	EG_018	5f5cc0b99597fab508f0cb34f5c476d6adb8b42c15d98db3f2a3405c912c8bfb	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0014	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_019_canary.pdf	EG_019	5c4c3ca0525e3a8fb0cc89d7554adb9481ed436585ab2087f159a81b447d9ea5	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0005	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_020_canary.pdf	EG_020	173555f46210fd0289d7e4e8285566305cc8647060736c73ff319079eac9c76d	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0006	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_021_canary.pdf	EG_021	015dae777e8bcf57256bd03a03f490e2283b8bae7d762ed011ea1dcb3d13f45f	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0025	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_022_canary.pdf	EG_022	920d94132e252439fe6c531fd23947530faaf90fafb754324537041df35a9829	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0019	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_023_canary.pdf	EG_023	2eaba5851835ffff618eb43f6ae301b1697562f6569b93635b6eef28ff9dfea5	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0212	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	A	public	blog-case-study.html	-	a4668c9aa9e639a193a1582de35786239bd71d457dc534a2a32e642606ffa221	ok	-	0/3	0/0	0/1	0/0	0	0	0	3011	0.0018	-
+plainview	0.0.0	2026-10-18	A	public	public-injection.pdf	-	2822e2674c9fe8f90d233f9076951ea053571dc2f7b60049d0d57bf2c19bfac7	ok	flagged	2/2	0/0	1/1	1/1	5	0	0	229	0.0042	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_001_canary.pdf	EG_001	48dbd9f64e45521cc3ba06e4f499341b842acc20d636552592e6f60212c48141	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	38	0.0028	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_002_canary.pdf	EG_002	9d056f4767e91abfa89025e5b167ff10a619e0d7d49ba0c877d46fd59e769ea6	ok	correct	1/1	0/0	0/0	0/0	0	0	1	11	0.0016	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_003_canary.pdf	EG_003	993ed345927a4729ffdd69d62eb7e056689d94cb251acc06a1d435b9c7733db9	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0013	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_004_canary.pdf	EG_004	0261fcfba2703de4667ae5533e45aaaaae5b45977ac1b3b2a74f4a827ec1de2a	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0012	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_005_canary.pdf	EG_005	97010d7339cef286d5cd776106e2daa6e4ee62ecd2ebff61cbabd9fe5109d07f	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0012	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_006_canary.pdf	EG_006	de6a8bed70376c5975a34d6b9f1e6fc0457791418d5a78705422a65b0cd7d95c	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	36	0.0012	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_007_canary.pdf	EG_007	d7e15d8c88925ef2c5293eb3ca56cfd05e6ab3c3396d434c2fc413190d5d49a1	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0047	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_008_canary.pdf	EG_008	dd773d30143de745fe444ac7c3f9440cbef11db4930d9b54bec6c38c727a3531	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0015	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_009_canary.pdf	EG_009	266c044af118b4d44adf3d1cf8a6ea3c260da3c7d2dd8ae3861f93b8b6b82304	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0012	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_010_canary.pdf	EG_010	2453833081c4c74c3d2e5e5e16c71bb1f5f3b1357c833c842cb738cd08e92066	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0015	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_011_canary.pdf	EG_011	2e43d8e2ee78b91b13fd01846a8c4450a2b59972f01db900bd5bf3928f64ad88	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0016	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_012_canary.pdf	EG_012	b93a4276bda40b92368f4367fc24d78d48f3dce4f2c92699487dfd482a90f4d6	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0037	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_013_canary.pdf	EG_013	331b4c7c9153d695f34245805500deab14669f90b1f3eb579650b91cd2a3e9d6	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	35	0.0018	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_014_canary.pdf	EG_014	5a5c024ba9d55da1a21b774f2913cefb9b7243dd806f03fb21de8e7ac64d09f1	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	36	0.0016	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_015_canary.pdf	EG_015	36d7971670ca3b9d4623d4bec5afc89c90e788a3699160146758682e5135105f	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0013	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_016_canary.pdf	EG_016	fac1093b7c616e7a7a87e7bd50ae80f519bc744622ed1b9455e3ea24eae7bfd2	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	23	0.0013	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_017_canary.pdf	EG_017	1daaff6c7c045e54b66c81d703d1170589fb24c94b2bdcb603f56eec8344cd17	ok	leaked	0/1	0/0	0/0	0/0	0	1	0	35	0.0012	-
+plainview	0.0.0	2026-10-18	B	splitview	EG_018_canary.pdf	EG_018	5f5cc0b99597fab508f0cb34f5c476d6adb8b42c15d98db3f2a3405c912c8bfb	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0010	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_019_canary.pdf	EG_019	5c4c3ca0525e3a8fb0cc89d7554adb9481ed436585ab2087f159a81b447d9ea5	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0007	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_020_canary.pdf	EG_020	173555f46210fd0289d7e4e8285566305cc8647060736c73ff319079eac9c76d	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0004	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_021_canary.pdf	EG_021	015dae777e8bcf57256bd03a03f490e2283b8bae7d762ed011ea1dcb3d13f45f	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0014	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_022_canary.pdf	EG_022	920d94132e252439fe6c531fd23947530faaf90fafb754324537041df35a9829	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0016	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_023_canary.pdf	EG_023	2eaba5851835ffff618eb43f6ae301b1697562f6569b93635b6eef28ff9dfea5	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0015	could not read this file: no text recognition available
 plainview	0.0.0	2026-10-18	B	splitview	EG_024_canary.pdf	EG_024	da2dcd90b4e522f7094d4ae5027ac2924853714a9ded2d42f6ff0b4908cb7ff6	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0010	could not read this file: no text recognition available
-plainview	0.0.0	2026-10-18	B	splitview	EG_025_canary.pdf	EG_025	e924da867ac9d89e59f1cf2401e130eb5f1803463f91ad7fb50cd1e0af34b259	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0017	could not read this file: no text recognition available
+plainview	0.0.0	2026-10-18	B	splitview	EG_025_canary.pdf	EG_025	e924da867ac9d89e59f1cf2401e130eb5f1803463f91ad7fb50cd1e0af34b259	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0015	could not read this file: no text recognition available
 markitdown	0.1.8	2026-10-18	C	synthetic	report.pdf	-	e8154a0eba882bbf4e69c03412456c19e56a958babd4facbe741aea7f3480121	ok	-	6/6	2/2	0/0	0/6	0	0	0	208	0.0159	-
 markitdown	0.1.8	2026-10-18	C	synthetic	two-column.pdf	-	47bc7e09c3763ca070f53b325fabd1e15941782ae90b6bc7d2783aececbe98d4	ok	-	2/2	0/0	1/1	0/0	0	0	0	345	0.0329	-
 markitdown	0.1.8	2026-10-18	C	synthetic	slides.pdf	-	c6eacd7a5d0c81414d13ece0a85bd5826c30a962225e34aec58d0b5b509cb4d6	ok	-	4/4	0/0	1/1	4/4	0	0	0	68	0.0148	-
@@ -163,6 +165,8 @@ markitdown	0.1.8	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb098604
 markitdown	0.1.8	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	ok	correct	1/1	0/0	0/0	0/0	0	0	1	33	0.0028	-
 markitdown	0.1.8	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	13	0.0026	-
 markitdown	0.1.8	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	15	0.0026	-
+markitdown	0.1.8	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	74	0.0031	-
+markitdown	0.1.8	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	79	0.0028	-
 markitdown	0.1.8	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	leaked	1/2	0/1	0/1	0/1	0	1	0	15	0.0052	-
 markitdown	0.1.8	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	ok	-	0/5	0/3	0/1	0/1	0	0	0	0	0.0043	-
 markitdown	0.1.8	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	ok	-	5/6	2/2	1/1	0/0	0	0	0	39	0.0962	-
@@ -262,6 +266,8 @@ docling	2.140.0	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986044
 docling	2.140.0	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	ok	correct	1/1	0/0	0/0	0/0	0	0	1	33	0.0014	-
 docling	2.140.0	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	ok	leaked	1/1	0/0	0/0	0/0	0	1	0	19	0.0010	-
 docling	2.140.0	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	15	0.0009	-
+docling	2.140.0	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	74	0.0015	-
+docling	2.140.0	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	79	0.0010	-
 docling	2.140.0	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	leaked	1/2	1/1	0/1	1/1	0	1	0	20	0.6920	-
 docling	2.140.0	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	ok	-	5/5	3/3	0/1	1/1	0	0	0	101	3.3919	-
 docling	2.140.0	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	ok	-	5/6	2/2	1/1	0/0	0	0	0	35	0.0138	-
@@ -361,6 +367,8 @@ unstructured	0.27.28	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb09
 unstructured	0.27.28	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	ok	correct	1/1	0/0	0/0	0/0	0	0	1	21	0.0005	-
 unstructured	0.27.28	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	13	0.0007	-
 unstructured	0.27.28	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	15	0.0004	-
+unstructured	0.27.28	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	74	0.0008	-
+unstructured	0.27.28	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	ok	flagged	1/1	0/0	0/0	0/0	1	0	0	79	0.0004	-
 unstructured	0.27.28	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	leaked	1/2	0/1	0/1	1/1	0	1	0	19	0.0022	-
 unstructured	0.27.28	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	error	-	0/5	0/3	0/1	0/1	-	-	-	-	0.2159	TesseractNotFoundError: tesseract is not installed or it's not in your PATH. See README file for more information.
 unstructured	0.27.28	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	ok	-	5/6	2/2	1/1	0/0	0	0	0	13	0.0070	-
@@ -460,6 +468,8 @@ marker	2.0.0	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986044c11
 marker	2.0.0	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0178	RuntimeError: Failed to convert <cache>/input/unicode-zero-width.html to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
 marker	2.0.0	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0157	RuntimeError: Failed to convert <cache>/input/unicode-bidi.html to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
 marker	2.0.0	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0151	RuntimeError: Failed to convert <cache>/input/unicode-homoglyph.html to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
+marker	2.0.0	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0479	RuntimeError: Failed to convert <cache>/input/unicode-variation-bmp.html to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
+marker	2.0.0	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	error	failed-closed	0/1	0/0	0/0	0/0	-	-	-	-	0.0143	RuntimeError: Failed to convert <cache>/input/unicode-variation-supp.html to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
 marker	2.0.0	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	correct	2/2	1/1	1/1	1/1	0	0	1	23	0.3045	-
 marker	2.0.0	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	ok	-	5/5	3/3	1/1	1/1	0	0	0	203	3.7879	-
 marker	2.0.0	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	error	-	0/6	0/2	0/1	0/0	-	-	-	-	0.0163	RuntimeError: Failed to convert <cache>/input/docx_complex_layout.docx to PDF: cannot load library 'libgobject-2.0-0': dlopen(libgobject-2.0-0, 0x0002): tried: 'libgobject-2.0-0' (no such file), '/System/Volumes/Preboot/Cryptexes/OSlibgobject-2.0-0' (no such file), '~/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/libgobject-2.0-0' (no such file), '/usr/lib/libgobject-2.0-0' (no such file, not in dyld cache), 'libgobject-2.0-0' (no such file).  Additionally, ctypes.util.find_library() did not manage to locate a library called 'libgobject-2.0-0'
@@ -559,6 +569,8 @@ tika	-	-	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986044c112e4249e2aa5feae
 tika	-	-	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 tika	-	-	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 tika	-	-	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
+tika	-	-	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
+tika	-	-	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 tika	-	-	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 tika	-	-	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 tika	-	-	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
@@ -658,6 +670,8 @@ pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986
 pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
+pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
+pymupdf4llm	1.28.2	2026-10-18	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 pymupdf4llm	1.28.2	2026-10-18	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	ok	leaked	1/2	1/1	0/1	1/1	0	1	0	20	0.1669	-
 pymupdf4llm	1.28.2	2026-10-18	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	ok	-	0/5	0/3	0/1	0/1	0	0	0	5	0.1817	-
 pymupdf4llm	1.28.2	2026-10-18	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
@@ -757,6 +771,8 @@ opendataloader	-	-	C	synthetic	unicode-tag-chars.html	-	de58b7fcb0986044c112e424
 opendataloader	-	-	C	synthetic	unicode-zero-width.html	-	d795ca646f32d292b8586e5ec0cda1d7b824513d6e688a3fae2fec29794edd21	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 opendataloader	-	-	C	synthetic	unicode-bidi.html	-	e99edf6335633010ea35bab83ed34985f401628785fa246a31ed8621d0864eef	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 opendataloader	-	-	C	synthetic	unicode-homoglyph.html	-	e53c3cbda82075a9c4de797be7d9908d9eaf1a2dec453e4425c3fe7d737e8120	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
+opendataloader	-	-	C	synthetic	unicode-variation-bmp.html	-	0b5b67f8370eee4b922320a62f209ede9749bbf8f11b14aa272245a1abfcc264	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
+opendataloader	-	-	C	synthetic	unicode-variation-supp.html	-	e11830caeb5581afd9deb35440da3feff1734dada2858a45c4a76bd4a8321ca4	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats
 opendataloader	-	-	A	public	pdf_complex_layout.pdf	-	cb6a044068394290bba9c464cefaf3baf598d3e4754df49f12ea2b23f09d06d1	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 opendataloader	-	-	A	public	pdf_scanned_sales_report.pdf	-	5a6f069f635f89a2268d558ee62ca09b86763e3fa628d02953979959d217c25a	not-run	-	-	-	-	-	-	-	-	-	-	not-run: RuntimeError: no Java runtime on this host
 opendataloader	-	-	A	public	docx_complex_layout.docx	-	6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	unsupported	-	-	-	-	-	-	-	-	-	-	format outside the tool's declared formats

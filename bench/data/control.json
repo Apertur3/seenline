@@ -40,5 +40,17 @@
 		"html": "<p>Thanks for the review.</p><p>СANARY-UNI-HOMOGLYPH</p>",
 		"facts": ["Thanks for the review."],
 		"hidden": ["СANARY-UNI-HOMOGLYPH"]
+	},
+	{
+		"file": "unicode-variation-bmp.html",
+		"html": "<p>Thanks for the review.</p><p>See you in two weeks.\ufe0f{vs}</p>",
+		"vs": { "mode": "bmp", "text": "CANARY-UNI-VSBMP" },
+		"facts": ["Thanks for the review."]
+	},
+	{
+		"file": "unicode-variation-supp.html",
+		"html": "<p>Thanks for the review.</p><p>See you in two weeks.{vs}</p>",
+		"vs": { "mode": "supp", "text": "CANARY-UNI-VSSUPP" },
+		"facts": ["Thanks for the review."]
 	}
 ]
