@@ -9,6 +9,7 @@ import { assess, type Outcome, outcome } from "./score.ts";
 import { speedSection } from "./speed.ts";
 import { median, stats } from "./stats.ts";
 import { tokens } from "./tokens.ts";
+import { commonTokens, hiddenRate } from "./tokens-report.ts";
 
 interface Spec {
 	formats: "*" | string[];
@@ -308,6 +309,10 @@ ${byFormat(
 		return `${Math.round(s.median)} (${Math.round(s.p10)} to ${Math.round(s.p90)})`;
 	},
 )}
+
+${commonTokens(rs, cache)}
+
+${hiddenRate(rs, cache)}
 
 ${provider(cache)}
 

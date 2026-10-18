@@ -47,7 +47,9 @@ export interface SplitView {
 	note: string;
 	gaps: { id: string; family: string; visible: string; payload: string }[];
 }
-export const PUBLIC = data<PublicFile[]>("public.json");
+export const PUBLIC = ["public", "public-pdf", "public-office", "public-web"].flatMap((name) =>
+	data<PublicFile[]>(`${name}.json`),
+);
 export const SPLITVIEW = data<SplitView>("splitview.json");
 
 interface Control {

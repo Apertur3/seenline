@@ -1,0 +1,1267 @@
+[
+	{
+		"file": "gov-5d53dafa-Template_Lease__Mutual_.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/5d53dafaed915d7647f7ecfa/Template_Lease__Mutual_.docx",
+		"sha256": "620220c104a4a7da055fa0a025f4926161853b1a3ef2a71c0d8829b99f13a582",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"This document is a template Lease to be granted by the Local Authority to the mutual.",
+			"The easements as specified in clause 4 of this lease.",
+			"the open market rent agreed or determined pursuant to this clause.",
+			"provide any of the Services outside the Permitted Hours; or",
+			"23.1 The Tenant shall comply with all laws relating to:",
+			"(i) any marketing or promotion activities in relation to the Building."
+		],
+		"rows": [["Category", "Assumption", "Additional Drafting"]],
+		"order": [
+			"This document is a template Lease to be granted by the Local Authority to the mutual.",
+			"The easements as specified in clause 4 of this lease.",
+			"the open market rent agreed or determined pursuant to this clause.",
+			"provide any of the Services outside the Permitted Hours; or",
+			"23.1 The Tenant shall comply with all laws relating to:",
+			"(i) any marketing or promotion activities in relation to the Building."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-62d6ac30-Environmental_Statement_Details_Template_-_required_as_a_pre.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/62d6ac30d3bf7f28643ca4d3/Environmental_Statement_Details_Template_-_required_as_a_preface_to_all_ES_submissions.docx",
+		"sha256": "1926dcc8092fd8028cc3999215bb5737f83043b5def12c9d9fa5ae7a87fe2613",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"ENVIRONMENTAL STATEMENT DETAILS",
+			"A3 - ES Contact Details (if different from above)",
+			"a) Please confirm licence(s) covering proposed activity or activities",
+			"a) Please specify the name of the project.",
+			"Distance to nearest international median line (km)",
+			"Identification number of ES:"
+		],
+		"rows": [["Licensee", "Percentage Equity"]],
+		"order": [
+			"ENVIRONMENTAL STATEMENT DETAILS",
+			"A3 - ES Contact Details (if different from above)",
+			"a) Please confirm licence(s) covering proposed activity or activities",
+			"a) Please specify the name of the project.",
+			"Distance to nearest international median line (km)",
+			"Identification number of ES:"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-63d38a0d-16._hcf_notification_template_3.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/63d38a0d8fa8f519d77d6952/16._hcf_notification_template_3.docx",
+		"sha256": "b49c00f6510e37993ad40b02434f64310dc4746a4bd35575480488ee9e050b4f",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Certificate reference numbers:",
+			"Number of days of Hearing and advocates meetings to date:",
+			"Number of days of future hearings / advocates meetings:",
+			"Date of Final Hearing (if known):",
+			"Costs to date",
+			"(Your Name and Firm Name)"
+		],
+		"rows": [],
+		"order": [
+			"Certificate reference numbers:",
+			"Number of days of Hearing and advocates meetings to date:",
+			"Number of days of future hearings / advocates meetings:",
+			"Date of Final Hearing (if known):",
+			"Costs to date",
+			"(Your Name and Firm Name)"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-655dfdac-HCF_Contract_2018_HR.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/655dfdac544aea0019fb3266/HCF_Contract_2018_HR.docx",
+		"sha256": "ef000bffe3b7e9b53b54c4da0ab1608a888faa2a476d1dc46911a56287ee3f9b",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Clients Name [ ]",
+			"Authorised signatory for and on behalf of the Lord Chancellor.",
+			"3 Service Standards - General",
+			"after the conclusion of the case.",
+			"7 Payment Rates Civil work",
+			"Cases where 2 Counsel are approved with a main hearing above 10 days."
+		],
+		"rows": [["Contract Manager", "Antony Leal"]],
+		"order": [
+			"Clients Name [ ]",
+			"Authorised signatory for and on behalf of the Lord Chancellor.",
+			"3 Service Standards - General",
+			"after the conclusion of the case.",
+			"7 Payment Rates Civil work",
+			"Cases where 2 Counsel are approved with a main hearing above 10 days."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-65e06d4f-2021_PAR_TEMPLATE_HYBRID_Reg_52__10.3_.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/65e06d4fb8da630f42c86305/2021_PAR_TEMPLATE_HYBRID_Reg_52__10.3_.docx",
+		"sha256": "e6948ed2911800e2feef646b2ea20dbb76a05631cfcbfe094129a9c9c81e5021",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Public Assessment Report",
+			"TABLE OF CONTENTS",
+			"This/These study(ies) were conducted in-line with current Good Clinical Practice (GCP).",
+			"III NON-CLINICAL ASPECTS",
+			"IV.4 Clinical efficacy",
+			"The benefit/risk is, therefore, considered to be positive."
+		],
+		"rows": [
+			[
+				"Application type",
+				"Scope",
+				"Product information affected",
+				"Date of grant",
+				"Outcome",
+				"Assessment report attached Y/N"
+			]
+		],
+		"order": [
+			"TABLE OF CONTENTS",
+			"IV.4 Clinical efficacy",
+			"The benefit/risk is, therefore, considered to be positive."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-66828966-QSR_Template_guidance.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/66828966c7f64e23420901ac/QSR_Template_guidance.docx",
+		"sha256": "d06f493c82cfd80a237944dd0206457ab3813ba3bfa485279cf50ddaf172bca0",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Quarterly Summary Reports",
+			"When providing these summaries please use the following template",
+			"Serious adverse events",
+			"Overall summary of the report"
+		],
+		"rows": [],
+		"order": [
+			"Quarterly Summary Reports",
+			"When providing these summaries please use the following template",
+			"Serious adverse events",
+			"Overall summary of the report"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-66fe79e7-Offshore_Industry_Guidance_on_the_EU_Mercury_Legislation__Fi.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/66fe79e7a31f45a9c765f0a2/Offshore_Industry_Guidance_on_the_EU_Mercury_Legislation__Final_.docx",
+		"sha256": "8ec3caa343bb38b8c4f992b5c7a8a733791d09d256ed15d117a702dd4eb17dbd",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"In practice this means OPRED will;",
+			"Appendix A Reporting Form",
+			"The cleaning of natural gas",
+			"Signature Print name"
+		],
+		"rows": [["Revision", "Issued Date", "Description of changes"]],
+		"order": [
+			"In practice this means OPRED will;",
+			"The cleaning of natural gas",
+			"Signature Print name"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-67ed5038-MHRA_Clinical_AR_Template.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/67ed5038e9c76fa33048c6af/MHRA_Clinical_AR_Template.docx",
+		"sha256": "4cda5f47c038979eea4eca3cbea4a1d37c3257d694abbc1529ee92cb52ca6fad",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"<new MA application>",
+			"Innovative Licencing and Access Pathway (ILAP)",
+			"Pharmacokinetics in the target population",
+			"Estimands for primary objective",
+			"* Received at least 1 dose of active treatment",
+			"Copy here the list of questions from the Assessment Report of Responses."
+		],
+		"rows": [
+			[
+				"Study identifier",
+				"Study design",
+				"Population",
+				"Dosing regimen",
+				"Main PK and PD parameters"
+			]
+		],
+		"order": [
+			"<new MA application>",
+			"Pharmacokinetics in the target population",
+			"Estimands for primary objective",
+			"* Received at least 1 dose of active treatment",
+			"Copy here the list of questions from the Assessment Report of Responses."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-67f93fa3-SSG_Grant_Agreement_Template__Including_T_s_and_C_s__-_Round.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/67f93fa345705eb1a1513f80/SSG_Grant_Agreement_Template__Including_T_s_and_C_s__-_Round_4.docx",
+		"sha256": "30b69b3cb652a40482a16d4cc84d417f4d9be86743a6d1872dcd82261017b3b1",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"is independently developed without access to the Confidential Information.",
+			"giving evidence to Parliamentary Select Committees;",
+			"Retention of documents",
+			"amount of working time assigned to the Funded Activities;",
+			"[insert long term outcomes from Part 2 of Application Form]"
+		],
+		"rows": [],
+		"order": [
+			"is independently developed without access to the Confidential Information.",
+			"giving evidence to Parliamentary Select Committees;",
+			"Retention of documents",
+			"amount of working time assigned to the Funded Activities;",
+			"[insert long term outcomes from Part 2 of Application Form]"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-6878d18d-FS_Suspected_breach_form.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/6878d18d760bf6cedaf5bdec/FS_Suspected_breach_form.docx",
+		"sha256": "6a2e0709793be86be223484f699949d8e20983f3c60b29b7d66d84d296331543",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Financial sanctions suspected breach reporting form",
+			"Pharmaceutical and healthcare",
+			"Postcode or zip code",
+			"State if this information is not known",
+			"credit, right of set-off, guarantees, performance bonds or other financial commitments",
+			"What to include"
+		],
+		"rows": [],
+		"order": [
+			"State if this information is not known",
+			"credit, right of set-off, guarantees, performance bonds or other financial commitments",
+			"What to include"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-6878d1f6-Complying_with_the_exception-_Humanitarian_Assistance_Activi.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/6878d1f60263c35f52e4dd42/Complying_with_the_exception-_Humanitarian_Assistance_Activity_in_relation_to_Syria__Relating_to_Petroleum_Products_.docx",
+		"sha256": "954e3a2d42fe305a87ab22724a07f681c6e1959c0ef1607938c758dc045bb670",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"1. What is your name?",
+			"2. What is the name of your organisation?",
+			"3. What is your address?",
+			"4. What is your phone number?",
+			"5. What is your email address?",
+			"OFSI expects you to include the following information in your compliance notification:"
+		],
+		"rows": [],
+		"order": [
+			"1. What is your name?",
+			"2. What is the name of your organisation?",
+			"3. What is your address?",
+			"4. What is your phone number?",
+			"5. What is your email address?",
+			"OFSI expects you to include the following information in your compliance notification:"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-6878d320-OPC_breach_form.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/6878d3202bad77c3dae4dd4e/OPC_breach_form.docx",
+		"sha256": "92e429126a81f221383c838fa9bf57bc933e4c3484d4564bc20d646aeaa332ba",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Oil Price Cap (OPC) suspected breach reporting form",
+			"Other (e.g., sector not otherwise listed on this page)",
+			"Circumventing prohibitions (regulation 67)",
+			"country and port of destination or unloading",
+			"Enter UK nexus for the suspected breach",
+			"What to include"
+		],
+		"rows": [],
+		"order": [
+			"Circumventing prohibitions (regulation 67)",
+			"country and port of destination or unloading",
+			"Enter UK nexus for the suspected breach",
+			"What to include"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-6878d353-Report_frozen_asset.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/6878d353a52cca025ef5bde0/Report_frozen_asset.docx",
+		"sha256": "d0e91b2409412f1be7ca278ff8ef1bd414d4b9d0dbbd995877e14321acb537ab",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Report frozen asset",
+			"1. Please provide your full name",
+			"5. Please provide the address of the company or organisation",
+			"Central African Republic",
+			"Republic of Guinea-Bissau",
+			"None of the above"
+		],
+		"rows": [],
+		"order": [
+			"1. Please provide your full name",
+			"5. Please provide the address of the company or organisation",
+			"Central African Republic",
+			"Republic of Guinea-Bissau",
+			"None of the above"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-68f2069b-Urgent_Capital_Support_-_Application_Form.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/68f2069b2f0fc56403a3cfe6/Urgent_Capital_Support_-_Application_Form.docx",
+		"sha256": "9d326793eb64f9fd72ff90ba7e25bf5f7bd4fa59b3eda6101caec5f463ed4757",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Urgent Capital Support (UCS) application form",
+			"Section 7: checklist",
+			"If other, please provide details:",
+			"What works are necessary to fix this issue?",
+			"Has funding previously been granted for this project/issue?",
+			"Section 8 - declaration"
+		],
+		"rows": [["Quotes/Tenders", "Amount", "Comments"]],
+		"order": [
+			"Urgent Capital Support (UCS) application form",
+			"Section 7: checklist",
+			"If other, please provide details:",
+			"What works are necessary to fix this issue?",
+			"Has funding previously been granted for this project/issue?",
+			"Section 8 - declaration"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-693bff97-GCP_inspection_dossier_template__Version_7.0_Dec_2025.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/693bff975cc812f50aa420d9/GCP_inspection_dossier_template__Version_7.0_Dec_2025.docx",
+		"sha256": "73d6770832a7f06df0466846b22e1b2c479736325564dfb84675d2f9de04dd91",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Item 5: List of clinical trials",
+			"Has it different levels?",
+			"Is there a risk proportionate approach to monitoring and how is this applied?",
+			"This will be relevant for pharmaceutical organisations and CROs that provide this service.",
+			"12. Computer Systems",
+			"Is there an in-house facility?"
+		],
+		"rows": [],
+		"order": [
+			"Item 5: List of clinical trials",
+			"Has it different levels?",
+			"Is there a risk proportionate approach to monitoring and how is this applied?",
+			"This will be relevant for pharmaceutical organisations and CROs that provide this service.",
+			"12. Computer Systems",
+			"Is there an in-house facility?"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-69fc535e-annex-f-mc.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/69fc535e8cc72d2f863ea584/annex-f-mc.docx",
+		"sha256": "c16ead5ab651f603d6a9deaeeffe5d1565a0cf4bb41b0f38171b2defaafc15c6",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Example template for notifying the enforcement authority",
+			"Food business name and address:",
+			"Product Size and type of packaging:",
+			"Import/Export details (including contact details):",
+			"Any additional information:"
+		],
+		"rows": [],
+		"order": [
+			"Example template for notifying the enforcement authority",
+			"Food business name and address:",
+			"Product Size and type of packaging:",
+			"Import/Export details (including contact details):",
+			"Any additional information:"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-6a5e2c52-06_Business_case_template_complex_change.docx",
+		"url": "https://assets.publishing.service.gov.uk/media/6a5e2c5213cf36b2315a5e89/06_Business_case_template_complex_change.docx",
+		"sha256": "57cfa7c5849a6aa992d6a41723ca511ffc781634b439172e752575722dfcdc29",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Project type: complex change",
+			"FCRM Asset Management Strategy",
+			"Case for change",
+			"Value for money statement",
+			"commitment from the relevant responsible organisation",
+			"Paste the full email from the Project Executive here."
+		],
+		"rows": [["1.8", "For FSoD team use only:"]],
+		"order": [
+			"Project type: complex change",
+			"FCRM Asset Management Strategy",
+			"Case for change",
+			"Value for money statement",
+			"commitment from the relevant responsible organisation",
+			"Paste the full email from the Project Executive here."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "tika-testWORD.docx",
+		"url": "https://raw.githubusercontent.com/apache/tika/eb024f1e6099d63b4bed75ca770b191f3be030db/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testWORD.docx",
+		"sha256": "67797f5691cb5346201f1c40000a959f9f08d05d0b4493b4291e8d5f16e81e65",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/tika/blob/eb024f1e6099d63b4bed75ca770b191f3be030db/LICENSE",
+		"transform": null,
+		"facts": [
+			"Sample Word Document Title",
+			"And now for a subtitle",
+			"Heading Level 2",
+			"Heading Level 3",
+			"This paragraph is in the default text style",
+			"This is back to the default again"
+		],
+		"rows": [],
+		"order": [
+			"Sample Word Document Title",
+			"And now for a subtitle",
+			"Heading Level 2",
+			"Heading Level 3",
+			"This paragraph is in the default text style",
+			"This is back to the default again"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "tika-testWORD_various.docx",
+		"url": "https://raw.githubusercontent.com/apache/tika/eb024f1e6099d63b4bed75ca770b191f3be030db/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testWORD_various.docx",
+		"sha256": "f7761e3893d795ed09f12f89a16d3265c3919da549adf00127b0f7094bccd0ee",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/tika/blob/eb024f1e6099d63b4bed75ca770b191f3be030db/LICENSE",
+		"transform": null,
+		"facts": [
+			"Footnote appears here",
+			"Here is a numbered list:",
+			"Number bullet 3",
+			"Suddenly some Japanese text:",
+			"Row 2 column 2"
+		],
+		"rows": [
+			["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+			["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
+		],
+		"order": [
+			"Footnote appears here",
+			"Here is a numbered list:",
+			"Number bullet 3",
+			"Suddenly some Japanese text:",
+			"Row 2 column 2"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "gov-5a755630-CCG_standard_slide_set.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5a755630e5274a3cb28699f0/CCG_standard_slide_set.pptx",
+		"sha256": "5cc89afe96ca38b52e18c4bb7798db52d61ca49f0cca22873a82c806707180bd",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Public Health England supports a new programme of work on tackling high blood pressure",
+			"Resource hub",
+			"demonstrate roles for a wide range of organisations to achieve this",
+			"Potential opportunities for CCGs",
+			"full assessment and initiation of BP treatment in those at high CVD risk"
+		],
+		"rows": [["England average", "37%"], ["Canada average", "66%"]],
+		"order": [
+			"Public Health England supports a new programme of work on tackling high blood pressure",
+			"demonstrate roles for a wide range of organisations to achieve this",
+			"full assessment and initiation of BP treatment in those at high CVD risk"
+		],
+		"anchors": [
+			{
+				"label": "[slide 2]",
+				"fact": "Public Health England supports a new programme of work on tackling high blood pressure"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5a7ca946-SDAG_280513_Presentation_-_Final.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5a7ca946e5274a38e5755f91/SDAG_280513_Presentation_-_Final.pptx",
+		"sha256": "fcead765b0d6e9b279cb65fe635389ef4e5c5732849b5ccae87abbf9eb479892",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"BIS Conference Centre",
+			"Determines valid DCC Users that can request consumer data, i.e. meter readings",
+			"To update on the two options for locally-initiated pairing",
+			"Prior / post DCC go-live;",
+			"Background 1 of 2",
+			"Date for Next Meeting"
+		],
+		"rows": [
+			["No", "Time", "Subject", "Lead"],
+			["5", "12.00 - 12.45", "HAN Options", "Colin Sawyer/Julian Hughes"]
+		],
+		"order": [
+			"Determines valid DCC Users that can request consumer data, i.e. meter readings",
+			"To update on the two options for locally-initiated pairing",
+			"Prior / post DCC go-live;",
+			"Background 1 of 2",
+			"Date for Next Meeting"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "BIS Conference Centre"
+			},
+			{
+				"label": "[slide 36]",
+				"fact": "Date for Next Meeting"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5a7f5e78-Tackling_high_blood_pressure_-_standard_slide-set.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5a7f5e78ed915d74e622a0af/Tackling_high_blood_pressure_-_standard_slide-set.pptx",
+		"sha256": "1d3ddf0a4a562d466e9de04241a5936313eb101d8bfeda27b9cbbec7838fbeb8",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Tackling high blood pressure",
+			"eating too much salt",
+			"Current performance (1 of 3)",
+			"The action plan"
+		],
+		"rows": [["England", "37%", "USA", "57%", "Canada", "66%"]],
+		"order": ["eating too much salt", "Current performance (1 of 3)", "The action plan"],
+		"anchors": [
+			{
+				"label": "[slide 19]",
+				"fact": "Tackling high blood pressure"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5ad856e7-20180411_Board_level_PPT_MC_PB.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5ad856e7e5274a76c13dfd9d/20180411_Board_level_PPT_MC_PB.pptx",
+		"sha256": "6c8852cad16cf8c7462c04357387ec43a403a469b772306c0e2fa918ac5fce43",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Board-level Briefing Pack",
+			"The DCPP",
+			"Align DCPP activities with Defending Defence.",
+			"First, a Risk Assessment is conducted.",
+			"A 30 minute podcast on the Cyber Security Model is available here:"
+		],
+		"rows": [
+			[
+				"Goals",
+				"a. Assuring the cybersecurity of the UK defence supply chain through the application of a coherent, risk based set of widely recognised controls",
+				"b. Aligning DCPP activities to benefit from, and contribute to other national cyber security initiatives"
+			]
+		],
+		"order": [
+			"Board-level Briefing Pack",
+			"Align DCPP activities with Defending Defence.",
+			"First, a Risk Assessment is conducted.",
+			"A 30 minute podcast on the Cyber Security Model is available here:"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Board-level Briefing Pack"
+			},
+			{
+				"label": "[slide 10]",
+				"fact": "A 30 minute podcast on the Cyber Security Model is available here:"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5bf2b5cf-Whenthingsgorightfinalslides.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5bf2b5cf40f0b6076315790c/Whenthingsgorightfinalslides.pptx",
+		"sha256": "a05c3bc11867e78ddd58268d88635d3b7fcb1af3a921f4620ed7f846ac81c0bd",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Part of a series of engagements with exam officers",
+			"The wider exam system and who does what",
+			"Intervention strategy",
+			"Make sure you have back up arrangements",
+			"Most precious, and expensive, item they own",
+			"Where do you tend to go for advice/guidance on how to manage an issue?"
+		],
+		"rows": [],
+		"order": [
+			"Part of a series of engagements with exam officers",
+			"The wider exam system and who does what",
+			"Intervention strategy",
+			"Make sure you have back up arrangements",
+			"Most precious, and expensive, item they own",
+			"Where do you tend to go for advice/guidance on how to manage an issue?"
+		],
+		"anchors": [
+			{
+				"label": "[slide 2]",
+				"fact": "Part of a series of engagements with exam officers"
+			},
+			{
+				"label": "[slide 26]",
+				"fact": "Where do you tend to go for advice/guidance on how to manage an issue?"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5e8b2bdb-For_Online-_5G_Create_Briefing.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/5e8b2bdbd3bf7f1fb5b9fed4/For_Online-_5G_Create_Briefing.pptx",
+		"sha256": "d0c12c81ef70f4e068b49a542c6175e2e301bc5805af8eaec67c3d457aaaee24",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"5G Create",
+			"Spectrum sharing, neutral host networks, private networks;",
+			"up to 50% if you are a medium-sized business",
+			"The lead partner notified of the funding decision for their project",
+			"Application Questions - Section A",
+			"Assessed against the questions set out in the application guidance (scale of 0-10)"
+		],
+		"rows": [],
+		"order": [
+			"Spectrum sharing, neutral host networks, private networks;",
+			"up to 50% if you are a medium-sized business",
+			"The lead partner notified of the funding decision for their project",
+			"Application Questions - Section A",
+			"Assessed against the questions set out in the application guidance (scale of 0-10)"
+		],
+		"anchors": [
+			{
+				"label": "[slide 14]",
+				"fact": "5G Create"
+			},
+			{
+				"label": "[slide 23]",
+				"fact": "Assessed against the questions set out in the application guidance (scale of 0-10)"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-60631bbc-An_introduction_to_the_Prevent_duty_in_higher_education__HE_.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/60631bbc8fa8f55b7245c433/An_introduction_to_the_Prevent_duty_in_higher_education__HE__PowerPoint__2_.pptx",
+		"sha256": "dad23a391014e679bff88ed83cc82138ec0cfbf9677e8e04da0893ae7b772eb2",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"an introduction",
+			"Prevent is intended to deal with all forms of terrorism.",
+			"What Prevent is not about",
+			"Awareness of providing physical security.",
+			"Prevent awareness training for all staff is available:"
+		],
+		"rows": [],
+		"order": [
+			"an introduction",
+			"Prevent is intended to deal with all forms of terrorism.",
+			"What Prevent is not about",
+			"Awareness of providing physical security.",
+			"Prevent awareness training for all staff is available:"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "an introduction"
+			},
+			{
+				"label": "[slide 37]",
+				"fact": "Prevent awareness training for all staff is available:"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-60631c0a-The_leadership_challenge_-_the_Prevent_duty_for_governing_bo.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/60631c0ad3bf7f5ceaca0d9c/The_leadership_challenge_-_the_Prevent_duty_for_governing_bodies_and_senior_leaders_in_HE__1_.pptx",
+		"sha256": "988791ca33fd6a3db180096f17929813e8265d96133466123c633ce157a21e62",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Office for Students (OfS) monitoring framework",
+			"For all specified authorities, there is an expectation that those in leadership positions:",
+			"Effective IT policies that do not constrain learning and teaching and research.",
+			"Material Changes:",
+			"OfS may report where other circumstances apply:",
+			"Without effective leadership, effective implementation of the duty will not ensue"
+		],
+		"rows": [],
+		"order": [
+			"Office for Students (OfS) monitoring framework",
+			"For all specified authorities, there is an expectation that those in leadership positions:",
+			"Effective IT policies that do not constrain learning and teaching and research.",
+			"Material Changes:",
+			"OfS may report where other circumstances apply:",
+			"Without effective leadership, effective implementation of the duty will not ensue"
+		],
+		"anchors": [
+			{
+				"label": "[slide 2]",
+				"fact": "Office for Students (OfS) monitoring framework"
+			},
+			{
+				"label": "[slide 16]",
+				"fact": "Without effective leadership, effective implementation of the duty will not ensue"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-60a3d452-Risk_assessment_and_action_planning_for_the_Prevent_duty_in_.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/60a3d4528fa8f56a34b10fd4/Risk_assessment_and_action_planning_for_the_Prevent_duty_in_Higher_Education__HE_.pptx",
+		"sha256": "353812e3aab46f1170ad5ba60116b2bf01062794ad6ca60241247dd18f0dfdf0",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Ensuring a proportionate response",
+			"Risk assessment:",
+			"Risk assessment drivers",
+			"Consider the use of filtering to restrict access to harmful online material.",
+			"on your local community"
+		],
+		"rows": [],
+		"order": [
+			"Ensuring a proportionate response",
+			"Risk assessment:",
+			"Risk assessment drivers",
+			"Consider the use of filtering to restrict access to harmful online material.",
+			"on your local community"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Ensuring a proportionate response"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-61421b5f-OTS_webinar_slides_15092021.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/61421b5f8fa8f503b680e94a/OTS_webinar_slides_15092021.pptx",
+		"sha256": "ceeea0bd48c4b77c8ec4329ff19c037bc4722f30f9016df67c0bc97eb112dd84",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Welcome to the OTS webinar",
+			"Review EIS rules to ensure admin issues do not prevent the reliefs",
+			"Better for those with international income and internationally mobile",
+			"The OTS webinar"
+		],
+		"rows": [],
+		"order": [
+			"Welcome to the OTS webinar",
+			"Review EIS rules to ensure admin issues do not prevent the reliefs",
+			"Better for those with international income and internationally mobile",
+			"The OTS webinar"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Welcome to the OTS webinar"
+			},
+			{
+				"label": "[slide 19]",
+				"fact": "The OTS webinar"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-69bbce52-Ofqual_GCSE_A_level_grading_lesson_plan_slides.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/69bbce528006048065f73c9f/Ofqual_GCSE_A_level_grading_lesson_plan_slides.pptx",
+		"sha256": "b70e310228b548e6b7d259e1247417072d32efb96129ed9a34b709ce502a2553",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"True or false?",
+			"It's no easier to get a grade with one exam board than another",
+			"Answer paper split into individual questions",
+			"The journey of your exam paper",
+			"How GCSE and A level grading works"
+		],
+		"rows": [],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[slide 7]",
+				"fact": "True or false?"
+			},
+			{
+				"label": "[slide 8]",
+				"fact": "How GCSE and A level grading works"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-6a22e811-Workshop_in_a_box_slides_standard.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/6a22e81156960b0542c0b0f6/Workshop_in_a_box_slides_standard.pptx",
+		"sha256": "c315e2db44d202b0541aa230eaee281612ed452ae1295e9fa9b042a4821c78bd",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Facilitator note: Before you begin",
+			"The government launched the Timms Review last year.",
+			"Workshop in a box",
+			"What do you think PIP should help people to do?",
+			"I strongly agree"
+		],
+		"rows": [["Welcome and introductions", "15 mins"], ["Introducing the Timms Review", "15 mins"]],
+		"order": [
+			"Facilitator note: Before you begin",
+			"The government launched the Timms Review last year.",
+			"Workshop in a box",
+			"What do you think PIP should help people to do?"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Facilitator note: Before you begin"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-60a3c03a-The_Prevent_duty_of_care_and_the_wellbeing_of_staff_and_stud.pptx",
+		"url": "https://assets.publishing.service.gov.uk/media/60a3c03a8fa8f56a32f91d06/The_Prevent_duty_of_care_and_the_wellbeing_of_staff_and_students_in_Higher_Education__HE__.pptx",
+		"sha256": "cca1e4a885e3f75994bc0b04567056316ba419b6bf08fe9f8ab0f83d64123f66",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Prevent: the duty of care and staff/student wellbeing",
+			"What we want to avoid:",
+			"Prevent duty guidance: achieving compliance (1/3)",
+			"What is reasonable varies with the circumstances",
+			"Duty 4 - to students under GDPR (an existing statutory obligation)",
+			"Questions and clarifications"
+		],
+		"rows": [],
+		"order": [
+			"Prevent: the duty of care and staff/student wellbeing",
+			"What we want to avoid:",
+			"Prevent duty guidance: achieving compliance (1/3)",
+			"What is reasonable varies with the circumstances",
+			"Duty 4 - to students under GDPR (an existing statutory obligation)",
+			"Questions and clarifications"
+		],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Prevent: the duty of care and staff/student wellbeing"
+			},
+			{
+				"label": "[slide 25]",
+				"fact": "Questions and clarifications"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "tika-testPPT_various.pptx",
+		"url": "https://raw.githubusercontent.com/apache/tika/eb024f1e6099d63b4bed75ca770b191f3be030db/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testPPT_various.pptx",
+		"sha256": "73e19e877797b9deb87f1d242c3d7aa6edb383258ca90054f9a912d3adb26a73",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/tika/blob/eb024f1e6099d63b4bed75ca770b191f3be030db/LICENSE",
+		"transform": null,
+		"facts": [
+			"Here is a text box",
+			"Bullet 2",
+			"Number bullet 2",
+			"Subject is here",
+			"Row 2 column 2"
+		],
+		"rows": [
+			["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+			["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
+		],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[slide 1]",
+				"fact": "Here is a text box"
+			},
+			{
+				"label": "[slide 1]",
+				"fact": "Row 2 column 2"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5a80bf43-tag-correspondence-new-old.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/5a80bf43e5274a2e87dbb962/tag-correspondence-new-old.xlsx",
+		"sha256": "2cc4bdf39dc8f0ad09225593797657294ade098c3b916e11498864095e743247",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"TAG Unit",
+			"Overview",
+			"PROJECT MANAGER",
+			"TAG Worksheets",
+			"Withdrawn (Financial Case)",
+			"Supplementary Guidance - NTEM Sub-Models"
+		],
+		"rows": [
+			["TAG Unit", "Restructured TAG Unit"],
+			["2.3: Policy Instruments", "Withdrawn (Strategic Case)"]
+		],
+		"order": [
+			"PROJECT MANAGER",
+			"TAG Worksheets",
+			"Withdrawn (Financial Case)",
+			"Supplementary Guidance - NTEM Sub-Models"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: NewOldMapping]",
+				"fact": "TAG Unit"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5d341b14-edr-wps-data-tables.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/5d341b14e5274a14f6df1b4d/edr-wps-data-tables.xlsx",
+		"sha256": "67c58405d0a2d4ef57ce4ea6d9c3c557527a8fbf05589212cb2d9f7f6b95a6fc",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Key notes",
+			"Community",
+			"5 - To a great extent",
+			"Electric heating technology",
+			"No difference",
+			"No energy specialist"
+		],
+		"rows": [
+			["Have you ever used one? (%)", "Unweighted bases (n=)"],
+			[
+				"Owned (%)",
+				"Leased (%)",
+				"Rented (%)",
+				"Mixed (%)",
+				"Don't know (%)",
+				"Unweighted bases (n=)"
+			]
+		],
+		"order": [
+			"Key notes",
+			"Community",
+			"5 - To a great extent",
+			"Electric heating technology",
+			"No difference",
+			"No energy specialist"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Notes]",
+				"fact": "Key notes"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-5d43e2ef-PPC_Inspection_Letters_2018_1.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/5d43e2efed915d7062511bc8/PPC_Inspection_Letters_2018_1.xlsx",
+		"sha256": "e67a9a947798ff9ad655a1f952e42282c9f746d06a6f80e6daa02be876c601c7",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Installation",
+			"EnQuest Heather Limited",
+			"Nexen Petroleum U.K. Limited",
+			"Petrofac Facilities Management Limited",
+			"Apache Beryl I Limited",
+			"Alwyn"
+		],
+		"rows": [
+			["Installation", "Company", "Permit Reference Number", "Date of Inspection", "Letter Date"]
+		],
+		"order": [
+			"Installation",
+			"EnQuest Heather Limited",
+			"Nexen Petroleum U.K. Limited",
+			"Petrofac Facilities Management Limited",
+			"Apache Beryl I Limited",
+			"Alwyn"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Sheet1]",
+				"fact": "Installation"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-6038dae8-rough_sleeping_statistics_2020.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/6038dae88fa8f50495bda321/rough_sleeping_statistics_2020.xlsx",
+		"sha256": "35b0ad8004c07d2d35d13c0b8743f27ab96f350bc0d829b34b25a59d6112a3ee",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Contents:",
+			"Cheshire West and Chester",
+			"Hillingdon",
+			"Reading",
+			"Thanet",
+			"Drugs & alcohol treatment teams"
+		],
+		"rows": [
+			[
+				"Local authority ONS code",
+				"Local authority",
+				"Region",
+				"Region ONS code",
+				"2010",
+				"2011",
+				"2012",
+				"2013",
+				"2014",
+				"2015",
+				"2016",
+				"2017",
+				"2018",
+				"2019",
+				"2020"
+			],
+			["Next Update:", "Winter 2021/2022"]
+		],
+		"order": [
+			"Contents:",
+			"Cheshire West and Chester",
+			"Hillingdon",
+			"Reading",
+			"Thanet",
+			"Drugs & alcohol treatment teams"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Contents]",
+				"fact": "Contents:"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-64e3355d-dublin-regulation-datasets-mar-2020.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/64e3355dbc2b520014a003bf/dublin-regulation-datasets-mar-2020.xlsx",
+		"sha256": "2ab8dba52d9ce84f019cb4219f24794d5466267ef8233b1077296192ba158c65",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": ["Immigration Statistics", "Next planned update", "Belgium", "Lithuania"],
+		"rows": [["Field", "Description"], ["Member State", "(All)"]],
+		"order": ["Immigration Statistics", "Next planned update", "Belgium", "Lithuania"],
+		"anchors": [
+			{
+				"label": "[Sheet: Cover sheet]",
+				"fact": "Immigration Statistics"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-6a69eadd-DUKES_1.1.6.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/6a69eadd229c578debc1a85b/DUKES_1.1.6.xlsx",
+		"sha256": "f9d16d83c9f3b3d6ee5c6f752b7bdfb25d84afe2335dc2e64166d7958d3f5947",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Expenditure on energy by final user",
+			"Glossary and acronyms DUKES Annex B (opens in a new window)",
+			"Notes",
+			"Industry: Heat and other fuels [note 5]",
+			"Other Final Users: Electricity",
+			"Total All Final Users"
+		],
+		"rows": [["Worksheet description", "Link"], ["Cover sheet", "Cover Sheet"]],
+		"order": [
+			"Glossary and acronyms DUKES Annex B (opens in a new window)",
+			"Notes",
+			"Industry: Heat and other fuels [note 5]",
+			"Other Final Users: Electricity",
+			"Total All Final Users"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Contents]",
+				"fact": "Expenditure on energy by final user"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-699827f0-Readiness_checker_for_gateway_1.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/699827f0339ee33f3ad0b9b2/Readiness_checker_for_gateway_1.xlsx",
+		"sha256": "9797cdb4573f06df42ad391bc79403700a5e525d84a96204f611b58856fad78f",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"LPA name:",
+			"Legal requirements you must have met before proceeding",
+			"We still need to involve other relevant teams and decision makers.",
+			"We haven't explored what engagement methods we could use.",
+			"Gathering evidence to inform the new plan",
+			"Developing SEA objectives"
+		],
+		"rows": [],
+		"order": [
+			"LPA name:",
+			"Legal requirements you must have met before proceeding",
+			"We still need to involve other relevant teams and decision makers.",
+			"We haven't explored what engagement methods we could use.",
+			"Gathering evidence to inform the new plan",
+			"Developing SEA objectives"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Readiness checker]",
+				"fact": "LPA name:"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "gov-628669d5-MHRA_PROTOCOL_DEVIATION_TRACKER.xlsx",
+		"url": "https://assets.publishing.service.gov.uk/media/628669d58fa8f55618cd367d/MHRA_PROTOCOL_DEVIATION_TRACKER.xlsx",
+		"sha256": "826ce98c6708c87049ab2379ab9024775784b42d20c18be9dbc58defe3472f0d",
+		"license": "OGL-3.0",
+		"licenseUrl": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+		"transform": null,
+		"facts": [
+			"Protocol Deviation Number",
+			"Major/ Minor",
+			"Deviation Type",
+			"Corrective and Preventative Action",
+			"Additional relevant info"
+		],
+		"rows": [],
+		"order": [
+			"Protocol Deviation Number",
+			"Major/ Minor",
+			"Deviation Type",
+			"Corrective and Preventative Action",
+			"Additional relevant info"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Sheet1]",
+				"fact": "Protocol Deviation Number"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "tika-testEXCEL-formats.xlsx",
+		"url": "https://raw.githubusercontent.com/apache/tika/eb024f1e6099d63b4bed75ca770b191f3be030db/tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-microsoft-module/src/test/resources/test-documents/testEXCEL-formats.xlsx",
+		"sha256": "c56368f9a09166eabe373042afefb651341b4d2f9e1fe779148218f93190a2d2",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/tika/blob/eb024f1e6099d63b4bed75ca770b191f3be030db/LICENSE",
+		"transform": null,
+		"facts": [
+			"Time Format: h:mm AM/PM",
+			"Time Format: h:mm",
+			"Date Format: d-mmm-yy",
+			"Date/Time Format",
+			"Custom Number:",
+			"Custom Date:"
+		],
+		"rows": [],
+		"order": [
+			"Time Format: h:mm AM/PM",
+			"Date Format: d-mmm-yy",
+			"Date/Time Format",
+			"Custom Number:",
+			"Custom Date:"
+		],
+		"anchors": [
+			{
+				"label": "[Sheet: Format Examples]",
+				"fact": "Time Format: h:mm AM/PM"
+			}
+		],
+		"hidden": []
+	}
+]

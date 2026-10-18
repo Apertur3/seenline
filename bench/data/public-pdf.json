@@ -1,0 +1,1321 @@
+[
+	{
+		"file": "arxiv-2205.12542.pdf",
+		"url": "https://arxiv.org/pdf/2205.12542v3",
+		"sha256": "748e174e135b3edaa9351863885a0334c5e3cfff1efb7b6b4fd0155831bc212f",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2205.12542",
+		"transform": null,
+		"facts": [
+			"By explaining how humans would solve a",
+			"is created by marking input tokens present in the",
+			"Table 2 shows the results for contrast set tests on",
+			"Fig. 7 presents the results for functional tests on",
+			"Only trend is also different from previous trends, in",
+			"to provide fair compensation to all Turkers, paying"
+		],
+		"rows": [],
+		"order": [
+			"By explaining how humans would solve a",
+			"is created by marking input tokens present in the",
+			"Table 2 shows the results for contrast set tests on",
+			"Fig. 7 presents the results for functional tests on",
+			"Only trend is also different from previous trends, in",
+			"to provide fair compensation to all Turkers, paying"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "By explaining how humans would solve a"
+			},
+			{
+				"label": "[p. 20]",
+				"fact": "to provide fair compensation to all Turkers, paying"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2210.01240.pdf",
+		"url": "https://arxiv.org/pdf/2210.01240v4",
+		"sha256": "8e0502fa3b6b93c967441b99270bb4ec0bcdd37924502eaa128ad0e7a6e567d9",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2210.01240",
+		"transform": null,
+		"facts": [
+			"All analysis code, data, data generation scripts,",
+			"language, and so provides value to both research directions.",
+			"proof step into a CoT sentence.",
+			"we did not encounter any instances of other broadly-valid rules.",
+			"not well-represented in the training data.",
+			"experiments here since there were too few incorrect proofs."
+		],
+		"rows": [],
+		"order": [
+			"All analysis code, data, data generation scripts,",
+			"language, and so provides value to both research directions.",
+			"proof step into a CoT sentence.",
+			"we did not encounter any instances of other broadly-valid rules.",
+			"not well-represented in the training data."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "All analysis code, data, data generation scripts,"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "experiments here since there were too few incorrect proofs."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2301.12112.pdf",
+		"url": "https://arxiv.org/pdf/2301.12112v2",
+		"sha256": "57153cd81be8523efc59cf1bf075d502743a754ae5a6f89ba44b3356ed82d6ac",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2301.12112",
+		"transform": null,
+		"facts": [
+			"various antibody tasks, which hinders the development",
+			"help to understand the binding mechanisms of therapeutic antibodies.",
+			"ondly, we compared the highly-ranked sequences",
+			"different amino acids between the predicted binder and the existing",
+			"sists in identifying mutation positions on antibodies, which",
+			"future studies may lead to improved results."
+		],
+		"rows": [],
+		"order": [
+			"various antibody tasks, which hinders the development",
+			"help to understand the binding mechanisms of therapeutic antibodies.",
+			"ondly, we compared the highly-ranked sequences",
+			"different amino acids between the predicted binder and the existing",
+			"sists in identifying mutation positions on antibodies, which",
+			"future studies may lead to improved results."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "various antibody tasks, which hinders the development"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "future studies may lead to improved results."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2302.12578.pdf",
+		"url": "https://arxiv.org/pdf/2302.12578v2",
+		"sha256": "90ca7dafa849f8712f146f915c7e3c6ee125a8a829f4711358145d72f779aa65",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2302.12578",
+		"transform": null,
+		"facts": [
+			"ubiquitous, it has become essential to address",
+			"The focus of much of the existing body of literature",
+			"semantic gender direction suggests the presence",
+			"Due to multilingual spaces being a composite of",
+			"non-binary identities, such as the Aravanis and the",
+			"that we may have missed including in this survey."
+		],
+		"rows": [],
+		"order": [
+			"ubiquitous, it has become essential to address",
+			"The focus of much of the existing body of literature",
+			"semantic gender direction suggests the presence",
+			"Due to multilingual spaces being a composite of",
+			"non-binary identities, such as the Aravanis and the",
+			"that we may have missed including in this survey."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "ubiquitous, it has become essential to address"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "that we may have missed including in this survey."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2302.14286.pdf",
+		"url": "https://arxiv.org/pdf/2302.14286v1",
+		"sha256": "5ca604359a18479d1da2f51695998f08b1df0d5ef69f5d0bddc228921f326b73",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2302.14286",
+		"transform": null,
+		"facts": [
+			"Yet, many existing approaches follow different",
+			"also implement some popular tuning algorithms",
+			"transform the original examples into model input",
+			"labeled data, which is one of the mature paradigms",
+			"the scenario of code understanding and generation,",
+			"suffer from these issues. We suggest that users"
+		],
+		"rows": [],
+		"order": [
+			"Yet, many existing approaches follow different",
+			"also implement some popular tuning algorithms",
+			"transform the original examples into model input",
+			"labeled data, which is one of the mature paradigms",
+			"the scenario of code understanding and generation,",
+			"suffer from these issues. We suggest that users"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "Yet, many existing approaches follow different"
+			},
+			{
+				"label": "[p. 7]",
+				"fact": "suffer from these issues. We suggest that users"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2302.14389.pdf",
+		"url": "https://arxiv.org/pdf/2302.14389v1",
+		"sha256": "6de6b59ba17637270ff9d173e2111166125f770f47e8c31ec1771afd0daf3aab",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2302.14389",
+		"transform": null,
+		"facts": [
+			"human brain, and therefore many questions remain open to this date.",
+			"semantic embeddings essentially encode semantic information.",
+			"separable in the left than in the right hemisphere .",
+			"using more context than what was available in the context window.",
+			"information drives the semantic interpretation at the sentence level.",
+			"predictions and the observed time series, for a given participant."
+		],
+		"rows": [],
+		"order": [
+			"human brain, and therefore many questions remain open to this date.",
+			"semantic embeddings essentially encode semantic information.",
+			"separable in the left than in the right hemisphere .",
+			"using more context than what was available in the context window.",
+			"information drives the semantic interpretation at the sentence level.",
+			"predictions and the observed time series, for a given participant."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "human brain, and therefore many questions remain open to this date."
+			},
+			{
+				"label": "[p. 18]",
+				"fact": "predictions and the observed time series, for a given participant."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2302.14494.pdf",
+		"url": "https://arxiv.org/pdf/2302.14494v1",
+		"sha256": "c074249423de94165d1d603bf3cf8d63291439aba27b415b863ab958268aa6b7",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2302.14494",
+		"transform": null,
+		"facts": [
+			"Text classification is a critical task in the field of natural",
+			"classification has improved dramatically in recent years. In",
+			"as well as press portals, including news articles and press",
+			"articles across 15 distinct categories, representing the Uzbek",
+			"Analysing the performance results of the models over the",
+			"stimulate further work in this area. By making the data and"
+		],
+		"rows": [],
+		"order": [
+			"Text classification is a critical task in the field of natural",
+			"classification has improved dramatically in recent years. In",
+			"as well as press portals, including news articles and press",
+			"articles across 15 distinct categories, representing the Uzbek",
+			"Analysing the performance results of the models over the",
+			"stimulate further work in this area. By making the data and"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "Text classification is a critical task in the field of natural"
+			},
+			{
+				"label": "[p. 4]",
+				"fact": "stimulate further work in this area. By making the data and"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2302.14635.pdf",
+		"url": "https://arxiv.org/pdf/2302.14635v1",
+		"sha256": "027179712c5e19c21cc2dec8a0f39f096ad95c1f047e212bdca24569df3ebc3d",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2302.14635",
+		"transform": null,
+		"facts": [
+			"and other low-resource languages remains unexplored. In this",
+			"a novel multi-scale essay representation approach based on",
+			"us an appreciation, understanding, and respect for different",
+			"an attention mechanism to handle sequences of ordered",
+			"scores obtained for organic prompt showed a slightly higher",
+			"may bring further improvement. We also hope to push the"
+		],
+		"rows": [],
+		"order": [
+			"and other low-resource languages remains unexplored. In this",
+			"a novel multi-scale essay representation approach based on",
+			"us an appreciation, understanding, and respect for different",
+			"an attention mechanism to handle sequences of ordered",
+			"scores obtained for organic prompt showed a slightly higher",
+			"may bring further improvement. We also hope to push the"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "and other low-resource languages remains unexplored. In this"
+			},
+			{
+				"label": "[p. 7]",
+				"fact": "may bring further improvement. We also hope to push the"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00069.pdf",
+		"url": "https://arxiv.org/pdf/2303.00069v1",
+		"sha256": "122c163d71bc4006f9c4961e79b3c57e15f70f7c676d380c8c4558f2825bc0b5",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00069",
+		"transform": null,
+		"facts": [
+			"closely resembles human speech. These models are trained with",
+			"dataset that maintains phonetic coverage is more manageable to",
+			"In this section, we describe the steps involved in building our",
+			"segments between two speech segments if the silence segment",
+			"coherence of subjective listening test with objective evaluation,",
+			"Arabic speech synthesis corpora namely Arabic speech corpus"
+		],
+		"rows": [],
+		"order": [
+			"closely resembles human speech. These models are trained with",
+			"dataset that maintains phonetic coverage is more manageable to",
+			"In this section, we describe the steps involved in building our",
+			"segments between two speech segments if the silence segment",
+			"coherence of subjective listening test with objective evaluation,",
+			"Arabic speech synthesis corpora namely Arabic speech corpus"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "closely resembles human speech. These models are trained with"
+			},
+			{
+				"label": "[p. 4]",
+				"fact": "Arabic speech synthesis corpora namely Arabic speech corpus"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00135.pdf",
+		"url": "https://arxiv.org/pdf/2303.00135v1",
+		"sha256": "479937bb6bacf91e9d6686b8c157873254560b4ec3fcd715c986be786f00a3f5",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00135",
+		"transform": null,
+		"facts": [
+			"which can be extended to other countries and regions.",
+			"government officials, celebrities, corona updates, etc.",
+			"adding that all stakeholders need to show sensitivity for students.",
+			"economy have been worst hit by the global epidemic.",
+			"Further visualisation after hierarchical topic reduction",
+			"different topics obtained by our framework."
+		],
+		"rows": [],
+		"order": [
+			"which can be extended to other countries and regions.",
+			"government officials, celebrities, corona updates, etc.",
+			"adding that all stakeholders need to show sensitivity for students.",
+			"economy have been worst hit by the global epidemic.",
+			"Further visualisation after hierarchical topic reduction",
+			"different topics obtained by our framework."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "which can be extended to other countries and regions."
+			},
+			{
+				"label": "[p. 21]",
+				"fact": "different topics obtained by our framework."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00461.pdf",
+		"url": "https://arxiv.org/pdf/2303.00461v1",
+		"sha256": "c2908c42bff023660eaa18f08461df8fdbec309ad9fde3fac83d8f4611f72536",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00461",
+		"transform": null,
+		"facts": [
+			"The task of text summarization is to reduce a given text to",
+			"This problem also occurs in other steps, such as",
+			"Despite its importance, there has been relatively little",
+			"Above all, the Uzbek language has seen a recent grooving",
+			"part of the paper we show an example of applying the Uzbek",
+			"the enormous support in discussions during the model"
+		],
+		"rows": [],
+		"order": [
+			"The task of text summarization is to reduce a given text to",
+			"This problem also occurs in other steps, such as",
+			"Despite its importance, there has been relatively little",
+			"Above all, the Uzbek language has seen a recent grooving",
+			"part of the paper we show an example of applying the Uzbek",
+			"the enormous support in discussions during the model"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "The task of text summarization is to reduce a given text to"
+			},
+			{
+				"label": "[p. 3]",
+				"fact": "the enormous support in discussions during the model"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00534.pdf",
+		"url": "https://arxiv.org/pdf/2303.00534v1",
+		"sha256": "d1bb10782187dc69c6c0b70347338ac55ed0de5ece0ca3d44f49b95b692f1b17",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00534",
+		"transform": null,
+		"facts": [
+			"patient-based image-text pairs containing diverse patient",
+			"used to retrieve similar pairs. Finally, taking the above",
+			"our task, the model pretrained by the image-text contrastive",
+			"which supplies additional texts containing answers.",
+			"empirical study of training end-to-end vision-and-language"
+		],
+		"rows": [],
+		"order": [
+			"patient-based image-text pairs containing diverse patient",
+			"used to retrieve similar pairs. Finally, taking the above",
+			"our task, the model pretrained by the image-text contrastive",
+			"which supplies additional texts containing answers.",
+			"empirical study of training end-to-end vision-and-language"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "patient-based image-text pairs containing diverse patient"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "empirical study of training end-to-end vision-and-language"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00722.pdf",
+		"url": "https://arxiv.org/pdf/2303.00722v1",
+		"sha256": "ec75d18c34dec72e7f790c0226585b7914a657d2d090d0ad829390a97a47b420",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00722",
+		"transform": null,
+		"facts": [
+			"practice in optimizing an MT model with",
+			"We also evaluated MT systems trained on the small",
+			"points in Section 3, conducted experiments with",
+			"of different combinations with respect to statistical",
+			"the performance on the generic domain test set",
+			"machine translation with limited degradation across"
+		],
+		"rows": [],
+		"order": [
+			"We also evaluated MT systems trained on the small",
+			"points in Section 3, conducted experiments with",
+			"of different combinations with respect to statistical",
+			"the performance on the generic domain test set",
+			"machine translation with limited degradation across"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "practice in optimizing an MT model with"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "machine translation with limited degradation across"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.00733.pdf",
+		"url": "https://arxiv.org/pdf/2303.00733v1",
+		"sha256": "8df37adf6b1690febaaec0e3ab5d0a779603d069d14f1ac5e929b5e9afc06cdb",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.00733",
+		"transform": null,
+		"facts": [
+			"revealed prompt tuning as a candidate approach to serving",
+			"a hand-crafted mapping function. This approach enables us",
+			"model various speech characteristics, showing competitive",
+			"consisting of six different languages for the task.",
+			"the performances with prompt tuning exhibit some variance,",
+			"the speech community to further explore the potential of the"
+		],
+		"rows": [],
+		"order": [
+			"revealed prompt tuning as a candidate approach to serving",
+			"a hand-crafted mapping function. This approach enables us",
+			"model various speech characteristics, showing competitive",
+			"consisting of six different languages for the task.",
+			"the performances with prompt tuning exhibit some variance,",
+			"the speech community to further explore the potential of the"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "revealed prompt tuning as a candidate approach to serving"
+			},
+			{
+				"label": "[p. 6]",
+				"fact": "the speech community to further explore the potential of the"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.01197.pdf",
+		"url": "https://arxiv.org/pdf/2303.01197v1",
+		"sha256": "7ab32ca0eb8412bb7856000777741e7a4738821e37dff286c1d9c2c966e10341",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.01197",
+		"transform": null,
+		"facts": [
+			"or promotional purposes, creating new collective works, for",
+			"aspects of the task. The experiments are conducted on",
+			"of these models is provided below.",
+			"the method is the assumption of the step size in the direction.",
+			"transformers in the author detection task. We note that",
+			"by exploring the other missing aspects of the task, such as"
+		],
+		"rows": [],
+		"order": [
+			"or promotional purposes, creating new collective works, for",
+			"aspects of the task. The experiments are conducted on",
+			"of these models is provided below.",
+			"the method is the assumption of the step size in the direction.",
+			"transformers in the author detection task. We note that",
+			"by exploring the other missing aspects of the task, such as"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "or promotional purposes, creating new collective works, for"
+			},
+			{
+				"label": "[p. 6]",
+				"fact": "by exploring the other missing aspects of the task, such as"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2303.01347.pdf",
+		"url": "https://arxiv.org/pdf/2303.01347v1",
+		"sha256": "6a9516b04e77e45b7759106a568254abb4ac1ad66a6ce5220f34f9f0d0bb1a50",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2303.01347",
+		"transform": null,
+		"facts": [
+			"environment is a real problem that requires practical solutions.",
+			"to have a direct impact on the development and maintenance",
+			"translations. We will evaluate our created models in the next",
+			"The pseudo-translation dataset is built by applying our",
+			"ChrF by adding n-grams of words to its computation.",
+			"For future work, we plan to improve the pseudo-translation"
+		],
+		"rows": [],
+		"order": [
+			"environment is a real problem that requires practical solutions.",
+			"to have a direct impact on the development and maintenance",
+			"translations. We will evaluate our created models in the next",
+			"The pseudo-translation dataset is built by applying our",
+			"ChrF by adding n-grams of words to its computation.",
+			"For future work, we plan to improve the pseudo-translation"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "environment is a real problem that requires practical solutions."
+			},
+			{
+				"label": "[p. 6]",
+				"fact": "For future work, we plan to improve the pseudo-translation"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2305.15991.pdf",
+		"url": "https://arxiv.org/pdf/2305.15991v2",
+		"sha256": "9fd70296292f604014a7a9a574da0795b10326792c9a9f45c7e7aefcce4ecbca",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2305.15991",
+		"transform": null,
+		"facts": [
+			"look into a few problems that this setup poses.",
+			"This step already relies on the localization argument",
+			"Fisher consistency for the signal-to-noise ratio",
+			"The empirical process of the bounded part",
+			"do not yet exploit any localization.",
+			"Proof of the consequence for linear separation"
+		],
+		"rows": [],
+		"order": [
+			"look into a few problems that this setup poses.",
+			"This step already relies on the localization argument",
+			"do not yet exploit any localization."
+		],
+		"anchors": [
+			{
+				"label": "[p. 5]",
+				"fact": "look into a few problems that this setup poses."
+			},
+			{
+				"label": "[p. 52]",
+				"fact": "Proof of the consequence for linear separation"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.06543.pdf",
+		"url": "https://arxiv.org/pdf/2402.06543v1",
+		"sha256": "4a5d5369c335fffa68bfeecf922061588b9d9aa17e3049d9ae7bee537e63640f",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.06543",
+		"transform": null,
+		"facts": [
+			"destruction. Compared to the non-magnetic homogeneous case, the dust",
+			"might be discounted from the total dust losses in the SNe models.",
+			"gas density and differ between regions.",
+			"are promising and have to be considered in future studies.",
+			"Due to the excessive computational effort required for highly resolved",
+			"The authors declare no competing interests."
+		],
+		"rows": [],
+		"order": [
+			"destruction. Compared to the non-magnetic homogeneous case, the dust",
+			"might be discounted from the total dust losses in the SNe models.",
+			"gas density and differ between regions.",
+			"are promising and have to be considered in future studies.",
+			"Due to the excessive computational effort required for highly resolved",
+			"The authors declare no competing interests."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "destruction. Compared to the non-magnetic homogeneous case, the dust"
+			},
+			{
+				"label": "[p. 21]",
+				"fact": "The authors declare no competing interests."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.12534.pdf",
+		"url": "https://arxiv.org/pdf/2402.12534v1",
+		"sha256": "2b1bad97b46c763f26c3762f053f7f26740c6da52a83d96edc479c7737579cc9",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.12534",
+		"transform": null,
+		"facts": [
+			"a stream of primitive debris from their surfaces. Heating would",
+			"disk then few chondrules could be formed in this way.",
+			"solids was much higher than current nebular models can explain.",
+			"interior of one or both colliders,",
+			"expectation based on observations of relict grains.",
+			"parameter space large enough to accommodate a wide range of outcomes."
+		],
+		"rows": [],
+		"order": [
+			"a stream of primitive debris from their surfaces. Heating would",
+			"disk then few chondrules could be formed in this way.",
+			"solids was much higher than current nebular models can explain.",
+			"interior of one or both colliders,",
+			"expectation based on observations of relict grains.",
+			"parameter space large enough to accommodate a wide range of outcomes."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "a stream of primitive debris from their surfaces. Heating would"
+			},
+			{
+				"label": "[p. 13]",
+				"fact": "parameter space large enough to accommodate a wide range of outcomes."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.18641.pdf",
+		"url": "https://arxiv.org/pdf/2402.18641v1",
+		"sha256": "d9b5c3a4b0cb22ac49770f382db44004af8754753973eb6cf7d65a87e56cc4e9",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.18641",
+		"transform": null,
+		"facts": [
+			"for performing statistical studies of white dwarfs.",
+			"profile as a function of wavelength varies with the location in the",
+			"given white dwarf candidate and the location associated with the",
+			"by disc emission. The last system in this sample is a double white",
+			"hotter white dwarfs showing atomic carbon lines and the cooler",
+			"These CVs have been serendipitously included in the selection"
+		],
+		"rows": [],
+		"order": [
+			"for performing statistical studies of white dwarfs.",
+			"profile as a function of wavelength varies with the location in the",
+			"given white dwarf candidate and the location associated with the",
+			"by disc emission. The last system in this sample is a double white",
+			"hotter white dwarfs showing atomic carbon lines and the cooler",
+			"These CVs have been serendipitously included in the selection"
+		],
+		"anchors": [
+			{
+				"label": "[p. 2]",
+				"fact": "for performing statistical studies of white dwarfs."
+			},
+			{
+				"label": "[p. 15]",
+				"fact": "These CVs have been serendipitously included in the selection"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.18651.pdf",
+		"url": "https://arxiv.org/pdf/2402.18651v1",
+		"sha256": "7b7006d6cc45a01e3a386072a6b0318c55f593585f7f96507285b2e2918bb70d",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.18651",
+		"transform": null,
+		"facts": [
+			"shown to be optimized for transmitting information about",
+			"ensure that the final design was as engaging and intuitive",
+			"we aimed to make their labels as neutral as possible. To this",
+			"reflecting the fact that larger subgraphs do not require more",
+			"Despite number of nodes clearly being a discrete variable, we",
+			"computationally tractable models for their priors."
+		],
+		"rows": [],
+		"order": [
+			"shown to be optimized for transmitting information about",
+			"ensure that the final design was as engaging and intuitive",
+			"we aimed to make their labels as neutral as possible. To this",
+			"reflecting the fact that larger subgraphs do not require more",
+			"Despite number of nodes clearly being a discrete variable, we",
+			"computationally tractable models for their priors."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "shown to be optimized for transmitting information about"
+			},
+			{
+				"label": "[p. 9]",
+				"fact": "computationally tractable models for their priors."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.18884.pdf",
+		"url": "https://arxiv.org/pdf/2402.18884v1",
+		"sha256": "19f0bbbd972476a611ce7a12dc376b2737f6fa296ee739a9a47f9426b0a97b6e",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.18884",
+		"transform": null,
+		"facts": [
+			"an analytical approach to study the solutions derived from",
+			"The NC discovery was an empirical attempt to demystify",
+			"the m-dimensional vector of all ones and the identity matrix",
+			"which we use later for taking a closer look at the structure of",
+			"lemma reduces the dimension of the original problem in the",
+			"loss value remains the same, while the optimizer changes."
+		],
+		"rows": [],
+		"order": [
+			"an analytical approach to study the solutions derived from",
+			"The NC discovery was an empirical attempt to demystify",
+			"the m-dimensional vector of all ones and the identity matrix",
+			"which we use later for taking a closer look at the structure of",
+			"lemma reduces the dimension of the original problem in the",
+			"loss value remains the same, while the optimizer changes."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "an analytical approach to study the solutions derived from"
+			},
+			{
+				"label": "[p. 10]",
+				"fact": "loss value remains the same, while the optimizer changes."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.18995.pdf",
+		"url": "https://arxiv.org/pdf/2402.18995v1",
+		"sha256": "7f2de1240eb45768e5491fdd4bf887408283725a93ed7cf9656df67f25c957ba",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.18995",
+		"transform": null,
+		"facts": [
+			"bursty dynamics behind count sequences. In",
+			"Suppose we have a sequentially-observed count data over",
+			"of graph structure. Hence, we further study to learn the latent",
+			"using both synthetic and real-world count data.",
+			"and overdispersion magnitude of the dimensions by tuning",
+			"include modeling bursty dynamics often observed in online or"
+		],
+		"rows": [],
+		"order": [
+			"bursty dynamics behind count sequences. In",
+			"Suppose we have a sequentially-observed count data over",
+			"of graph structure. Hence, we further study to learn the latent",
+			"using both synthetic and real-world count data.",
+			"and overdispersion magnitude of the dimensions by tuning",
+			"include modeling bursty dynamics often observed in online or"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "bursty dynamics behind count sequences. In"
+			},
+			{
+				"label": "[p. 7]",
+				"fact": "include modeling bursty dynamics often observed in online or"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "arxiv-2402.19190.pdf",
+		"url": "https://arxiv.org/pdf/2402.19190v1",
+		"sha256": "52beb8765aa433a293abd8c636e8e6365f7e6db3d5f230c74c3c0d9c3e2285b4",
+		"license": "CC-BY-4.0",
+		"licenseUrl": "https://arxiv.org/abs/2402.19190",
+		"transform": null,
+		"facts": [
+			"vaccine coverage level in the structured population.",
+			"and by the balance relation we have",
+			"Vaccination game in the heterogeneous mixing population",
+			"The expression of the determinant of the Jacobian matrix is",
+			"It can be calculated that near the equilibria",
+			"population sizes with the following values,"
+		],
+		"rows": [],
+		"order": [
+			"and by the balance relation we have",
+			"The expression of the determinant of the Jacobian matrix is",
+			"It can be calculated that near the equilibria",
+			"population sizes with the following values,"
+		],
+		"anchors": [
+			{
+				"label": "[p. 3]",
+				"fact": "vaccine coverage level in the structured population."
+			},
+			{
+				"label": "[p. 11]",
+				"fact": "population sizes with the following values,"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "eu-ai_act.pdf",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401689",
+		"sha256": "bba630444b3278e881066774002a1d7824308934f49ccfa203e65be43692f55e",
+		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
+		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+		"transform": null,
+		"facts": [
+			"ultimate aim of increasing human well-being.",
+			"dealing with the preparation of delegated acts.",
+			"Application of a conformity assessment body for notification",
+			"with a view to allowing for comparable and verifiable documentation.",
+			"European Union acting in its judicial capacity.",
+			"provenance of data and curation methodologies."
+		],
+		"rows": [],
+		"order": [
+			"ultimate aim of increasing human well-being.",
+			"dealing with the preparation of delegated acts.",
+			"Application of a conformity assessment body for notification",
+			"with a view to allowing for comparable and verifiable documentation.",
+			"European Union acting in its judicial capacity.",
+			"provenance of data and curation methodologies."
+		],
+		"anchors": [
+			{
+				"label": "[p. 2]",
+				"fact": "ultimate aim of increasing human well-being."
+			},
+			{
+				"label": "[p. 143]",
+				"fact": "provenance of data and curation methodologies."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "eu-data_act.pdf",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202302854",
+		"sha256": "0d100d513136adfaa5655d77784d3af00f477b8588471cbb51dea7aff8687838",
+		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
+		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+		"transform": null,
+		"facts": [
+			"of contractual imbalances with regard to data access and use.",
+			"bodies should make annual activity reports publicly available.",
+			"contractual relations when accessing and sharing data.",
+			"not be binding on the latter enterprise if it is unfair.",
+			"services provided by the provider of data processing services.",
+			"to and authorising the use of data for scientific research purposes."
+		],
+		"rows": [],
+		"order": [
+			"of contractual imbalances with regard to data access and use.",
+			"bodies should make annual activity reports publicly available.",
+			"contractual relations when accessing and sharing data.",
+			"not be binding on the latter enterprise if it is unfair.",
+			"services provided by the provider of data processing services."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "of contractual imbalances with regard to data access and use."
+			},
+			{
+				"label": "[p. 69]",
+				"fact": "to and authorising the use of data for scientific research purposes."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "eu-dsa.pdf",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022R2065",
+		"sha256": "04b688f2ea13fc0f0e0f615b6835608405ee848b17892d26a1b69dcf1bae71a0",
+		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
+		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+		"transform": null,
+		"facts": [
+			"the attainment of a high level of consumer protection.",
+			"interface where the recommendations are presented.",
+			"Notification of suspicions of criminal offences",
+			"the recommended timeframe to achieve compliance.",
+			"enforcement measures to be taken, including interim measures.",
+			"growth of small and medium-sized enterprises."
+		],
+		"rows": [],
+		"order": [
+			"the attainment of a high level of consumer protection.",
+			"interface where the recommendations are presented.",
+			"Notification of suspicions of criminal offences",
+			"the recommended timeframe to achieve compliance.",
+			"enforcement measures to be taken, including interim measures.",
+			"growth of small and medium-sized enterprises."
+		],
+		"anchors": [
+			{
+				"label": "[p. 2]",
+				"fact": "the attainment of a high level of consumer protection."
+			},
+			{
+				"label": "[p. 100]",
+				"fact": "growth of small and medium-sized enterprises."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "eu-gdpr.pdf",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679",
+		"sha256": "bd84e63f5b622b739a83389afc3b30d240f792bb88d8eb03a816c9a82b0c2499",
+		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
+		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+		"transform": null,
+		"facts": [
+			"personal data concerning him or her.",
+			"when preparing its draft decision in that one-stop-shop mechanism.",
+			"about those recipients if the data subject requests it.",
+			"shall register and publish the code.",
+			"authority receiving the request is subject.",
+			"Review of other Union legal acts on data protection"
+		],
+		"rows": [],
+		"order": [
+			"when preparing its draft decision in that one-stop-shop mechanism.",
+			"about those recipients if the data subject requests it.",
+			"shall register and publish the code.",
+			"authority receiving the request is subject.",
+			"Review of other Union legal acts on data protection"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "personal data concerning him or her."
+			},
+			{
+				"label": "[p. 87]",
+				"fact": "Review of other Union legal acts on data protection"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "eu-nis2.pdf",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022L2555",
+		"sha256": "20d29e9c5300ae1095530996f04731311bf82bb7d4d6a7a0102cd0f075755cf3",
+		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
+		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
+		"transform": null,
+		"facts": [
+			"and to the effective functioning of its economy and society.",
+			"defensive strategy that excludes offensive measures.",
+			"result of an infringement of this Directive.",
+			"be held liable for infringements by the entities of that Article.",
+			"registration services to cooperate with each other.",
+			"management is not their principal economic activity"
+		],
+		"rows": [],
+		"order": [
+			"and to the effective functioning of its economy and society.",
+			"defensive strategy that excludes offensive measures.",
+			"result of an infringement of this Directive.",
+			"be held liable for infringements by the entities of that Article.",
+			"registration services to cooperate with each other.",
+			"management is not their principal economic activity"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "and to the effective functioning of its economy and society."
+			},
+			{
+				"label": "[p. 69]",
+				"fact": "management is not their principal economic activity"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nist-ai_rmf.pdf",
+		"url": "https://nvlpubs.nist.gov/nistpubs/AI/NIST.AI.100-1.pdf",
+		"sha256": "7576edb531d9848825814ee88e28b1795d3a84b435b4b797d3670eafdc4a89f1",
+		"license": "US Government work (public domain)",
+		"licenseUrl": "https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications",
+		"transform": null,
+		"facts": [
+			"and will be reviewed and integrated on a semi-annual basis.",
+			"meaning or context to the user.",
+			"regarding the potential individual and societal impacts related to",
+			"as knowledge, methodologies, risks, and impacts evolve over time.",
+			"system achieves its intended purposes and stated objectives and",
+			"with other approaches to managing AI risks."
+		],
+		"rows": [],
+		"order": [
+			"and will be reviewed and integrated on a semi-annual basis.",
+			"meaning or context to the user.",
+			"regarding the potential individual and societal impacts related to",
+			"as knowledge, methodologies, risks, and impacts evolve over time.",
+			"system achieves its intended purposes and stated objectives and",
+			"with other approaches to managing AI risks."
+		],
+		"anchors": [
+			{
+				"label": "[p. 3]",
+				"fact": "and will be reviewed and integrated on a semi-annual basis."
+			},
+			{
+				"label": "[p. 47]",
+				"fact": "with other approaches to managing AI risks."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nist-sp800_171r3.pdf",
+		"url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-171r3.pdf",
+		"sha256": "3e4631df8b5d61f40a6e542b52779ef30ddbbfff31e09214fa94ad6e6f5e6d08",
+		"license": "US Government work (public domain)",
+		"licenseUrl": "https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications",
+		"transform": null,
+		"facts": [
+			"including related content, potential updates, and document history.",
+			"procedures to assess the security requirements.",
+			"activities with industry, government, and academic organizations.",
+			"contractual vehicles or other types of agreements",
+			"requirements set forth in contracts or agreements",
+			"infringement in the use of this publication."
+		],
+		"rows": [],
+		"order": [
+			"including related content, potential updates, and document history.",
+			"procedures to assess the security requirements.",
+			"activities with industry, government, and academic organizations.",
+			"contractual vehicles or other types of agreements",
+			"requirements set forth in contracts or agreements",
+			"infringement in the use of this publication."
+		],
+		"anchors": [
+			{
+				"label": "[p. 4]",
+				"fact": "including related content, potential updates, and document history."
+			},
+			{
+				"label": "[p. 7]",
+				"fact": "infringement in the use of this publication."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nist-sp800_61r3.pdf",
+		"url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r3.pdf",
+		"sha256": "e5593d6bb85daecec7e8d9549400c7b3473bcc3f06e469c82218073afa7fba2d",
+		"license": "US Government work (public domain)",
+		"licenseUrl": "https://www.nist.gov/director/copyright-fair-use-and-licensing-statements-srd-data-software-and-technical-series-publications",
+		"transform": null,
+		"facts": [
+			"including related content, potential updates, and document history.",
+			"data classifications, owners, and logical and",
+			"should include all successful and failed",
+			"other indicators, such as an unavailable",
+			"in accordance with regulatory, legal, and",
+			"recover from the incident and to prevent a"
+		],
+		"rows": [],
+		"order": [
+			"including related content, potential updates, and document history.",
+			"data classifications, owners, and logical and",
+			"should include all successful and failed",
+			"other indicators, such as an unavailable",
+			"in accordance with regulatory, legal, and",
+			"recover from the incident and to prevent a"
+		],
+		"anchors": [
+			{
+				"label": "[p. 4]",
+				"fact": "including related content, potential updates, and document history."
+			},
+			{
+				"label": "[p. 43]",
+				"fact": "recover from the incident and to prevent a"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nl-stb-2021-200.pdf",
+		"url": "https://zoek.officielebekendmakingen.nl/stb-2021-200.pdf",
+		"sha256": "3a368a0becc83701c09c5046f0c1cf91c2ad9df7ca6e4fa1dd433f761e630aae",
+		"license": "Public domain (Dutch Copyright Act art. 11)",
+		"licenseUrl": "https://www.officielebekendmakingen.nl/over-deze-website/copyright",
+		"transform": null,
+		"facts": [
+			"in verband met de implementatie van het",
+			"en minder gangbare brandstoffen is bekeken, bijvoorbeeld aardgas,",
+			"worden diverse afwijkmogelijkheden in de voetnoten bij de",
+			"Er waren in Nederland nog geen zuiveringsinstallaties voor toiletwater",
+			"gezorgd dat de wijzigingen in dit besluit direct deel uitmaken van het",
+			"Voorzien is dat dit besluit in werking treedt op het moment dat het"
+		],
+		"rows": [],
+		"order": [
+			"in verband met de implementatie van het",
+			"en minder gangbare brandstoffen is bekeken, bijvoorbeeld aardgas,",
+			"worden diverse afwijkmogelijkheden in de voetnoten bij de",
+			"Er waren in Nederland nog geen zuiveringsinstallaties voor toiletwater",
+			"gezorgd dat de wijzigingen in dit besluit direct deel uitmaken van het",
+			"Voorzien is dat dit besluit in werking treedt op het moment dat het"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "in verband met de implementatie van het"
+			},
+			{
+				"label": "[p. 43]",
+				"fact": "Voorzien is dat dit besluit in werking treedt op het moment dat het"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nl-stb-2023-1.pdf",
+		"url": "https://zoek.officielebekendmakingen.nl/stb-2023-1.pdf",
+		"sha256": "0f20e7d06c061aaa8f7b9b4902d276341241a7010f6a9fd18032cab3b6917381",
+		"license": "Public domain (Dutch Copyright Act art. 11)",
+		"licenseUrl": "https://www.officielebekendmakingen.nl/over-deze-website/copyright",
+		"transform": null,
+		"facts": [
+			"strafzaken in verband met de verruiming van de",
+			"daarom in praktijk politiefunctionarissen vanuit hoge leidinggevende",
+			"beperking vormt een belangrijke belemmering voor de borging van kennis",
+			"adviserende rol optimaal te kunnen vervullen weegt in dat verband",
+			"De Rvdr stelt ten tweede de vraag of de benodigde expertise niet op",
+			"nota van toelichting. Tegen deze achtergrond acht de regering de"
+		],
+		"rows": [],
+		"order": [
+			"strafzaken in verband met de verruiming van de",
+			"daarom in praktijk politiefunctionarissen vanuit hoge leidinggevende",
+			"beperking vormt een belangrijke belemmering voor de borging van kennis",
+			"adviserende rol optimaal te kunnen vervullen weegt in dat verband",
+			"De Rvdr stelt ten tweede de vraag of de benodigde expertise niet op",
+			"nota van toelichting. Tegen deze achtergrond acht de regering de"
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "strafzaken in verband met de verruiming van de"
+			},
+			{
+				"label": "[p. 7]",
+				"fact": "nota van toelichting. Tegen deze achtergrond acht de regering de"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nl-stb-2023-100.pdf",
+		"url": "https://zoek.officielebekendmakingen.nl/stb-2023-100.pdf",
+		"sha256": "641717d4a707b623030e644b3eb9a771d81e3e6b1f2aad845acb62e8fc27da4b",
+		"license": "Public domain (Dutch Copyright Act art. 11)",
+		"licenseUrl": "https://www.officielebekendmakingen.nl/over-deze-website/copyright",
+		"transform": null,
+		"facts": [
+			"Dit besluit treedt in werking op een bij koninklijk besluit te bepalen",
+			"woningen, als sociale huurwoningen, middenhuurwoningen en",
+			"wordt aansluiting gehouden bij de woningbouwdeals, waarin wordt",
+			"bij de behoefte en demografische ontwikkelingen. Het effect van deze",
+			"onderwerp betaalbare woningen werkt door naar de bepalingen in de",
+			"van openstelling van de vijfde tranche Woningbouwimpuls."
+		],
+		"rows": [],
+		"order": [
+			"Dit besluit treedt in werking op een bij koninklijk besluit te bepalen",
+			"woningen, als sociale huurwoningen, middenhuurwoningen en",
+			"wordt aansluiting gehouden bij de woningbouwdeals, waarin wordt",
+			"bij de behoefte en demografische ontwikkelingen. Het effect van deze",
+			"onderwerp betaalbare woningen werkt door naar de bepalingen in de",
+			"van openstelling van de vijfde tranche Woningbouwimpuls."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "Dit besluit treedt in werking op een bij koninklijk besluit te bepalen"
+			},
+			{
+				"label": "[p. 5]",
+				"fact": "van openstelling van de vijfde tranche Woningbouwimpuls."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "nl-stb-2023-200.pdf",
+		"url": "https://zoek.officielebekendmakingen.nl/stb-2023-200.pdf",
+		"sha256": "b3505a14997eb9d24455fe90483c8e2d43fa9ebac237150bb96c89e5dbe306da",
+		"license": "Public domain (Dutch Copyright Act art. 11)",
+		"licenseUrl": "https://www.officielebekendmakingen.nl/over-deze-website/copyright",
+		"transform": null,
+		"facts": [
+			"van het tijdstip van inwerkingtreding van het",
+			"inname van afval in de Rijn- en binnenvaart",
+			"toelichting in het Staatsblad zal worden geplaatst.",
+			"bepaalt dat het verdrag in werking treedt binnen zes maanden nadat de",
+			"Voor de uitvoering van het besluit is namelijk de samenwerking tussen",
+			"koninklijk besluit wordt daar gehoor aan gegeven."
+		],
+		"rows": [],
+		"order": [
+			"van het tijdstip van inwerkingtreding van het",
+			"toelichting in het Staatsblad zal worden geplaatst.",
+			"bepaalt dat het verdrag in werking treedt binnen zes maanden nadat de",
+			"Voor de uitvoering van het besluit is namelijk de samenwerking tussen",
+			"koninklijk besluit wordt daar gehoor aan gegeven."
+		],
+		"anchors": [
+			{
+				"label": "[p. 1]",
+				"fact": "van het tijdstip van inwerkingtreding van het"
+			},
+			{
+				"label": "[p. 3]",
+				"fact": "koninklijk besluit wordt daar gehoor aan gegeven."
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "sec-cyber-rule-33-11216.pdf",
+		"url": "https://www.sec.gov/files/rules/final/2023/33-11216.pdf",
+		"sha256": "1900e0c066715f4b53671145d5f2872baa7c20281181c8a9935359f11d9827d5",
+		"license": "US Government work (public domain, 17 USC 105)",
+		"licenseUrl": "https://www.law.cornell.edu/uscode/text/17/105",
+		"transform": null,
+		"facts": [
+			"Commission and staff had issued in prior years.",
+			"disclosure would pose a substantial risk to national security or",
+			"of its business strategy, risk management, and financial oversight.",
+			"both larger and smaller than that size were impacted by cyberattacks.",
+			"disclosure could provide timely information to attackers.",
+			"without unreasonable delay after discovery of the incident."
+		],
+		"rows": [],
+		"order": [
+			"Commission and staff had issued in prior years.",
+			"of its business strategy, risk management, and financial oversight.",
+			"both larger and smaller than that size were impacted by cyberattacks.",
+			"disclosure could provide timely information to attackers.",
+			"without unreasonable delay after discovery of the incident."
+		],
+		"anchors": [
+			{
+				"label": "[p. 5]",
+				"fact": "Commission and staff had issued in prior years."
+			},
+			{
+				"label": "[p. 185]",
+				"fact": "without unreasonable delay after discovery of the incident."
+			}
+		],
+		"hidden": []
+	}
+]

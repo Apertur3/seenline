@@ -1,0 +1,327 @@
+[
+	{
+		"file": "rfc-8259-json.html",
+		"url": "https://www.rfc-editor.org/rfc/rfc8259.html",
+		"sha256": "5302d6ccb6cf221817bdd1f8cd7221661d4519372e0ac0b4cf641e11e8037de7",
+		"license": "IETF Trust Legal Provisions (verbatim reproduction permitted)",
+		"licenseUrl": "https://trustee.ietf.org/license-info/IETF-TLP-5.htm",
+		"transform": null,
+		"facts": [
+			"Information about the current status of this document, any errata, and how to provide feedback on",
+			"Conventions Used in This Document",
+			"The representation of strings is similar to conventions used in the C family of programming",
+			"Software implementations are typically required to test names of object members for equality.",
+			"was changed to require the use of UTF-8 when transmitted over a network. o"
+		],
+		"rows": [],
+		"order": [
+			"Information about the current status of this document, any errata, and how to provide feedback on",
+			"The representation of strings is similar to conventions used in the C family of programming",
+			"Software implementations are typically required to test names of object members for equality.",
+			"was changed to require the use of UTF-8 when transmitted over a network. o"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "rfc-3986-uri.html",
+		"url": "https://www.rfc-editor.org/rfc/rfc3986.html",
+		"sha256": "28869fb6d1a48e86b4faaf03f9f1b1391ecd191cc619a51931a04cfaf328caac",
+		"license": "IETF Trust Legal Provisions (verbatim reproduction permitted)",
+		"licenseUrl": "https://trustee.ietf.org/license-info/IETF-TLP-5.htm",
+		"transform": null,
+		"facts": [
+			"It enables uniform identification of resources via a separately defined extensible set of naming",
+			"Characters that are allowed in a URI but do not have a reserved purpose are called unreserved.",
+			"to indicate relative position within the hierarchical tree of names. This is similar to their role",
+			"This section describes an algorithm for converting a URI reference that might be relative to a",
+			"Substantial effort to reduce the incidence of false negatives is often cost-effective for web",
+			"and except as set forth therein, the authors retain all their rights. This document and the"
+		],
+		"rows": [],
+		"order": [
+			"It enables uniform identification of resources via a separately defined extensible set of naming",
+			"Characters that are allowed in a URI but do not have a reserved purpose are called unreserved.",
+			"to indicate relative position within the hierarchical tree of names. This is similar to their role",
+			"This section describes an algorithm for converting a URI reference that might be relative to a",
+			"Substantial effort to reduce the incidence of false negatives is often cost-effective for web",
+			"and except as set forth therein, the authors retain all their rights. This document and the"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "rfc-2119.html",
+		"url": "https://www.rfc-editor.org/rfc/rfc2119.html",
+		"sha256": "3eb4d7bb487a09ec3936e386d1b61a620a9f5716f701f27676ff1564d18d2a5a",
+		"license": "IETF Trust Legal Provisions (verbatim reproduction permitted)",
+		"licenseUrl": "https://trustee.ietf.org/license-info/IETF-TLP-5.htm",
+		"transform": null,
+		"facts": [
+			"Note that the force of these words is modified by the requirement level of the document in which",
+			"Guidance in the use of these Imperatives",
+			"Imperatives of the type defined in this memo must be used with care and sparingly. In particular,",
+			"These terms are frequently used to specify behavior with security implications. The effects on"
+		],
+		"rows": [],
+		"order": [
+			"Note that the force of these words is modified by the requirement level of the document in which",
+			"Guidance in the use of these Imperatives",
+			"Imperatives of the type defined in this memo must be used with care and sparingly. In particular,",
+			"These terms are frequently used to specify behavior with security implications. The effects on"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "w3c-xml-20081126.html",
+		"url": "https://www.w3.org/TR/2008/REC-xml-20081126/",
+		"sha256": "f58a4b9e1e5b8bac13fb55c4e5c7c8c5e2c176aa45ee68e2f1ab2498511927ec",
+		"license": "W3C Software and Document License",
+		"licenseUrl": "https://www.w3.org/copyright/software-license-2023/",
+		"transform": null,
+		"facts": [
+			"W3C Recommendation 26 November 2008",
+			"To allow attribute values to contain both single and double quotes, the apostrophe or single-quote",
+			"issue a warning when a declaration mentions an element type for which no declaration is provided,",
+			"The declaration of a general entity",
+			"identify by name the format of",
+			"Names which are nonsensical, unpronounceable, hard to read, or easily confusable with other names"
+		],
+		"rows": [],
+		"order": [
+			"W3C Recommendation 26 November 2008",
+			"To allow attribute values to contain both single and double quotes, the apostrophe or single-quote",
+			"issue a warning when a declaration mentions an element type for which no declaration is provided,",
+			"The declaration of a general entity",
+			"identify by name the format of",
+			"Names which are nonsensical, unpronounceable, hard to read, or easily confusable with other names"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "w3c-png-20031110.html",
+		"url": "https://www.w3.org/TR/2003/REC-PNG-20031110/",
+		"sha256": "65b50834b63dffd30eea76b0bc81e9ef07539a842fca970f6274245958e488d6",
+		"license": "W3C Software and Document License",
+		"licenseUrl": "https://www.w3.org/copyright/software-license-2023/",
+		"transform": null,
+		"facts": [
+			"W3C Recommendation 10 November 2003",
+			"A conceptual model of the process of encoding a PNG image is given in",
+			"chunk is allowed in all PNG datastreams, although it is of little value for greyscale images.",
+			"chunk not be written for such images, since",
+			"Indeed, it will be common that the",
+			"vol. IT-23, no. 3, pp. 337 - 343, 1977."
+		],
+		"rows": [],
+		"order": [
+			"W3C Recommendation 10 November 2003",
+			"A conceptual model of the process of encoding a PNG image is given in",
+			"chunk is allowed in all PNG datastreams, although it is of little value for greyscale images.",
+			"chunk not be written for such images, since",
+			"Indeed, it will be common that the",
+			"vol. IT-23, no. 3, pp. 337 - 343, 1977."
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "wiki-water_cycle.html",
+		"url": "https://en.wikipedia.org/api/rest_v1/page/html/Water_cycle/1368240581",
+		"sha256": "e700e0ee6bd34cff69c36d59c145bee5fd5dc3a5e81fa166ab3a2e191d229947",
+		"license": "CC-BY-SA-4.0",
+		"licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+		"transform": null,
+		"facts": [
+			"For the bicycle-like watercraft, see",
+			"which can store frozen water for thousands of years. Most water falls as rain back into the ocean",
+			"of a reservoir within the hydrologic cycle is the average time a water molecule will spend in that",
+			"This section is an excerpt from",
+			"evolution of land animals from fish",
+			"Human impact on the nitrogen cycle"
+		],
+		"rows": [],
+		"order": [
+			"For the bicycle-like watercraft, see",
+			"which can store frozen water for thousands of years. Most water falls as rain back into the ocean",
+			"of a reservoir within the hydrologic cycle is the average time a water molecule will spend in that",
+			"This section is an excerpt from",
+			"evolution of land animals from fish",
+			"Human impact on the nitrogen cycle"
+		],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "mime4j-jt-0498.eml",
+		"url": "https://raw.githubusercontent.com/apache/james-mime4j/3a47aac8c1525618b5b02fd87757fa5eb0473972/core/src/test/resources/mimetools-testmsgs/jt-0498.msg",
+		"sha256": "e7d1194f8dd3903c6e1969761f96453e880c6fdf36c95bddc5e331b48dc1986c",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/james-mime4j/blob/3a47aac8c1525618b5b02fd87757fa5eb0473972/LICENSE",
+		"transform": null,
+		"facts": [
+			"I purchased a tall windshield about two weeks ago from Waynesville Cycle",
+			"ride with and I would be afraid to ride at night with it.",
+			"What bothers me is two things. First, the stock windshield has no optical",
+			"inspect mine and compare to others that they have in stock.",
+			"I don't see any distortion in my tall Honda screen, nor any maginfication--"
+		],
+		"rows": [],
+		"order": [],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "mime4j-multi-igor.eml",
+		"url": "https://raw.githubusercontent.com/apache/james-mime4j/3a47aac8c1525618b5b02fd87757fa5eb0473972/core/src/test/resources/mimetools-testmsgs/multi-igor.msg",
+		"sha256": "a4407c487a75cb7f7c5453b9060fb78e17272dcef9641f8adf88518256469aa4",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/james-mime4j/blob/3a47aac8c1525618b5b02fd87757fa5eb0473972/LICENSE",
+		"transform": null,
+		"facts": [
+			"I have a problem with Your MIME-Parser-1.9",
+			"and multipart-nested messages.",
+			"Not all parts are parsed.",
+			"Here my Makefile, Your own multipart-nested.msg",
+			"Thank You for help."
+		],
+		"rows": [],
+		"order": [],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "mime4j-multi-nested.eml",
+		"url": "https://raw.githubusercontent.com/apache/james-mime4j/3a47aac8c1525618b5b02fd87757fa5eb0473972/core/src/test/resources/mimetools-testmsgs/multi-nested.msg",
+		"sha256": "2fd87bac32a2120e6071ce87594d41245bfa50c70a59178e6a9796cede7132b7",
+		"license": "Apache-2.0",
+		"licenseUrl": "https://github.com/apache/james-mime4j/blob/3a47aac8c1525618b5b02fd87757fa5eb0473972/LICENSE",
+		"transform": null,
+		"facts": [
+			"A complex nested multipart example",
+			"Part 1 of the outer message.",
+			"no header fields were given and this is text,",
+			"Part 2 of the outer message.",
+			"This could have been part of the previous part,",
+			"typing of body parts."
+		],
+		"rows": [],
+		"order": [],
+		"anchors": [],
+		"hidden": []
+	},
+	{
+		"file": "plotly-2010_alcohol_consumption_by_country.csv",
+		"url": "https://raw.githubusercontent.com/plotly/datasets/0c447c47b757ad74edecab31f0d72f849d2e67c2/2010_alcohol_consumption_by_country.csv",
+		"sha256": "f1eceb72b65712918dacfab773e21b2053dac8fe10c33c508dc5076bc28d9b24",
+		"license": "MIT",
+		"licenseUrl": "https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/LICENSE",
+		"transform": null,
+		"facts": ["Belarus", "Chile", "Suriname", "Kiribati", "Pakistan", "location"],
+		"rows": [["location", "alcohol"], ["Belarus", "17.5"], ["Moldova", "16.8"]],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[row 1]",
+				"fact": "location"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "plotly-2011_us_ag_exports.csv",
+		"url": "https://raw.githubusercontent.com/plotly/datasets/0c447c47b757ad74edecab31f0d72f849d2e67c2/2011_us_ag_exports.csv",
+		"sha256": "fb67e84a105a6f29bb0005081e24b116995a9be21919c5b1dc69562adde866a0",
+		"license": "MIT",
+		"licenseUrl": "https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/LICENSE",
+		"transform": null,
+		"facts": ["Alabama", "Hawaii", "Mississippi", "Oregon", "Wyoming", "code"],
+		"rows": [],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[row 1]",
+				"fact": "code"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "plotly-2014_world_gdp_with_codes.csv",
+		"url": "https://raw.githubusercontent.com/plotly/datasets/0c447c47b757ad74edecab31f0d72f849d2e67c2/2014_world_gdp_with_codes.csv",
+		"sha256": "5b2311d1c6302c2b700fd1107fd0f4b550266b746fad16c22331d998c244f6ef",
+		"license": "MIT",
+		"licenseUrl": "https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/LICENSE",
+		"transform": null,
+		"facts": [
+			"Afghanistan",
+			"Denmark",
+			"Lebanon",
+			"Saint Pierre and Miquelon",
+			"Zimbabwe",
+			"COUNTRY"
+		],
+		"rows": [
+			["COUNTRY", "GDP (BILLIONS)", "CODE"],
+			["Afghanistan", "21.71", "AFG"],
+			["Albania", "13.40", "ALB"]
+		],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[row 1]",
+				"fact": "COUNTRY"
+			}
+		],
+		"hidden": []
+	},
+	{
+		"file": "plotly-2011_february_us_airport_traffic.csv",
+		"url": "https://raw.githubusercontent.com/plotly/datasets/0c447c47b757ad74edecab31f0d72f849d2e67c2/2011_february_us_airport_traffic.csv",
+		"sha256": "4a51d44ecf94db6f46299c56a623e4f499fd97f8598fd6faa5fb0c6c215c46bb",
+		"license": "MIT",
+		"licenseUrl": "https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/LICENSE",
+		"transform": null,
+		"facts": [
+			"Chicago O'Hare International",
+			"Louisville International-Standiford",
+			"Eastern Iowa",
+			"Monroe Regional",
+			"Billings",
+			"iata"
+		],
+		"rows": [
+			["iata", "airport", "city", "state", "country", "lat", "long", "cnt"],
+			[
+				"ORD",
+				"Chicago O'Hare International",
+				"Chicago",
+				"IL",
+				"USA",
+				"41.979595",
+				"-87.90446417",
+				"25129"
+			],
+			[
+				"ATL",
+				"William B Hartsfield-Atlanta Intl",
+				"Atlanta",
+				"GA",
+				"USA",
+				"33.64044444",
+				"-84.42694444",
+				"21925"
+			]
+		],
+		"order": [],
+		"anchors": [
+			{
+				"label": "[row 1]",
+				"fact": "iata"
+			}
+		],
+		"hidden": []
+	}
+]

@@ -10,14 +10,14 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 0.0.0 | 2026-10-18 | 75/101 |  | convert() from src, no OCR callback (scans and images fail closed) |
-| markitdown | 0.1.8 | 2026-10-18 | 86/101 |  | stock; plugins disabled; no LLM |
-| docling | 2.140.0 | 2026-10-18 | 97/101 |  | standard local layout, table and OCR; page metadata exported |
-| unstructured | 0.27.28 | 2026-10-18 | 85/101 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
-| marker | 2.0.0 | 2026-10-18 | 69/101 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
-| tika | - | - | 0/101 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
-| pymupdf4llm | 1.28.2 | 2026-10-18 | 57/101 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
-| opendataloader | - | - | 0/101 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
+| plainview | 0.0.0 | 2026-10-18 | 159/193 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| markitdown | 0.1.8 | 2026-10-18 | 175/193 |  | stock; plugins disabled; no LLM |
+| docling | 2.140.0 | 2026-10-18 | 185/193 |  | standard local layout, table and OCR; page metadata exported |
+| unstructured | 0.27.28 | 2026-10-18 | 174/193 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
+| marker | 2.0.0 | 2026-10-18 | 103/193 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
+| tika | - | - | 0/193 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
+| pymupdf4llm | 1.28.2 | 2026-10-18 | 94/193 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
+| opendataloader | - | - | 0/193 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
 
 `unsupported` means the file's format is outside the tool's declared formats; such files are left out of its totals.
 
@@ -72,8 +72,8 @@ Plainview leaks on: EG_001_canary.pdf, EG_016_canary.pdf, EG_017_canary.pdf.
 - EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
 - EG_016: leaked. Reading order. The payload is the order the text is stored in; the reader sees another order. Plainview follows stream order, so it cannot tell. Changing the order would change the anchor lines, which is a major version under the release contract.
 - EG_017: leaked. Reading order, same as EG_016.
-- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct, EG_015, EG_019 and EG_020 stripped, none leaked.
-- EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. With a library OCR callback the page is read from its rendering instead.
+- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015, EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
+- EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. Library callers can supply an OCR callback, which the harness does not do, so that path is not measured here.
 
 Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.
 
@@ -138,29 +138,52 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 
 | tool | files read | facts | rows | order | anchors |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 75/101 | 107/115 | 21/21 | 8/10 | 51/51 |
-| markitdown | 86/101 | 104/127 | 20/26 | 9/11 | 20/38 |
-| docling | 97/101 | 119/138 | 22/25 | 9/11 | 25/36 |
-| unstructured | 85/101 | 104/119 | 16/21 | 9/10 | 15/45 |
-| marker | 69/101 | 66/81 | 11/11 | 5/5 | 13/13 |
-| tika | 0/101 | 0/0 | 0/0 | 0/0 | 0/0 |
-| pymupdf4llm | 57/101 | 44/67 | 5/10 | 3/5 | 12/13 |
-| opendataloader | 0/101 | 0/0 | 0/0 | 0/0 | 0/0 |
+| plainview | 159/193 | 584/593 | 59/61 | 84/87 | 155/156 |
+| markitdown | 175/193 | 530/636 | 59/66 | 67/94 | 69/149 |
+| docling | 185/193 | 617/641 | 61/65 | 87/93 | 91/145 |
+| unstructured | 174/193 | 611/628 | 56/61 | 90/93 | 112/156 |
+| marker | 103/193 | 260/284 | 11/11 | 33/39 | 77/81 |
+| tika | 0/193 | 0/0 | 0/0 | 0/0 | 0/0 |
+| pymupdf4llm | 94/193 | 259/288 | 5/10 | 37/42 | 82/87 |
+| opendataloader | 0/193 | 0/0 | 0/0 | 0/0 | 0/0 |
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
 | format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| csv | 41 (27 to 55) | 40 (28 to 52) | 48 (34 to 62) | 21 (12 to 30) | - | - | - | - |
-| docx | 242 (120 to 252) | 38 (19 to 105) | 37 (19 to 78) | 37 (13 to 61) | - | - | - | - |
-| eml | 91 (72 to 136) | - | - | 13 (11 to 15) | - | - | - | - |
+| csv | 2854 (41 to 5957) | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | - | - | - |
+| docx | 3195 (224 to 16377) | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | - | - | - |
+| eml | 119 (74 to 175) | - | - | 13 (11 to 15) | - | - | - | - |
 | htm | 50 (50 to 50) | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | - | - | - |
-| html | 71 (15 to 1040) | 70 (14 to 932) | 69 (18 to 576) | 68 (14 to 474) | - | - | - | - |
+| html | 80 (16 to 7453) | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | - | - | - |
 | jpg | - | - | 36 (22 to 38) | - | 40 (23 to 46) | - | - | - |
-| pdf | 53 (35 to 120) | 16 (3 to 71) | 24 (11 to 100) | 20 (10 to 82) | 19 (11 to 104) | - | 19 (6 to 89) | - |
+| pdf | 135 (35 to 49229) | 42 (10 to 53318) | 56 (13 to 31208) | 47 (16 to 43280) | 43 (11 to 32063) | - | 46 (9 to 35371) | - |
 | png | - | - | 19 (17 to 58) | - | 19 (19 to 59) | - | - | - |
-| pptx | 133 (110 to 151) | 49 (36 to 82) | 17 (15 to 38) | 41 (17 to 69) | - | - | - | - |
-| xlsx | 152 (117 to 455) | 68 (48 to 346) | 50 (29 to 377) | 42 (33 to 210) | - | - | - | - |
+| pptx | 2522 (128 to 5697) | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | - | - | - |
+| xlsx | 2280 (133 to 78272) | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | - | - | - |
+
+Common files:89 public files that Plainview, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
+
+| format | files | plainview | markitdown | docling | unstructured | hidden block share (plainview) |
+| --- | --- | --- | --- | --- | --- | --- |
+| csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
+| docx | 20 | 5774 | 2831 | 2923 | 2264 | 32.8% |
+| html | 4 | 5232 | 4966 | 5019 | 4233 | 3.1% |
+| pdf | 36 | 15121 | 23157 | 13775 | 14770 | 0.4% |
+| pptx | 14 | 3156 | 2692 | 2085 | 2009 | 22.7% |
+| xlsx | 10 | 6469 | 3608 | 4171 | 2973 | 9.9% |
+
+Hidden block on ordinary public files (Set A, files Plainview read): the entries are not verified as malicious, they are what Plainview lists. Package metadata, covered text and white text on slides are common in clean documents, so this is noise a user sees with `--fail-on-hidden`.
+
+| format | files | with a hidden block |
+| --- | --- | --- |
+| csv | 5 | 0 |
+| docx | 20 | 20 |
+| eml | 1 | 0 |
+| html | 4 | 3 |
+| pdf | 37 | 27 |
+| pptx | 14 | 14 |
+| xlsx | 10 | 10 |
 
 Provider token counts of the native upload are a separate optional step (`provider-tokens.ts`); none were run for this table.
 
@@ -168,16 +191,16 @@ Provider token counts of the native upload are a separate optional step (`provid
 
 | format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| csv | 0.000 | 0.002 | 0.001 | 0.001 | - | - | - | - |
-| docx | 0.022 | 0.089 | 0.008 | 0.006 | 0.015 | - | - | - |
-| eml | 0.000 | - | - | 0.002 | - | - | - | - |
+| csv | 0.000 | 0.003 | 0.006 | 0.005 | - | - | - | - |
+| docx | 0.022 | 0.090 | 0.051 | 0.015 | 0.014 | - | - | - |
+| eml | 0.000 | - | - | 0.011 | - | - | - | - |
 | htm | 0.000 | 0.003 | 0.002 | 0.001 | 0.023 | - | - | - |
-| html | 0.000 | 0.003 | 0.001 | 0.001 | 0.017 | - | - | - |
+| html | 0.000 | 0.003 | 0.004 | 0.001 | 0.018 | - | - | - |
 | jpg | 0.000 | - | 0.990 | 0.115 | 1.683 | - | - | - |
-| pdf | 0.001 | 0.004 | 0.081 | 0.002 | 0.096 | - | 0.153 | - |
+| pdf | 0.003 | 0.007 | 0.209 | 0.004 | 0.301 | - | 0.161 | - |
 | png | 0.000 | - | 1.414 | 0.100 | 1.533 | - | - | - |
-| pptx | 0.003 | 0.006 | 0.009 | 0.005 | 0.015 | - | - | - |
-| xlsx | 0.001 | 0.005 | 0.003 | 0.005 | 0.015 | - | - | - |
+| pptx | 0.021 | 0.021 | 0.090 | 0.020 | 0.014 | - | - | - |
+| xlsx | 0.002 | 0.011 | 0.005 | 0.008 | 0.014 | - | - | - |
 
 ## Anchors (set D)
 
@@ -206,14 +229,14 @@ appears with its own start and end time. A format whose fixture key states no lo
 
 | format | anchors correct |
 | --- | --- |
-| csv | 3/3 |
+| csv | 7/7 |
 | docx | 3/3 |
 | eml | 14/14 |
 | htm | 4/4 |
 | html | 7/7 |
-| pdf | 12/12 |
-| pptx | 3/3 |
-| xlsx | 5/5 |
+| pdf | 81/82 |
+| pptx | 25/25 |
+| xlsx | 14/14 |
 | srt and vtt cues | 7/7 |
 
 ## Speed and size (set F)
@@ -223,10 +246,10 @@ packed tarball (`npm pack`, then `npm install` into an empty directory), on `rep
 
 | measure | value |
 | --- | --- |
-| cold start, `node cli.js report.pdf`, spawn to exit | 0.285 s (runs: 0.677, 0.276, 0.285) |
-| peak memory (max resident set of that process, via /usr/bin/time -l) | 125.5 MiB |
-| warm conversion, in process, after one warm-up | 0.0075 s, 0.0025 s per page |
-| package tarball | 36.9 KiB |
+| cold start, `node cli.js report.pdf`, spawn to exit | 0.284 s (runs: 0.622, 0.280, 0.284) |
+| peak memory (max resident set of that process, via /usr/bin/time -l) | 125.1 MiB |
+| warm conversion, in process, after one warm-up | 0.0078 s, 0.0026 s per page |
+| package tarball | 37.0 KiB |
 | clean install (all of node_modules, apparent bytes) | 77.5 MiB |
 
 The page count comes from the fixture's own anchors. The document is small, so read the per-page figure as a floor, not a throughput figure.
