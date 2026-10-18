@@ -18,6 +18,36 @@
 		"hidden": []
 	},
 	{
+		"file": "form-covers.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-FORM-COVER"]
+	},
+	{
+		"file": "rotated-clipped.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-ROTATED-CLIP"]
+	},
+	{
+		"file": "properties.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-META"]
+	},
+	{
+		"file": "form-beside.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],
+		"hidden": []
+	},
+	{
+		"file": "rotated-holds.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],
+		"hidden": []
+	},
+	{
 		"file": "unicode-tag-chars.html",
 		"html": "<p>Thanks for the review.</p><p>See you in two weeks.{tag}</p>",
 		"tag": "CANARY-UNI-TAG",

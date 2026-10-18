@@ -1,3 +1,4 @@
+import { light } from "./colour.ts";
 import {
 	all,
 	attr,
@@ -22,9 +23,15 @@ function properties(n: Xml | undefined): Record<string, string> {
 	const out: Record<string, string> = {};
 	if (!n) return out;
 	for (const c of nodes(n)) out[local(c) as string] = attr(c, "val") ?? "true";
-	const shade = first(n, "shd");
-	if (shade) out.background = attr(shade, "fill") ?? "";
+	const shade = shading(n);
+	if (shade !== undefined) out.background = shade;
 	return out;
+}
+
+// A shading's colour: a solid pattern shows its pattern colour, any other pattern its fill.
+function shading(n: Xml | undefined): string | undefined {
+	const s = n && first(n, "shd");
+	return s && (attr(s, "val") === "solid" ? attr(s, "color") : attr(s, "fill"));
 }
 
 function styles(parts: Map<string, Xml>) {
@@ -47,16 +54,24 @@ function styles(parts: Map<string, Xml>) {
 			...properties(first(s, "pPr")),
 		};
 	};
-	return { defaults, resolve, defaultId };
+	// A table style's cell shading, for the whole table or for one of its conditional parts.
+	const tableFill = (id: string | undefined, kind?: string) => {
+		const s = defs.get(id);
+		const at = kind ? s && children(s, "tblStylePr").find((t) => attr(t, "type") === kind) : s;
+		return shading(at && children(at, "tcPr")[0]);
+	};
+	return { defaults, resolve, defaultId, tableFill };
 }
 
 function reason(p: Record<string, string>): string[] {
 	const why: string[] = [];
-	if (["vanish", "webHidden"].some((k) => p[k] && !["0", "false", "off"].includes(p[k] as string)))
-		why.push("hidden run");
+	// webHidden hides a run in Web Layout only; the page a reader prints or reads shows it.
+	if (p.vanish && !["0", "false", "off"].includes(p.vanish)) why.push("hidden run");
 	if ([p.sz, p.szCs].some((size) => size !== undefined && Number(size) < 4)) why.push("tiny text");
+	// What is behind the letters: the shading, else a white page.
+	const ground = (p.background ?? "").replace(/^auto$/i, "").toUpperCase() || "FFFFFF";
 	const color = p.color?.toUpperCase();
-	if (color === "FFFFFF" || (color && color !== "AUTO" && color === p.background?.toUpperCase()))
+	if (color && color !== "AUTO" && (color === ground || (color === "FFFFFF" && light(ground))))
 		why.push("white or same-background text");
 	return why;
 }
@@ -95,15 +110,25 @@ export function word(parts: Map<string, Xml>): OfficeText {
 		for (const c of nodes(n)) {
 			if (local(c) === "p") target.push(paragraph(c));
 			else if (local(c) === "tbl") {
-				for (const row of children(c, "tr"))
+				// A cell's ground: its shading, else its style's header-row shading (where the table turns
+				// the header row on), else the table's, else its style's, else the page's.
+				const pr = children(c, "tblPr")[0];
+				const id = attr(pr && first(pr, "tblStyle"), "val");
+				const look = pr && first(pr, "tblLook");
+				const bits = Number.parseInt(attr(look, "val") ?? "0", 16) & 0x20;
+				const header = (attr(look, "firstRow") ?? (bits ? "1" : "0")) === "1";
+				const ground = shading(pr) ?? style.tableFill(id) ?? background;
+				for (const [i, row] of children(c, "tr").entries())
 					target.push(
 						children(row, "tc")
-							.map((cell) =>
-								all(cell, "p")
-									.map((p) => paragraph(p, attr(first(cell, "shd"), "fill") ?? background))
+							.map((cell) => {
+								const top = i === 0 && header ? style.tableFill(id, "firstRow") : undefined;
+								const fill = shading(children(cell, "tcPr")[0]) ?? top ?? ground;
+								return all(cell, "p")
+									.map((p) => paragraph(p, fill))
 									.filter(Boolean)
-									.join(" "),
-							)
+									.join(" ");
+							})
 							.join(" | "),
 					);
 			} else blocks(c, target);
@@ -142,9 +167,10 @@ function readRuns(
 			};
 			const why = reason(props);
 			if (deleted) why.push("tracked deletion");
+			// A field instruction (instrText) is code Word runs, never text it shows: it is left out.
 			const value = nodes(c)
 				.map((v) =>
-					["t", "delText", "instrText"].includes(local(v) ?? "")
+					["t", "delText"].includes(local(v) ?? "")
 						? text(v)
 						: local(v) === "tab"
 							? "\t"

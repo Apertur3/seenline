@@ -4,7 +4,8 @@ import { HIDDEN_BLOCK } from "./hidden.ts";
 import { MAX_ROWS, sheets } from "./office-sheets.ts";
 import { slides } from "./office-slides.ts";
 import { word } from "./office-word.ts";
-import { flat, packageXml, text, type Xml } from "./office-xml.ts";
+import { flat, local, packageXml, text, type Xml } from "./office-xml.ts";
+import { listedValue, unseen } from "./parse-hidden.ts";
 
 export const OFFICE_FILE = /\.(docx?|pptx?|xlsx?|csv|tsv)$/i;
 export const OFFICE_FAILURE = "could not read this file: save it as .docx, .pptx or .xlsx";
@@ -31,13 +32,16 @@ export function convertOffice(
 						: null;
 		if (!out) throw new Error("format");
 		for (const [name, node] of parts) {
-			if (/^(docProps|customXml)\//.test(name) || /(?:comments\d*|comment\d*)\.xml$/i.test(name)) {
-				const value = flat(name.startsWith("customXml/") ? customText(node) : text(node));
-				if (value) out.hidden.push(`${name}: ${value}`);
-			}
+			const value = /(?:comments\d*|comment\d*)\.xml$/i.test(name)
+				? text(node)
+				: /^(docProps|customXml)\//.test(name) && !GENERATED.test(name)
+					? partText(node, name)
+					: "";
+			if (flat(value)) out.hidden.push(`${name}: ${flat(value)}`);
 		}
 		const lines = out.body.filter(Boolean).map(safe);
-		if (out.hidden.length) lines.push(HIDDEN_BLOCK, ...out.hidden.map(safe));
+		const listed = unseen(lines, out.hidden.map(safe));
+		if (listed.length) lines.push(HIDDEN_BLOCK, ...listed);
 		if (!lines.length) throw new Error("no text");
 		const result = `${lines.join("\n")}\n`;
 		if (Buffer.byteLength(result) > 5 * 1024 * 1024) throw new Error("text size");
@@ -111,11 +115,30 @@ function detect(source: string): string {
 	return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? ",";
 }
 
-function customText(n: Xml): string {
+// Package parts a program writes for itself: relationships, data-store ids, and the SharePoint
+// form, content-type and event definitions a library stamps on every file. Statistics and the
+// generated title list in app.xml likewise; only its free-text fields are read.
+const GENERATED = /^customXml\/(?:_rels\/|itemProps)/;
+const DEFINITIONS = ["FormTemplates", "contentTypeSchema", "Receivers"];
+const APP_FIELDS = ["Company", "Manager"];
+// Namespace declarations, nil markers and the citation style Word records on a bibliography.
+const SETTINGS = /^(?:xmlns|xsi:|SelectedStyle$|StyleName$)/;
+
+/** A property or custom XML part's values worth listing; custom XML attributes as `name: value`. */
+function partText(n: Xml, part: string, depth = 0): string {
+	const name = local(n) ?? "";
+	if (depth === 0 && DEFINITIONS.includes(name)) return "";
+	if (depth === 1 && part === "docProps/app.xml" && !APP_FIELDS.includes(name)) return "";
+	if (name === "language") return "";
+	const attrs = part.startsWith("customXml/")
+		? Object.entries(n.attrs).filter(([k, v]) => !SETTINGS.test(k) && listedValue(k, v))
+		: [];
 	return [
-		...Object.entries(n.attrs)
-			.filter(([k]) => !k.startsWith("xmlns"))
-			.map(([k, v]) => `${k}: ${v}`),
-		...n.children.map((c) => (typeof c === "string" ? c : customText(c))),
-	].join(" ");
+		...attrs.map(([k, v]) => `${k}: ${v}`),
+		...n.children.map((c) =>
+			typeof c !== "string" ? partText(c, part, depth + 1) : listedValue(name, c) ? c : "",
+		),
+	]
+		.filter((s) => s.trim())
+		.join(" ");
 }

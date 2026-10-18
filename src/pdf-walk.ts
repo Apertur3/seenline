@@ -10,6 +10,8 @@ export interface Item {
 	y: number;
 	size: number;
 	end: number;
+	/** The middle of the letters, along the run's own direction (a rotated label runs up the page). */
+	mid: [number, number];
 	why: string[];
 }
 interface Glyph {
@@ -97,6 +99,7 @@ class Walker {
 	// The bounding box of the clipping paths in force. pdfjs reports `W` before the path it clips to.
 	private clip: Box | null = null;
 	private clipping = false;
+	private groupBox: number[] | null = null;
 	private tm = IDENTITY;
 	private tlm = IDENTITY;
 	private leading = 0;
@@ -117,7 +120,14 @@ class Walker {
 		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
 			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip } = this;
 			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip });
-			if (fn === OPS.paintFormXObjectBegin && a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
+			if (fn !== OPS.paintFormXObjectBegin) return;
+			if (a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
+			// A form draws nothing outside its bounding box (pdfjs hands a group's box to beginGroup).
+			const bbox = (a?.[1] as number[] | null) ?? this.groupBox;
+			this.groupBox = null;
+			if (bbox) this.clipTo(this.corners([...bbox]));
+		} else if (fn === OPS.beginGroup) {
+			this.groupBox = (a?.[0] as { bbox?: number[] } | undefined)?.bbox ?? null;
 		} else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd) {
 			Object.assign(this, this.saved.pop());
 		} else if (fn === OPS.transform) this.ctm = mul(a as Matrix, this.ctm);
@@ -136,7 +146,7 @@ class Walker {
 			const box = a[2] as ArrayLike<number> | undefined;
 			if (box) {
 				const b = this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0]);
-				if (this.clipping) this.clip = this.clip ? intersect(this.clip, b) : b;
+				if (this.clipping) this.clipTo(b);
 				if (FILLS.some((n) => OPS[n] === a[0])) this.cover(b);
 			}
 			this.clipping = false;
@@ -161,10 +171,15 @@ class Walker {
 		return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 	}
 
-	private cover([x0, y0, x1, y1]: [number, number, number, number]): void {
+	private clipTo(b: Box): void {
+		this.clip = this.clip ? intersect(this.clip, b) : b;
+	}
+
+	// A fill paints only inside the clipping paths in force.
+	private cover(box: Box): void {
+		const [x0, y0, x1, y1] = this.clip ? intersect(this.clip, box) : box;
 		for (const it of this.out) {
-			const mx = (it.x + it.end) / 2;
-			const my = it.y + 0.3 * it.size; // the middle of the letters, not their baseline
+			const [mx, my] = it.mid;
 			const inside = mx >= x0 && mx <= x1 && my >= y0 && my <= y1;
 			// A rule or underline is thin; only a shape as tall as the text can hide it.
 			if (inside && y1 - y0 >= 0.5 * it.size && x1 - x0 >= it.size && !it.why.includes("covered"))
@@ -237,9 +252,13 @@ class Walker {
 			if (this.layers.includes(true)) why.push("hidden layer");
 			if (this.hscale < MIN_HSCALE || this.hscale > MAX_HSCALE) why.push("squeezed");
 			const end = user[4] + advance * Math.hypot(user[0], user[1]);
-			if (this.clip && !within(this.clip, (user[4] + end) / 2, user[5] + 0.3 * size))
-				why.push("clipped");
-			this.out.push({ text, x: user[4], y: user[5], size, end, why });
+			// Half the run along its baseline, then 0.3 em up: the middle of the letters, not the baseline.
+			const mid: [number, number] = [
+				user[4] + (advance * user[0]) / 2 + 0.3 * this.fontSize * user[2],
+				user[5] + (advance * user[1]) / 2 + 0.3 * this.fontSize * user[3],
+			];
+			if (this.clip && !within(this.clip, ...mid)) why.push("clipped");
+			this.out.push({ text, x: user[4], y: user[5], size, end, mid, why });
 		}
 		this.tm = mul([1, 0, 0, 1, advance, 0], this.tm);
 	}

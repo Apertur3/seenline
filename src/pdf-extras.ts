@@ -2,6 +2,7 @@
 // attachments and scripts. None of it is in the page a reader sees, so it goes to the flagged block
 // one line each, never dropped.
 import type { PDFDocumentProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { listedValue } from "./parse-hidden.ts";
 
 const MAX_LINE = 2000;
 const flat = (s: string) => {
@@ -24,13 +25,14 @@ export async function extras(doc: PDFDocumentProxy): Promise<string[]> {
 	const meta = await tried("metadata", () => doc.getMetadata(), null);
 	const info = (meta?.info ?? {}) as Record<string, unknown>;
 	for (const key of PROPERTIES) {
-		if (typeof info[key] === "string" && flat(info[key]))
-			out.push(`metadata ${key}: ${flat(info[key])}`);
+		const value = info[key];
+		if (typeof value === "string" && listedValue(key, value))
+			out.push(`metadata ${key}: ${flat(value)}`);
 	}
 	const xmp = (meta?.metadata as { getRaw?: () => string } | null)?.getRaw?.() ?? "";
-	for (const [, tag, inner] of xmp.matchAll(XMP_TEXT)) {
+	for (const [, tag = "", inner] of xmp.matchAll(XMP_TEXT)) {
 		const text = flat((inner ?? "").replace(/<[^>]*>/g, " "));
-		if (text) out.push(`metadata ${tag}: ${text}`);
+		if (listedValue(tag, text)) out.push(`metadata ${tag}: ${text}`);
 	}
 	for (const [name, list] of (await tried("javascript", () => doc.getJSActions(), null)) ?? []) {
 		for (const code of list) out.push(`javascript ${name}: ${flat(code)}`);

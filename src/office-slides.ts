@@ -33,17 +33,20 @@ function shapeReasons(shape: Xml, width: number, height: number): string[] {
 	const why: string[] = [];
 	const nv = first(shape, "cNvPr");
 	if (["1", "true"].includes(attr(nv, "hidden") ?? "")) why.push("hidden shape");
-	const off = first(shape, "off");
-	const ext = first(shape, "ext");
-	const x = Number(attr(off, "x") ?? 0),
-		y = Number(attr(off, "y") ?? 0);
+	// The shape's own frame (an extLst before it can hold an unrelated a:ext).
+	const xf = first(shape, "xfrm");
+	const [off, ext] = [xf && first(xf, "off"), xf && first(xf, "ext")];
+	const num = (n: Xml | undefined, k: string) => Number(attr(n, k) ?? 0);
+	const [x, y, w, h] = [num(off, "x"), num(off, "y"), num(ext, "cx"), num(ext, "cy")];
+	const on = (lo: number, size: number, max: number) =>
+		Math.max(0, Math.min(lo + size, max) - Math.max(lo, 0));
+	// Off the slide: it starts well outside it, or less than half of it is on it.
 	if (
-		x < 0 ||
-		y < 0 ||
+		x < -width / 10 ||
+		y < -height / 10 ||
 		x >= width ||
 		y >= height ||
-		x + Number(attr(ext, "cx") ?? 0) > width ||
-		y + Number(attr(ext, "cy") ?? 0) > height
+		on(x, w, width) * on(y, h, height) < (w * h) / 2
 	)
 		why.push("off-slide shape");
 	return why;

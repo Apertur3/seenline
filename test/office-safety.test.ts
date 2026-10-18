@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { officeFixtures } from "../scripts/office-fixtures.ts";
@@ -8,8 +9,9 @@ import { convert } from "../src/index.ts";
 const convertOffice = async (bytes: Uint8Array, name: string) =>
 	(await convert(bytes, { name })).markdown;
 
-function changeDoc(edit: (s: string) => string): Uint8Array {
+function changeDoc(edit: (s: string) => string, styles?: string): Uint8Array {
 	const files = unzipSync(officeFixtures()["office-memo.docx"] as Uint8Array);
+	if (styles) files["word/styles.xml"] = strToU8(styles);
 	files["word/document.xml"] = strToU8(edit(strFromU8(files["word/document.xml"] as Uint8Array)));
 	return zipSync(files);
 }
@@ -87,6 +89,45 @@ test("DOCX unused character styles do not hide ordinary paragraphs", async () =>
 	);
 	const output = await convertOffice(zipSync(files), ".docx");
 	assert.ok((output.split(HIDDEN_BLOCK)[0] ?? "").includes("Budget is 42000 EUR"));
+});
+
+// Cases and expectations: fixtures/hidden-noise.json.
+const twins = JSON.parse(
+	await readFile(new URL("./fixtures/hidden-noise.json", import.meta.url), "utf8"),
+);
+function expect(out: string, c: { seen: string[]; flagged: string[]; gone: string[] }) {
+	const [body = "", block = ""] = out.split(HIDDEN_BLOCK);
+	for (const t of c.seen) assert.ok(body.includes(t) && !block.includes(t), `seen: ${t}`);
+	for (const t of c.flagged) assert.ok(block.includes(t) && !body.includes(t), `flagged: ${t}`);
+	for (const t of c.gone) assert.ok(!out.includes(t), `gone: ${t}`);
+	assert.doesNotMatch(out, /: $/m, "no entry without text");
+}
+
+test("DOCX: header shading and webHidden are visible, field codes are not text", async () => {
+	const doc = changeDoc(
+		(s) => s.replace("<w:body>", `<w:body>${twins.docx.body}`),
+		twins.docx.styles,
+	);
+	expect(await convertOffice(doc, ".docx"), twins.docx);
+});
+
+test("OOXML parts: generated values are not listed, free text is", async () => {
+	const files = unzipSync(officeFixtures()["office-memo.docx"] as Uint8Array);
+	for (const [name, xml] of Object.entries(twins.parts.files)) files[name] = strToU8(xml as string);
+	expect(await convertOffice(zipSync(files), ".docx"), twins.parts);
+});
+
+test("HTML: charset, icon link and a title the page shows are not listed", async () => {
+	expect(await convertOffice(Buffer.from(twins.html.page), ".html"), twins.html);
+});
+
+test("PPTX: a shape a little past the slide edge is on the slide", async () => {
+	const files = unzipSync(officeFixtures()["office-deck.pptx"] as Uint8Array);
+	const slide = strFromU8(files["ppt/slides/slide1.xml"] as Uint8Array);
+	files["ppt/slides/slide1.xml"] = strToU8(
+		slide.replace("</p:spTree>", `${twins.pptx.shapes}</p:spTree>`),
+	);
+	expect(await convertOffice(zipSync(files), ".pptx"), twins.pptx);
 });
 
 test("custom XML attribute values are preserved as hidden content", async () => {

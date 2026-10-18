@@ -5,6 +5,7 @@ import { imageMeta } from "./image-meta.ts";
 import { legacyOfficeToText } from "./legacy-office.ts";
 import { convertMail } from "./mail.ts";
 import { convertOffice, OFFICE_FILE } from "./office.ts";
+import { unseen } from "./parse-hidden.ts";
 import { type PdfPage, readPdf } from "./pdf.ts";
 import { subtitlesToText } from "./subtitles.ts";
 import type { ConvertOptions, DocumentText, OcrResult } from "./types.ts";
@@ -34,7 +35,8 @@ export async function documentToText(
 		? await fromPdf(bytes, opts, ocr)
 		: await fromImage(bytes, ocr);
 	const { body, hidden, pages, readers } = result;
-	const lines = hidden.length > 0 ? [...body, HIDDEN_BLOCK, ...hidden] : body;
+	const listed = unseen(body, hidden);
+	const lines = listed.length > 0 ? [...body, HIDDEN_BLOCK, ...listed] : body;
 	if (lines.every((l) => l.trim() === "" || /^\[p\. \d+\]$/.test(l)))
 		throw new PlainviewError("invalid", "could not read this file: no text found in it");
 	return { markdown: `${lines.join("\n")}\n`, pages, ...(readers && { readers }) };

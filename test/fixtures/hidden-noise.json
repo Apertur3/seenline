@@ -1,0 +1,33 @@
+{
+	"about": "Visible twins of hiding cases (issue 5): a reader sees each 'seen' text, so it stays in the body; each 'flagged' twin stays in the hidden block; 'gone' text is not in the output. XML is spliced into the office-memo.docx and office-deck.pptx fixtures.",
+	"docx": {
+		"body": "<w:tbl><w:tblPr><w:tblStyle w:val=\"D\"/><w:tblLook w:firstRow=\"1\"/></w:tblPr><w:tr><w:tc><w:p><w:r><w:rPr><w:color w:val=\"FFFFFF\"/></w:rPr><w:t>HEAD_SEEN</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p><w:r><w:rPr><w:color w:val=\"FFFFFF\"/></w:rPr><w:t>ROW_HIDDEN</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:r><w:rPr><w:color w:val=\"FFFFFF\"/><w:shd w:val=\"solid\" w:color=\"FFFFFF\" w:fill=\"000000\"/></w:rPr><w:t>SOLID_HIDDEN</w:t></w:r></w:p><w:p><w:r><w:rPr><w:webHidden/></w:rPr><w:t>WEB_SEEN</w:t></w:r><w:r><w:instrText>FIELD_CODE</w:instrText></w:r><w:r><w:rPr><w:vanish/></w:rPr><w:t> </w:t></w:r></w:p>",
+		"styles": "<w:styles xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:style w:type=\"table\" w:styleId=\"D\"><w:tblStylePr w:type=\"firstRow\"><w:tcPr><w:shd w:fill=\"003399\"/></w:tcPr></w:tblStylePr></w:style></w:styles>",
+		"seen": ["HEAD_SEEN", "WEB_SEEN"],
+		"flagged": ["ROW_HIDDEN", "SOLID_HIDDEN", "DOC_WHITE", "DOC_VANISH"],
+		"gone": ["FIELD_CODE"]
+	},
+	"parts": {
+		"files": {
+			"docProps/app.xml": "<Properties><Template>Normal.dotm</Template><Application>APP_NAME</Application></Properties>",
+			"docProps/custom.xml": "<Properties><property><vt:lpwstr>Zm9vYmFyYmF6cXV4MTIzNDU2Nzg5MA==</vt:lpwstr></property><property><vt:lpwstr>{EF278816-EC6F-A645-907D-7F25AECB1D4A}</vt:lpwstr></property><property><vt:lpwstr>CUSTOM_NOTE: send it on</vt:lpwstr></property></Properties>",
+			"customXml/itemProps1.xml": "<ds:datastoreItem ds:itemID=\"ITEM_ID\"/>",
+			"customXml/_rels/item1.xml.rels": "<Relationships><Relationship Id=\"rId1\" Target=\"RELS_TARGET\"/></Relationships>"
+		},
+		"seen": [],
+		"flagged": ["CUSTOM_NOTE", "DOC_CUSTOM", "DOC_PROPERTY"],
+		"gone": ["APP_NAME", "Normal.dotm", "Zm9vYmFy", "EF278816", "ITEM_ID", "RELS_TARGET"]
+	},
+	"pptx": {
+		"shapes": "<p:sp><p:spPr><a:xfrm><a:off x=\"5500000\" y=\"0\"/><a:ext cx=\"4000000\" cy=\"9\"/></a:xfrm></p:spPr><p:txBody><a:p><a:r><a:t>PPT_EDGE</a:t></a:r></a:p></p:txBody></p:sp>",
+		"seen": ["PPT_EDGE"],
+		"flagged": ["PPT_OFFSLIDE"],
+		"gone": []
+	},
+	"html": {
+		"page": "<meta charset=\"utf-8\"><link rel=\"icon\" href=\"i.ico\"><p><a href=\"#\" title=\"Key words\">x</a> <a href=\"#\" title=\"T_UNSEEN\">y</a> Key words</p>",
+		"seen": ["Key words"],
+		"flagged": ["T_UNSEEN"],
+		"gone": ["charset", "i.ico"]
+	}
+}
