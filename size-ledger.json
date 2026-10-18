@@ -1,0 +1,13 @@
+{
+	"releases": [
+		{
+			"version": "0.0.0-baseline",
+			"lines": {
+				"src": 2372,
+				"scripts": 1560,
+				"test": 1448
+			}
+		}
+	],
+	"exemptions": []
+}

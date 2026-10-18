@@ -45,9 +45,11 @@
     "build": "tsc -p tsconfig.build.json",
     "pretest": "npm run build",
     "test": "node --test test/*.test.ts test/injection/*.test.ts",
-    "check": "tsc --noEmit && biome check",
+    "check": "tsc --noEmit && biome check && node scripts/check-size.ts",
     "golden": "node scripts/make-golden.ts",
     "smoke": "node scripts/smoke.mjs",
-    "licences": "node scripts/check-licences.ts"
+    "licences": "node scripts/check-licences.ts",
+    "size": "node scripts/check-size.ts",
+    "net-loc": "node scripts/net-loc.ts"
   }
 }
