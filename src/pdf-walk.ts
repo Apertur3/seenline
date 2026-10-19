@@ -15,6 +15,8 @@ export interface Item {
 	end: number;
 	/** The middle of the letters, along the run's own direction (a rotated label runs up the page). */
 	mid: [number, number];
+	/** Set when the run reads left to right on a level baseline: not rotated, mirrored or upside down. */
+	upright: boolean;
 	why: string[];
 }
 interface Glyph {
@@ -290,7 +292,8 @@ class Walker {
 			const white = why.indexOf("white");
 			const ground = white < 0 ? undefined : this.painted.findLast((p) => paints(p, mx, my));
 			if (ground && !light(ground.color)) why.splice(white, 1);
-			this.out.push({ text, x: user[4], y: user[5], size, end, mid, why });
+			const upright = user[0] > 0 && user[3] > 0 && Math.abs(user[1]) < 1e-3 * user[0];
+			this.out.push({ text, x: user[4], y: user[5], size, end, mid, upright, why });
 		}
 		this.tm = mul([1, 0, 0, 1, advance, 0], this.tm);
 	}

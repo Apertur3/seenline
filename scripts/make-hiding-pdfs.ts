@@ -24,6 +24,47 @@ const form = (bbox: string) => ({
 // A vertical label (rotated a quarter turn) inside a narrow clip strip.
 const rotated = (text: string, strip: string) =>
 	`q ${strip} re W n BT /F1 12 Tf 0 1 -1 0 300 400 Tm (${text}) Tj ET Q\n`;
+// Helvetica widths (per 1000 em) of the letters below: words one space apart, drawn in a given order.
+const WIDTH: Record<string, number> = {
+	P: 667,
+	".": 278,
+	a: 556,
+	d: 556,
+	e: 556,
+	h: 556,
+	i: 222,
+	l: 222,
+	m: 833,
+	n: 556,
+	o: 556,
+	p: 556,
+	r: 333,
+	s: 500,
+	t: 278,
+	v: 500,
+	y: 500,
+};
+function sentence(words: string[], order: number[]): string {
+	let x = 72;
+	const at = words.map((w) => {
+		const here = x;
+		x += ([...w].reduce((n, c) => n + (WIDTH[c] ?? 600), 0) + 278) * 0.012;
+		return here;
+	});
+	return order.map((i) => T(at[i] ?? 0, 660, 12, words[i] ?? "")).join("");
+}
+const words = ["Please", "do", "not", "approve", "this", "payment."];
+// Words in two columns or a grid, each [x, y, text], drawn in the order given.
+const placed = (items: [number, number, string][]) =>
+	items.map(([x, y, t]) => T(x, y, 12, t)).join("");
+const grid = (x: number, y: number): [number, number, string][] => [
+	[72, 660, "Alder"],
+	[72, 620, "Cedar"],
+	[72, 580, "Elm"],
+	[x, y, "Birch"],
+	[x, y - 40, "Daisy"],
+	[x, y - 80, "Fern"],
+];
 const FILES: Record<string, string | Spec> = {
 	// Text drawn inside a 1 pt clip at the page corner: never on the page.
 	"clipped.pdf": `${base}q 0 0 1 1 re W n\n${line(canary("PDF-CLIPPED"))}Q\n`,
@@ -56,6 +97,21 @@ const FILES: Record<string, string | Spec> = {
 	"white-on-light.pdf": `${base}0.95 g 60 650 400 30 re f\n${line(canary("PDF-WHITE-LIGHT"), "1 g")}`,
 	// White letters on a picture (one white pixel, stretched): its pixels are not read, so flagged.
 	"white-on-picture.pdf": `${base}q 400 0 0 30 60 650 cm BI /W 1 /H 1 /CS /G /BPC 8 ID \xff EI Q\n${line(canary("PDF-WHITE-PICTURE"), "1 g")}`,
+	// A sentence whose words are stored out of the order a reader sees: an extractor reads "do approve".
+	"shuffled-line.pdf": `${base}${sentence(words, [0, 1, 3, 4, 5, 2])}`,
+	// The same sentence stored as it reads.
+	"in-order-line.pdf": `${base}${sentence(words, [0, 1, 2, 3, 4, 5])}`,
+	// A grid of words 40 pt (3.3 em) apart, stored a column at a time: a reader takes it row by row.
+	"grid-down.pdf": `${base}${placed(grid(320, 660))}`,
+	// Two columns of lines 14 pt apart, stored a column at a time, as a paper is: read as stored.
+	"two-columns.pdf": `${base}${placed([
+		[72, 660, "The left column opens"],
+		[72, 646, "the page and runs on"],
+		[72, 632, "to its end."],
+		[320, 660, "The right column comes"],
+		[320, 646, "after it in the file,"],
+		[320, 632, "as a reader expects."],
+	])}`,
 	// Properties: placeholders and a one-word author are not listed, a free-text subject is.
 	"properties.pdf": {
 		content: base,

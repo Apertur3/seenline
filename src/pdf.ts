@@ -4,6 +4,7 @@
 import { fileURLToPath } from "node:url";
 import { PlainviewError } from "./error.ts";
 import { extras } from "./pdf-extras.ts";
+import { lines, readingOrder } from "./pdf-order.ts";
 import { type Item, type Matrix, walk } from "./pdf-walk.ts";
 
 export interface PdfDoc {
@@ -14,9 +15,9 @@ export interface PdfDoc {
 
 export interface PdfPage {
 	number: number;
-	/** Text a reader of the page sees, one string per line, in content-stream order. */
+	/** Text a reader of the page sees, one string per line, in reading order (pdf-order.ts). */
 	lines: string[];
-	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, clipped, squeezed, hidden layer. */
+	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, clipped, squeezed, hidden layer; and the stored text of a page whose stored order is not its reading order (reading order). */
 	hidden: { text: string; why: string[] }[];
 }
 
@@ -69,33 +70,30 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 	}
 }
 
-// Groups visible items into lines in stream order (a new line when the baseline moves or the text
-// jumps back, as at a column change), and a wide gap on a line into " | " (table cells).
+// Visible runs in reading order (pdf-order.ts), grouped into lines: a new line when the baseline moves or
+// the text jumps back, as at a column change, and a wide gap on a line as " | " (table cells).
 function arrange(number: number, found: Item[]): PdfPage {
-	const page: PdfPage = { number, lines: [], hidden: [] };
-	let prev: Item | undefined;
-	for (const it of found) {
-		if (it.why.length > 0) {
-			page.hidden.push({ text: it.text.trim(), why: it.why });
-			continue;
-		}
-		const sameLine =
-			prev &&
-			Math.abs(it.y - prev.y) < 0.5 * Math.max(it.size, prev.size) &&
-			it.x > prev.end - it.size;
-		if (!prev || !sameLine) page.lines.push(it.text);
-		else {
-			const gap = it.x - prev.end;
-			// A run's own trailing or leading space already is the gap; only a bare gap needs one.
-			const glue = gap > 1.2 * it.size ? " | " : gap > 0.15 * it.size ? " " : "";
-			page.lines[page.lines.length - 1] += glue + it.text;
-		}
-		prev = it;
-	}
+	const hidden = found
+		.filter((it) => it.why.length > 0)
+		.map((it) => ({ text: it.text.trim(), why: it.why }));
+	const { order, moved } = readingOrder(found.filter((it) => it.why.length === 0));
+	// The stored order goes in the block: it is what an extractor that follows the file reads.
+	if (moved.length > 0) hidden.push({ text: text(moved, " ").join(" "), why: ["reading order"] });
+	return { number, lines: text(order, " | "), hidden };
+}
+
+function text(runs: Item[], cell: string): string[] {
+	const glue = (prev: Item, it: Item) => {
+		const gap = it.x - prev.end;
+		// A run's own trailing or leading space already is the gap; only a bare gap needs one.
+		return gap > 1.2 * it.size ? cell : gap > 0.15 * it.size ? " " : "";
+	};
+	const joined = lines(runs).map((line) =>
+		line.map((it, i) => (i === 0 ? it.text : glue(line[i - 1] as Item, it) + it.text)).join(""),
+	);
 	// Ligature glyphs (fi, fl, ffi) are one character in the file; readers and searches want letters.
-	page.lines = page.lines
+	return joined
 		.map((l) => l.replace(/[ﬀ-ﬆ]/g, (c) => c.normalize("NFKC")))
 		.map((l) => l.replace(/\s+/g, " ").trim())
 		.filter(Boolean);
-	return page;
 }
