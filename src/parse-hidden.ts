@@ -7,28 +7,42 @@ const MACHINE =
 	/^(?:[\d\s.,:;/#|+-]*|true|false|nil|null|untitled|anonymous|unknown|unspecified|\{?[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\}?|0x[\da-f]+|\d{4}-\d\d-\d\dT[\d:.]+(?:Z|[+-][\d:]+)?)$/i;
 const BASE64 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?:[A-Za-z\d+/=]{20,}\s*)+$/;
 const NAME_FIELD = /^(?:Author|dc:creator|creator|lastModifiedBy|Company|Manager)$/;
+// A name: capitalised words and initials ("U.S."), name particles, separators; no digits.
+const NAME_TOKEN =
+	/^(?:\p{Lu}[\p{L}'’-]*\.?|(?:\p{Lu}\.)+|and|&|de|van|von|der|den|la|le|[,.;-])$/u;
 
 /**
  * Whether a metadata value (a document property, a custom XML value) is worth listing: free text a
- * model could read. Machine values are not; a name field only when it is longer than a list of names.
+ * model could read. Machine values are not; a name field only when it does not read as names.
  */
 export function listedValue(field: string, value: string): boolean {
 	const v = norm(value);
 	if (MACHINE.test(v) || BASE64.test(v)) return false;
-	return !NAME_FIELD.test(field) || v.split(" ").length > 8;
+	const tokens = v.split(/[\s,;]+/).filter(Boolean);
+	const names = tokens.length <= 8 && !/\d/.test(v) && tokens.every((t) => NAME_TOKEN.test(t));
+	return !NAME_FIELD.test(field) || !names;
+}
+
+// Whether `text` stands in `seen` as whole words, not inside a longer word.
+function contains(seen: string, text: string): boolean {
+	const edge = (c: string | undefined) => !c || !/[\p{L}\p{N}]/u.test(c);
+	for (let at = seen.indexOf(text); at >= 0; at = seen.indexOf(text, at + 1))
+		if (edge(seen[at - 1]) && edge(seen[at + text.length])) return true;
+	return false;
 }
 
 /**
- * The hidden entries worth listing under a body. An entry is left out when it holds no text, or when
- * its text is already in the visible body or in an earlier entry: a reader sees it there.
+ * The hidden entries worth listing under a body. An entry is left out when it holds no text, when
+ * its text stands as whole words in the visible body (a reader sees it there), or when it repeats an
+ * earlier line exactly, location and reason included.
  */
 export function unseen(body: string[], hidden: string[]): string[] {
 	const seen = norm(body.join(" "));
 	const listed = new Set<string>();
 	return hidden.filter((line) => {
 		const text = norm(parseHidden([line])[0]?.text ?? "");
-		if (!text || listed.has(text) || seen.includes(text)) return false;
-		listed.add(text);
+		if (!text || listed.has(line) || contains(seen, text)) return false;
+		listed.add(line);
 		return true;
 	});
 }
@@ -48,7 +62,7 @@ export function parseHidden(lines: string[]): HiddenText[] {
 			if (at?.[1]?.startsWith("p. ")) reason = reason.replace(/ text$/, "");
 			const labelled =
 				at ||
-				/^(?:hidden run|tiny text|white or same-background text|tracked deletion|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
+				/^(?:hidden run|field code|tiny text|white or same-background text|tracked deletion|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
 					reason,
 				);
 			return {

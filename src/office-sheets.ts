@@ -48,6 +48,8 @@ function filler(parts: Map<string, Xml>, styles: Xml | undefined) {
 		if (fill && first(fill, "gradientFill")) return "";
 		const pattern = fill && first(fill, "patternFill");
 		if (!pattern || ["none", undefined].includes(pattern.attrs.patternType)) return undefined;
+		// A hatch or dot pattern mixes its two colours: unknown ("" counts as light).
+		if (pattern.attrs.patternType !== "solid") return "";
 		const c = first(pattern, "fgColor");
 		const hex =
 			c?.attrs.rgb?.slice(-6) ??

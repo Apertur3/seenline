@@ -18,6 +18,9 @@ export interface OfficeText {
 	hidden: string[];
 }
 const on = (n: Xml | undefined) => !!n && !["0", "false", "off"].includes(attr(n, "val") ?? "");
+// Field commands that only number, date, index or cross-reference (or switches alone).
+const INERT_FIELD =
+	/^(?:(?:PAGE|NUMPAGES|PAGEREF|TOC|TOA|REF|NOTEREF|SEQ|STYLEREF|FORMTEXT|FORMCHECKBOX|FORMDROPDOWN|DATE|TIME|CREATEDATE|SAVEDATE|PRINTDATE|SECTION|SECTIONPAGES|XE|TC|BIBLIOGRAPHY|CITATION)\b|\\)/i;
 
 function properties(n: Xml | undefined): Record<string, string> {
 	const out: Record<string, string> = {};
@@ -87,7 +90,12 @@ function makeParagraph(style: ReturnType<typeof styles>, hidden: string[], backg
 			...properties(pp),
 		};
 		const visible: string[] = [];
-		readRuns(p, base, style.resolve, hidden, visible);
+		const fields: string[] = [];
+		readRuns(p, base, style.resolve, hidden, [visible, fields, []]);
+		// A field's instruction is code, never shown: listed unless it only numbers, dates or
+		// cross-references (a link target, an included file or a DDE command is listed).
+		for (const code of fields.map(flat))
+			if (code && !INERT_FIELD.test(code)) hidden.push(`field code: ${code}`);
 		const value = flat(visible.join(""));
 		if (!value) return "";
 		const level = attr(pp ? first(pp, "outlineLvl") : undefined, "val") ?? base.outlineLvl;
@@ -152,13 +160,24 @@ function readRuns(
 	base: Record<string, string>,
 	resolve: (id: string | undefined) => Record<string, string>,
 	hidden: string[],
-	visible: string[],
+	out: [visible: string[], fields: string[], open: number[]],
 	deleted = false,
 ): void {
+	const [visible, fields, open] = out;
 	for (const c of nodes(n)) {
 		const kind = local(c);
 		if (kind === "pPr" || kind === "rPr") continue;
+		if (kind === "fldSimple") fields.push(attr(c, "instr") ?? "");
 		if (kind === "r") {
+			// Fields nest: an instruction continues the innermost field still open.
+			for (const v of nodes(c)) {
+				const mark = local(v) === "fldChar" ? attr(v, "fldCharType") : undefined;
+				if (mark === "begin") open.push(fields.push("") - 1);
+				if (mark === "end") open.pop();
+				if (local(v) !== "instrText") continue;
+				const at = open.at(-1) ?? fields.push("") - 1;
+				fields[at] = (fields[at] ?? "") + text(v);
+			}
 			const rp = children(c, "rPr")[0];
 			const props = {
 				...base,
@@ -167,7 +186,7 @@ function readRuns(
 			};
 			const why = reason(props);
 			if (deleted) why.push("tracked deletion");
-			// A field instruction (instrText) is code Word runs, never text it shows: it is left out.
+			// A field instruction (instrText) is never shown: it goes to `fields`, not the text.
 			const value = nodes(c)
 				.map((v) =>
 					["t", "delText"].includes(local(v) ?? "")
@@ -181,9 +200,8 @@ function readRuns(
 				.join("");
 			if (value && why.length) hidden.push(`${why.join(" and ")}: ${flat(value)}`);
 			else visible.push(value);
-		} else if (kind === "del" || kind === "moveFrom")
-			readRuns(c, base, resolve, hidden, visible, true);
+		} else if (kind === "del" || kind === "moveFrom") readRuns(c, base, resolve, hidden, out, true);
 		else if (kind === "vanish" && on(c)) continue;
-		else readRuns(c, base, resolve, hidden, visible, deleted);
+		else readRuns(c, base, resolve, hidden, out, deleted);
 	}
 }

@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { officeFixtures } from "../scripts/office-fixtures.ts";
+import { light } from "../src/colour.ts";
 import { HIDDEN_BLOCK } from "../src/hidden.ts";
 import { convert } from "../src/index.ts";
+import { listedValue, unseen } from "../src/parse-hidden.ts";
 
 const convertOffice = async (bytes: Uint8Array, name: string) =>
 	(await convert(bytes, { name })).markdown;
@@ -103,7 +105,7 @@ function expect(out: string, c: { seen: string[]; flagged: string[]; gone: strin
 	assert.doesNotMatch(out, /: $/m, "no entry without text");
 }
 
-test("DOCX: header shading and webHidden are visible, field codes are not text", async () => {
+test("DOCX: header shading and webHidden are visible; field codes leave the text, risky ones are listed", async () => {
 	const doc = changeDoc(
 		(s) => s.replace("<w:body>", `<w:body>${twins.docx.body}`),
 		twins.docx.styles,
@@ -146,4 +148,18 @@ test("custom XML attribute values are preserved as hidden content", async () => 
 	const output = await convertOffice(zipSync(files), ".docx");
 	assert.ok(output.indexOf("ATTRIBUTE_PAYLOAD") > output.indexOf(HIDDEN_BLOCK));
 	assert.ok(output.includes("ATTRIBUTE_PAYLOAD"));
+});
+
+test("name fields: names are not listed, anything else in them is", () => {
+	for (const v of twins.authors.listed) assert.ok(listedValue("Author", v), v);
+	for (const v of twins.authors.names) assert.ok(!listedValue("creator", v), v);
+});
+
+test("white text: light grounds (contrast under 3) stay hidden, dark ones show it", () => {
+	for (const c of twins.grounds.light) assert.ok(light(c), c);
+	for (const c of twins.grounds.dark) assert.ok(!light(c), c);
+});
+
+test("unseen: only whole words of the body, and only exact repeats, are left out", () => {
+	assert.deepEqual(unseen(twins.unseen.body, twins.unseen.hidden), twins.unseen.kept);
 });

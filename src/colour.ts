@@ -8,11 +8,15 @@ export function mix(rgb: string, f: (x: number) => number): string {
 		.join("");
 }
 
-/** Whether white text on this ground is hard to see: a light RRGGBB colour, or one not given as RRGGBB. */
+/**
+ * Whether white text on this ground is hard to see, or the ground is not given as RRGGBB: white on
+ * it has a contrast ratio under 3 (WCAG relative luminance above 0.3), as on cyan, lime or yellow.
+ */
 export function light(rgb = ""): boolean {
 	const hex = /^#?[\da-f]{6}$/i.test(rgb) ? rgb.replace("#", "") : "FFFFFF";
-	const [r = 255, g = 255, b = 255] = [0, 2, 4].map((i) =>
-		Number.parseInt(hex.slice(i, i + 2), 16),
-	);
-	return 0.299 * r + 0.587 * g + 0.114 * b > 180;
+	const [r = 1, g = 1, b = 1] = [0, 2, 4].map((i) => {
+		const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+		return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+	});
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.3;
 }

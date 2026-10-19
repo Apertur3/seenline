@@ -16,11 +16,11 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 			return "";
 		}
 		if (n.tag === "meta" || n.tag === "link" || n.tag === "base") {
-			// A charset, or a link to an icon, a feed or another address, holds no text. A stylesheet is
-			// listed: this reader cannot see what it hides, so it hides the whole page here.
-			const listed =
-				n.tag === "base" ||
-				(n.tag === "meta" ? n.attrs.content !== undefined : /stylesheet/i.test(n.attrs.rel ?? ""));
+			// A charset, or a link to an icon, a feed or another address, holds no text. Listed: any meta
+			// content and any link title (free text), and a stylesheet, which this reader cannot see into,
+			// so it hides the whole page here.
+			const link = n.attrs.title !== undefined || /stylesheet/i.test(n.attrs.rel ?? "");
+			const listed = n.tag === "base" || (n.tag === "meta" ? n.attrs.content !== undefined : link);
 			if (listed)
 				out.hidden.push(
 					`HTML ${n.tag}: ${flat(
