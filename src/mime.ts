@@ -72,16 +72,17 @@ export function mimeParams(raw: string): { value: string; params: Record<string,
 	}
 	return { value, params };
 }
-function splitHeaders(raw: string) {
-	// A part that starts with a blank line has no headers (RFC 2046 5.1.1).
-	const separator = /^\r?\n|\r?\n\r?\n/.exec(raw);
+function splitHeaders(raw: string, part: boolean) {
+	// A MIME part that starts with a blank line has no headers (RFC 2046 5.1.1); a message must have them.
+	if (part && /^\r?\n/.test(raw))
+		return { headers: new Map<string, string>(), body: raw.replace(/^\r?\n/, "") };
+	const separator = /\r?\n\r?\n/.exec(raw);
 	if (!separator || separator.index > 64 * 1024) throw new Error("MIME headers");
 	const headers = new Map<string, string>();
 	const lines = raw
 		.slice(0, separator.index)
 		.replace(/\r?\n[ \t]+/g, " ")
-		.split(/\r?\n/)
-		.filter((l, i) => i > 0 || l);
+		.split(/\r?\n/);
 	if (lines.length > 200) throw new Error("MIME header count");
 	for (const line of lines) {
 		const m = /^([!-9;-~]+):[ \t]*(.*)$/.exec(line);
@@ -99,7 +100,7 @@ export function readMime(bytes: Uint8Array): MimePart {
 	let count = 0;
 	const parse = (raw: string, depth: number): MimePart => {
 		if (++count > 200 || depth > 20) throw new Error("MIME parts budget");
-		const { headers, body } = splitHeaders(raw);
+		const { headers, body } = splitHeaders(raw, depth > 0);
 		const { value: type, params } = mimeParams(
 			headers.get("content-type") ?? "text/plain; charset=us-ascii",
 		);
@@ -130,11 +131,13 @@ export function readMime(bytes: Uint8Array): MimePart {
 		if (!part.children.length) throw new Error("unclosed MIME multipart");
 		return part;
 	};
-	// An mbox export starts with a "From sender date" envelope line; keep it as a header the scan sees.
-	return parse(
-		Buffer.from(bytes)
-			.toString("latin1")
-			.replace(/^From /, "Mbox-From: "),
-		0,
-	);
+	// An mbox export starts with a "From sender weekday date" envelope line before the headers; keep
+	// it as a header the scan sees. Any other first line without a colon still fails.
+	const raw = Buffer.from(bytes)
+		.toString("latin1")
+		.replace(
+			/^From (\S+ +(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) [^\r\n]*)(?=\r?\n[!-9;-~]+:)/,
+			"Mbox-From: $1",
+		);
+	return parse(raw, 0);
 }

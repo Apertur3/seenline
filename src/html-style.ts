@@ -26,7 +26,9 @@ export function declarations(raw: string): Css {
 const INERT =
 	/^(?:font-(?:weight|style|variant)|text-(?:decoration(?:-[a-z]+)?|align|transform|underline-offset)|list-style(?:-type|-position)?|counter-(?:increment|reset)|cursor|background-(?:size|repeat|position))$/;
 const inert = (raw: string) =>
-	raw.split(";").every((d) => !d.trim() || INERT.test(/^\s*([a-z-]+)\s*:/i.exec(d)?.[1] ?? ""));
+	raw
+		.split(";")
+		.every((d) => !d.trim() || INERT.test(/^\s*([a-z-]+)\s*:/i.exec(d)?.[1]?.toLowerCase() ?? ""));
 const linked = (n: HtmlNode): boolean =>
 	(n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? "")) ||
 	n.children.some((c) => typeof c !== "string" && linked(c));

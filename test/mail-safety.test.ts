@@ -87,10 +87,10 @@ test("XHTML reads: the XML declaration is kept as a comment and <br/> closes its
 });
 
 test("an unmatched CSS selector is skipped only when its rule cannot hide text", async () => {
-	const ok = await convert(
-		"<style>ul > li { font-weight: bold; text-decoration: underline }</style><ul><li>ITEM_SHOWN</li></ul>",
-	);
-	assert.ok(ok.includes("ITEM_SHOWN") && !flagged(ok, "ITEM_SHOWN"));
+	for (const inert of ["font-weight: bold; text-decoration: underline", "TEXT-ALIGN: center"]) {
+		const ok = await convert(`<style>ul > li { ${inert} }</style><ul><li>ITEM_SHOWN</li></ul>`);
+		assert.ok(ok.includes("ITEM_SHOWN") && !flagged(ok, "ITEM_SHOWN"), inert);
+	}
 	for (const rule of [
 		"ul > li { display: none }",
 		"li:first-child { color: white }",

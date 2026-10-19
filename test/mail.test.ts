@@ -111,6 +111,24 @@ test("mbox exports, header-less parts, trailing semicolons and a lost close boun
 	assert.doesNotMatch(text, /preamble/);
 });
 
+test("only a MIME part may skip its headers; a message starting with a blank line is refused", async () => {
+	const part =
+		'Content-Type: multipart/mixed; boundary="b"\r\n\r\n--b\r\n\r\nNO_HEADERS\r\n--b--\r\n';
+	assert.match(await convert("part.eml", Buffer.from(part)), /^NO_HEADERS\n/);
+	const message =
+		'\r\nFrom: a@b.example\nBcc: x\nContent-Type: text/html\n\n<p style="display:none">HIDDEN_HTML</p>';
+	await assert.rejects(convert("blank.eml", Buffer.from(message)), /malformed email structure/);
+});
+
+test("a first line that only starts with From is not taken for an mbox envelope", async () => {
+	for (const raw of [
+		"From Monday to Friday we work.",
+		"From Monday to Friday we work.\r\nSubject: Hours\r\n\r\nBody",
+		"From mira@example.com  Thu Apr 30 14:27:51 1998\r\n\r\nBody",
+	])
+		await assert.rejects(convert("plain.eml", Buffer.from(raw)), /malformed email structure/, raw);
+});
+
 test("unsupported Outlook MSG is clearly refused", async () => {
 	await assert.rejects(
 		convert("mail-outlook.msg", Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1])),
