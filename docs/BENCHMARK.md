@@ -48,8 +48,8 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_013 | extractor-side-payload | flagged | leaked | correct | correct | correct | not-run | correct | not-run |
 | EG_014 | extractor-side-payload | flagged | leaked | correct | leaked | correct | not-run | correct | not-run |
 | EG_015 | reading-order | failed-closed | correct | leaked | correct | stripped | not-run | correct | not-run |
-| EG_016 | reading-order | leaked | correct | stripped | correct | leaked | not-run | stripped | not-run |
-| EG_017 | reading-order | leaked | stripped | correct | leaked | leaked | not-run | stripped | not-run |
+| EG_016 | reading-order | flagged | correct | stripped | correct | leaked | not-run | stripped | not-run |
+| EG_017 | reading-order | flagged | stripped | correct | leaked | leaked | not-run | stripped | not-run |
 | EG_018 | font-decoding | failed-closed | correct | stripped | correct | correct | not-run | stripped | not-run |
 | EG_019 | font-decoding | failed-closed | correct | leaked | correct | correct | not-run | stripped | not-run |
 | EG_020 | font-decoding | failed-closed | correct | leaked | correct | stripped | not-run | correct | not-run |
@@ -58,21 +58,19 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_023 | font-decoding | failed-closed | stripped | leaked | stripped | stripped | not-run | stripped | not-run |
 | EG_024 | font-decoding | failed-closed | leaked | stripped | leaked | leaked | not-run | stripped | not-run |
 | EG_025 | font-decoding | failed-closed | stripped | stripped | stripped | stripped | not-run | correct | not-run |
-| **leaked** |  | 3 | 12 | 7 | 12 | 3 | 0 | 1 | 0 |
-| **flagged** |  | 11 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **leaked** |  | 1 | 12 | 7 | 12 | 3 | 0 | 1 | 0 |
+| **flagged** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **stripped** |  | 0 | 5 | 6 | 4 | 8 | 0 | 9 | 0 |
 | **failed-closed** |  | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **correct** |  | 1 | 8 | 12 | 9 | 14 | 0 | 15 | 0 |
-| **flagged by the tool itself** |  | 11 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **flagged by the tool itself** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Plainview leaks on: EG_001_canary.pdf, EG_016_canary.pdf, EG_017_canary.pdf.
+Plainview leaks on: EG_001_canary.pdf.
 
 ### Known limits
 
 - EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
-- EG_016: leaked. Reading order. The payload is the order the text is stored in; the reader sees another order. Plainview follows stream order, so it cannot tell. Changing the order would change the anchor lines, which is a major version under the release contract.
-- EG_017: leaked. Reading order, same as EG_016.
-- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015, EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
+- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015 comes out flagged (the body in reading order, the stored order under reading order in the hidden block); EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
 - EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. Library callers can supply an OCR callback, which the harness does not do, so that path is not measured here.
 
 Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.
@@ -206,7 +204,7 @@ Provider token counts of the native upload are a separate optional step (`provid
 | jpg | 0.000 | - | 0.990 | 0.115 | 1.683 | - | - | - |
 | pdf | 0.002 | 0.005 | 0.085 | 0.003 | 0.118 | - | 0.158 | - |
 | png | 0.000 | - | 1.414 | 0.100 | 1.533 | - | - | - |
-| pptx | 0.025 | 0.021 | 0.090 | 0.020 | 0.014 | - | - | - |
+| pptx | 0.040 | 0.021 | 0.090 | 0.020 | 0.014 | - | - | - |
 | xlsx | 0.002 | 0.011 | 0.005 | 0.008 | 0.014 | - | - | - |
 
 ## Anchors (set D)
