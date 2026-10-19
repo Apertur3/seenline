@@ -12,6 +12,10 @@ for (const [name, canary, reason] of [
 	["form-covers.pdf", "CANARY-PDF-FORM-COVER", "covered"],
 	["rotated-clipped.pdf", "CANARY-PDF-ROTATED-CLIP", "clipped"],
 	["properties.pdf", "CANARY-PDF-META", "metadata Subject"],
+	["frame-covers.pdf", "CANARY-PDF-FRAME-COVER", "covered"],
+	["ring-filled.pdf", "CANARY-PDF-RING-COVER", "covered"],
+	["white-on-light.pdf", "CANARY-PDF-WHITE-LIGHT", "white"],
+	["white-on-picture.pdf", "CANARY-PDF-WHITE-PICTURE", "white"],
 ]) {
 	test(`${name}: flagged as hidden, kept out of the body`, async () => {
 		const { markdown, hidden } = await run(name as string);
@@ -29,6 +33,9 @@ for (const [name, text] of [
 	["clip-holds.pdf", "Clipped but inside the box."],
 	["form-beside.pdf", "Shown to every reader."],
 	["rotated-holds.pdf", "Shown to every reader."],
+	["frame-around.pdf", "Shown to every reader."],
+	["ring-hole.pdf", "Shown to every reader."],
+	["white-on-dark.pdf", "Shown to every reader."],
 ]) {
 	test(`${name}: visible text stays in the body`, async () => {
 		const { markdown, hidden } = await run(name as string);

@@ -41,6 +41,20 @@ const FILES: Record<string, string | Spec> = {
 	"rotated-holds.pdf": `${base}${rotated(visible, "285 390 20 160")}`,
 	// The same label beside the strip: clipped away.
 	"rotated-clipped.pdf": `${base}${rotated(canary("PDF-ROTATED-CLIP"), "320 390 20 160")}`,
+	// A frame as four thin bars in one path: the text inside it is not under any of them.
+	"frame-around.pdf": `${base}${line(visible)}0 g 60 650 400 2 re 60 680 400 2 re 60 650 2 32 re 458 650 2 32 re f\n`,
+	// The same path with a fifth bar as tall as the text over it.
+	"frame-covers.pdf": `${base}${line(canary("PDF-FRAME-COVER"))}0 g 60 650 400 2 re 60 680 400 2 re 60 655 400 20 re f\n`,
+	// Two nested boxes filled even-odd: a ring, the text sits in its hole.
+	"ring-hole.pdf": `${base}${line(visible)}0 g 40 630 480 60 re 60 650 400 30 re f*\n`,
+	// The same boxes filled by the nonzero rule: both wind the same way, so the inner one is painted too.
+	"ring-filled.pdf": `${base}${line(canary("PDF-RING-COVER"))}0 g 40 630 480 60 re 60 650 400 30 re f\n`,
+	// White letters on a dark box drawn before them.
+	"white-on-dark.pdf": `${base}0.1 0.2 0.4 rg 60 650 400 30 re f\n${line(visible, "1 g")}`,
+	// White letters on a near-white box: hidden.
+	"white-on-light.pdf": `${base}0.95 g 60 650 400 30 re f\n${line(canary("PDF-WHITE-LIGHT"), "1 g")}`,
+	// White letters on a picture (one white pixel, stretched): its pixels are not read, so flagged.
+	"white-on-picture.pdf": `${base}q 400 0 0 30 60 650 cm BI /W 1 /H 1 /CS /G /BPC 8 ID \xff EI Q\n${line(canary("PDF-WHITE-PICTURE"), "1 g")}`,
 	// Properties: placeholders and a one-word author are not listed, a free-text subject is.
 	"properties.pdf": {
 		content: base,

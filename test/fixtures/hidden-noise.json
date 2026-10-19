@@ -24,6 +24,40 @@
 		"flagged": ["PPT_OFFSLIDE"],
 		"gone": []
 	},
+	"edits": {
+		"PPTX white text on a dark shape fill is visible, on a light one hidden": {
+			"fixture": "office-deck.pptx",
+			"edits": [
+				[
+					"ppt/slides/slide1.xml",
+					"</p:spTree>",
+					"<p:sp><p:spPr><a:xfrm><a:off x=\"0\" y=\"3000000\"/><a:ext cx=\"4000000\" cy=\"500000\"/></a:xfrm><a:solidFill><a:srgbClr val=\"1F3864\"/></a:solidFill></p:spPr><p:txBody><a:p><a:r><a:rPr><a:solidFill><a:srgbClr val=\"FFFFFF\"/></a:solidFill></a:rPr><a:t>PPT_ON_DARK</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:spPr><a:xfrm><a:off x=\"0\" y=\"4000000\"/><a:ext cx=\"4000000\" cy=\"500000\"/></a:xfrm><a:solidFill><a:srgbClr val=\"F2F2F2\"/></a:solidFill></p:spPr><p:txBody><a:p><a:r><a:rPr><a:solidFill><a:srgbClr val=\"FFFFFF\"/></a:solidFill></a:rPr><a:t>PPT_ON_LIGHT</a:t></a:r></a:p></p:txBody></p:sp></p:spTree>"
+				]
+			],
+			"seen": ["PPT_ON_DARK"],
+			"flagged": ["PPT_ON_LIGHT", "PPT_WHITE"],
+			"gone": []
+		},
+		"XLSX white text on a dark cell fill is visible, with no fill hidden": {
+			"fixture": "office-book.xlsx",
+			"edits": [
+				[
+					"xl/styles.xml",
+					"</fills>",
+					"<fill><patternFill patternType=\"solid\"><fgColor rgb=\"FF1F3864\"/></patternFill></fill></fills>"
+				],
+				["xl/styles.xml", "</cellXfs>", "<xf fontId=\"1\" fillId=\"2\"/></cellXfs>"],
+				[
+					"xl/worksheets/sheet1.xml",
+					"</sheetData>",
+					"<row r=\"8\"><c r=\"A8\" t=\"inlineStr\" s=\"3\"><is><t>XLS_ON_DARK</t></is></c></row></sheetData>"
+				]
+			],
+			"seen": ["XLS_ON_DARK"],
+			"flagged": ["XLS_WHITE"],
+			"gone": []
+		}
+	},
 	"html": {
 		"page": "<meta charset=\"utf-8\"><link rel=\"icon\" href=\"i.ico\"><p><a href=\"#\" title=\"Key words\">x</a> <a href=\"#\" title=\"T_UNSEEN\">y</a> Key words</p>",
 		"seen": ["Key words"],

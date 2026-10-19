@@ -36,6 +36,48 @@
 		"hidden": ["CANARY-PDF-META"]
 	},
 	{
+		"file": "frame-covers.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-FRAME-COVER"]
+	},
+	{
+		"file": "ring-filled.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-RING-COVER"]
+	},
+	{
+		"file": "white-on-light.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-WHITE-LIGHT"]
+	},
+	{
+		"file": "white-on-picture.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027."],
+		"hidden": ["CANARY-PDF-WHITE-PICTURE"]
+	},
+	{
+		"file": "frame-around.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],
+		"hidden": []
+	},
+	{
+		"file": "ring-hole.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],
+		"hidden": []
+	},
+	{
+		"file": "white-on-dark.pdf",
+		"dir": "pdf-hiding",
+		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],
+		"hidden": []
+	},
+	{
 		"file": "form-beside.pdf",
 		"dir": "pdf-hiding",
 		"facts": ["Approved budget: EUR 100,000 for 2027.", "Shown to every reader."],

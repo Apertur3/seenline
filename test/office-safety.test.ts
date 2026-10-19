@@ -130,6 +130,16 @@ test("PPTX: a shape a little past the slide edge is on the slide", async () => {
 	expect(await convertOffice(zipSync(files), ".pptx"), twins.pptx);
 });
 
+type Edited = { fixture: string; edits: string[][]; seen: string[]; flagged: string[]; gone: [] };
+for (const [title, c] of Object.entries(twins.edits as Record<string, Edited>)) {
+	test(title, async () => {
+		const files = unzipSync(officeFixtures()[c.fixture] as Uint8Array);
+		for (const [part = "", from = "", to = ""] of c.edits)
+			files[part] = strToU8(strFromU8(files[part] as Uint8Array).replace(from, to));
+		expect(await convertOffice(zipSync(files), c.fixture), c);
+	});
+}
+
 test("custom XML attribute values are preserved as hidden content", async () => {
 	const files = unzipSync(officeFixtures()["office-memo.docx"] as Uint8Array);
 	files["customXml/item1.xml"] = strToU8('<record instruction="ATTRIBUTE_PAYLOAD"/>');
