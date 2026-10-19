@@ -1,5 +1,6 @@
 // Regenerates test/fixtures/pdf-hiding/ (SYNTHETIC): PDF ways to hide text that the pinned reference
-// reader passes into the body, so these have no reference golden; test/pdf-hiding.test.ts asserts on them.
+// reader passes into the body, and a page with almost no text layer, so these have no reference golden;
+// test/pdf-hiding.test.ts asserts on them.
 // Usage: node scripts/make-hiding-pdfs.ts
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -18,3 +19,6 @@ const FILES: Record<string, string> = {
 };
 for (const [name, content] of Object.entries(FILES))
 	writeFileSync(join(OUT, name), pdf({ content }));
+// Two text pages around one that holds only its page number, as a paper's figure pages do.
+const more = [T(300, 40, 10, "2 of 3"), T(72, 700, 14, "Signed off on 3 March 2027.")];
+writeFileSync(join(OUT, "weak-page.pdf"), pdf({ content: base, more }));

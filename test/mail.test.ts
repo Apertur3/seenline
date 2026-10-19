@@ -89,6 +89,28 @@ test("hostile HTML and MIME over budgets or malformed encodings fail closed", as
 		await assert.rejects(convert(name, Buffer.from(raw)), /could not read this file/i, name);
 });
 
+test("mbox exports, header-less parts, trailing semicolons and a lost close boundary read", async () => {
+	const raw = [
+		"From mira@example.com  Thu Apr 30 14:27:51 1998",
+		"From: Mira Otter <mira@example.com>",
+		"Subject: Archive copy",
+		'Content-Type: multipart/mixed; boundary="b1";',
+		"",
+		"preamble",
+		"--b1",
+		"",
+		"HEADERLESS_PART",
+		"--b1",
+		"Content-Type: text/plain; charset=us-ascii;",
+		"",
+		"TRUNCATED_LAST_PART",
+	].join("\r\n");
+	const text = await convert("archive.eml", Buffer.from(raw));
+	assert.match(text, /^From: Mira Otter <mira@example\.com>\nSubject: Archive copy\n/);
+	assert.match(text, /HEADERLESS_PART[\s\S]*TRUNCATED_LAST_PART/);
+	assert.doesNotMatch(text, /preamble/);
+});
+
 test("unsupported Outlook MSG is clearly refused", async () => {
 	await assert.rejects(
 		convert("mail-outlook.msg", Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1])),

@@ -60,7 +60,8 @@ export function mimeParams(raw: string): { value: string; params: Record<string,
 	const params: Record<string, string> = Object.create(null);
 	let at = raw.indexOf(";");
 	const re = /;\s*([\w*-]+)\s*=\s*(?:"((?:[^"\\]|\\.)*)"|([^;\s]+))\s*/gy;
-	while (at >= 0 && at < raw.length) {
+	// A trailing ";" after the last parameter is common and carries nothing.
+	while (at >= 0 && at < raw.length && raw.slice(at).replace(/^;/, "").trim()) {
 		re.lastIndex = at;
 		const m = re.exec(raw);
 		if (!m) throw new Error("MIME parameter");
@@ -72,13 +73,15 @@ export function mimeParams(raw: string): { value: string; params: Record<string,
 	return { value, params };
 }
 function splitHeaders(raw: string) {
-	const separator = /\r?\n\r?\n/.exec(raw);
+	// A part that starts with a blank line has no headers (RFC 2046 5.1.1).
+	const separator = /^\r?\n|\r?\n\r?\n/.exec(raw);
 	if (!separator || separator.index > 64 * 1024) throw new Error("MIME headers");
 	const headers = new Map<string, string>();
 	const lines = raw
 		.slice(0, separator.index)
 		.replace(/\r?\n[ \t]+/g, " ")
-		.split(/\r?\n/);
+		.split(/\r?\n/)
+		.filter((l, i) => i > 0 || l);
 	if (lines.length > 200) throw new Error("MIME header count");
 	for (const line of lines) {
 		const m = /^([!-9;-~]+):[ \t]*(.*)$/.exec(line);
@@ -110,23 +113,28 @@ export function readMime(bytes: Uint8Array): MimePart {
 		const boundary = params.boundary;
 		if (!boundary || boundary.length > 200 || /[\r\n]/.test(boundary))
 			throw new Error("MIME boundary");
-		let current: string[] | null = null,
-			closed = false;
+		let current: string[] | null = null;
 		for (const line of body.split(/\r?\n/)) {
 			if (
 				line.replace(/[ \t]+$/, "") === `--${boundary}` ||
 				line.replace(/[ \t]+$/, "") === `--${boundary}--`
 			) {
 				if (current) part.children.push(parse(current.join("\r\n"), depth + 1));
-				if (line.trimEnd() === `--${boundary}--`) {
-					closed = true;
-					break;
-				}
+				current = null;
+				if (line.trimEnd() === `--${boundary}--`) break;
 				current = [];
 			} else if (current) current.push(line);
 		}
-		if (!closed || !part.children.length) throw new Error("unclosed MIME multipart");
+		// A truncated message without its closing boundary: mail readers show the last part to the end.
+		if (current) part.children.push(parse(current.join("\r\n"), depth + 1));
+		if (!part.children.length) throw new Error("unclosed MIME multipart");
 		return part;
 	};
-	return parse(Buffer.from(bytes).toString("latin1"), 0);
+	// An mbox export starts with a "From sender date" envelope line; keep it as a header the scan sees.
+	return parse(
+		Buffer.from(bytes)
+			.toString("latin1")
+			.replace(/^From /, "Mbox-From: "),
+		0,
+	);
 }

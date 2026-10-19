@@ -77,6 +77,14 @@ test("CLI file failures emit a code and message on stderr and no stdout", () => 
 	}
 });
 
+test("CLI reads a PDF with one near-empty page and marks that page", () => {
+	const result = run(
+		fileURLToPath(new URL("./fixtures/pdf-hiding/weak-page.pdf", import.meta.url)),
+	);
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, /\n\[p\. 2\]\n\(no readable text layer on this page[^\n]*\n2 of 3\n/);
+});
+
 test("CLI failed conversion writes no --out file and batches continue after errors", async () => {
 	const out = await mkdtemp(join(tmpdir(), "plainview-cli-"));
 	try {

@@ -68,6 +68,33 @@ test("PPTX run attributes do not erase inherited tiny or white paragraph text", 
 	assert.ok(output.indexOf("PPT_INHERITED") > output.indexOf(HIDDEN_BLOCK));
 });
 
+test("PPTX sections list slides again without adding slides; a lost slide part is named", async () => {
+	const deck = officeFixtures()["office-deck.pptx"] as Uint8Array;
+	const edit = (change: (s: string) => string) => {
+		const files = unzipSync(deck);
+		const name = "ppt/presentation.xml";
+		files[name] = strToU8(change(strFromU8(files[name] as Uint8Array)));
+		return zipSync(files);
+	};
+	const sections = edit((s) =>
+		s.replace(
+			"</p:presentation>",
+			'<p:extLst><p:ext uri="{521415D9-36F7-43E2-AB2F-B90AF26B5E84}"><p14:sectionLst xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main"><p14:section name="Intro" id="{00000000-0000-0000-0000-000000000001}"><p14:sldIdLst><p14:sldId id="256"/><p14:sldId id="257"/></p14:sldIdLst></p14:section></p14:sectionLst></p:ext></p:extLst></p:presentation>',
+		),
+	);
+	assert.deepEqual(
+		await convert(sections, { name: "s.pptx" }),
+		await convert(deck, { name: "d.pptx" }),
+	);
+	await assert.rejects(
+		convert(
+			edit((s) => s.replace('r:id="rId1"', 'r:id="rId99"')),
+			{ name: "x.pptx" },
+		),
+		/could not read this file: a document part is missing or invalid$/,
+	);
+});
+
 test("DOCX default paragraph style preserves hidden runs even without explicit pStyle", async () => {
 	const files = unzipSync(officeFixtures()["office-memo.docx"] as Uint8Array);
 	files["word/document.xml"] = strToU8(

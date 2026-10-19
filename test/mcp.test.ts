@@ -46,6 +46,11 @@ test("MCP in-memory discovery, golden conversion and fail-closed tool errors", a
 			assert.deepEqual(result.content, [{ type: "text", text: golden }]);
 			assert.deepEqual(result.structuredContent, { pages, flags, hidden });
 		}
+		const weak = fileURLToPath(new URL("./fixtures/pdf-hiding/weak-page.pdf", import.meta.url));
+		const marked = await client.callTool({ name: "convert_file", arguments: { path: weak } });
+		assert.ok(!marked.isError);
+		assert.deepEqual(marked.structuredContent, { pages: 3, flags: [], hidden: [] });
+		assert.match(JSON.stringify(marked.content), /\[p\. 2\]\\n\(no readable text layer/);
 		for (const [path, message] of [
 			[fixture("missing.pdf"), /^invalid: could not read this file:/],
 			[
