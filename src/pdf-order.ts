@@ -4,8 +4,8 @@
 // only they are put in reading order (and flagged), so ordinary output stays as stored:
 // - a shuffled phrase: words on one baseline, no further apart than a word space, stored out of
 //   left-to-right order;
-// - a grid read down: separate items (rows more than 2 em apart) stored a column at a time, on a page
-//   with no tight text in columns. A reader takes such a grid row by row, as a table.
+// - a grid read down: separate items (rows more than 2 em apart, three or more down a column) stored a
+//   column at a time, on a page with no tight text in columns. A reader takes it row by row, as a table.
 // Measured on the benchmark's public PDFs (40 files, 1,410 pages): neither shape occurs there.
 import type { Item } from "./pdf-walk.ts";
 
@@ -38,7 +38,8 @@ export function lines(runs: Item[]): Item[][] {
 
 /** The visible runs in reading order, and the ones stored in another order (in stored order; none on most pages). */
 export function readingOrder(runs: Item[]): { order: Item[]; moved: Item[] } {
-	const upright = runs.filter((r) => r.upright);
+	// Only runs with a usable size are measured; the rest keep their stored place in the body.
+	const upright = runs.filter((r) => r.upright && Number.isFinite(r.size) && r.size > 0);
 	if (readDown(upright)) return { order: rows(runs).flatMap(byX), moved: runs };
 	const at = new Map(runs.map((r, i) => [r, i]));
 	const pos = (r: Item) => at.get(r) ?? 0;
@@ -105,9 +106,9 @@ function shuffled(p: Item[], pos: (r: Item) => number): boolean {
 	return keys.some((k, j) => j > 0 && k < (keys[j - 1] ?? k));
 }
 
-// Whether the page stores a grid of separate items a column at a time: a step down a column by more than
-// 2 em skips the rest of its row (stored later, to the right), and the row it lands on goes on to the
-// right as well. A step of 2 em or less from a row with other lines on it is text in columns, which a
+// Whether the page stores a grid of separate items a column at a time: two steps in a row down a column,
+// each by more than 2 em, skip the rest of their row (stored later, to the right), and each row they land
+// on goes on to the right as well. A step of 2 em or less from a row with other lines on it is text in columns, which a
 // reader also takes a column at a time, so such a page is left as stored.
 function readDown(upright: Item[]): boolean {
 	const ls = lines(upright).map((l, i) => ({
@@ -137,14 +138,18 @@ function readDown(upright: Item[]): boolean {
 		}
 	}
 	let grid = false;
+	let down = false;
 	for (const [k, a] of ls.entries()) {
 		const b = ls[k + 1];
 		if (!b) break;
 		const drop = (a.y - b.y) / Math.max(a.size, b.size);
-		if (drop <= ROW) continue;
-		if (drop <= LOOSE && (mates[a.i] ?? 0) > 1) return false;
+		if (drop > ROW && drop <= LOOSE && (mates[a.i] ?? 0) > 1) return false;
 		const goesOn = (l: number) => (right[l] ?? -1) > b.i;
-		if (drop > LOOSE && a.x0 < b.x1 && b.x0 < a.x1 && goesOn(a.i) && goesOn(b.i)) grid = true;
+		const step = drop > LOOSE && a.x0 < b.x1 && b.x0 < a.x1 && goesOn(a.i) && goesOn(b.i);
+		// Two such steps in a row: three items read down one column. Two items per column (a resume's
+		// headings beside their entries) are as often read across as down, so they are left as stored.
+		grid ||= step && down;
+		down = step;
 	}
 	return grid;
 }

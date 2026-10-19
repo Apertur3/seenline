@@ -44,14 +44,18 @@ const WIDTH: Record<string, number> = {
 	v: 500,
 	y: 500,
 };
-function sentence(words: string[], order: number[]): string {
+function sentence(
+	words: string[],
+	order: number[],
+	draw = (x: number, w: string) => T(x, 660, 12, w),
+) {
 	let x = 72;
 	const at = words.map((w) => {
 		const here = x;
 		x += ([...w].reduce((n, c) => n + (WIDTH[c] ?? 600), 0) + 278) * 0.012;
 		return here;
 	});
-	return order.map((i) => T(at[i] ?? 0, 660, 12, words[i] ?? "")).join("");
+	return order.map((i) => draw(at[i] ?? 0, words[i] ?? "")).join("");
 }
 const words = ["Please", "do", "not", "approve", "this", "payment."];
 // Words in two columns or a grid, each [x, y, text], drawn in the order given.
@@ -103,6 +107,17 @@ const FILES: Record<string, string | Spec> = {
 	"in-order-line.pdf": `${base}${sentence(words, [0, 1, 2, 3, 4, 5])}`,
 	// A grid of words 40 pt (3.3 em) apart, stored a column at a time: a reader takes it row by row.
 	"grid-down.pdf": `${base}${placed(grid(320, 660))}`,
+	// The shuffled sentence in italics made by shearing (Tm c = 0.25), and on a page whose content is drawn
+	// with the y axis flipped (a cm and a Tm that each have d = -1): both still read left to right.
+	"shuffled-italic.pdf": `${base}${sentence(words, [0, 1, 3, 4, 5, 2], (x, w) => T(x - 165, 660, 12, w, "1 0 0.25 1 0 0 Tm"))}`,
+	"shuffled-flipped.pdf": `${base}q 1 0 0 -1 0 792 cm\n${sentence(words, [0, 1, 3, 4, 5, 2], (x, w) => `BT /F1 12 Tf 1 0 0 -1 ${x} 132 Tm (${w}) Tj ET\n`)}Q\n`,
+	// A resume-like page: two items per column, 36 pt (3 em) apart, stored a column at a time.
+	"resume.pdf": `${base}${placed([
+		[72, 660, "Experience"],
+		[72, 624, "Education"],
+		[320, 660, "Engineer at a shipping firm"],
+		[320, 624, "Degree in applied physics"],
+	])}`,
 	// Two columns of lines 14 pt apart, stored a column at a time, as a paper is: read as stored.
 	"two-columns.pdf": `${base}${placed([
 		[72, 660, "The left column opens"],

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { NO_TEXT_LAYER } from "../src/documents.ts";
 import { convert } from "../src/index.ts";
+import { readingOrder } from "../src/pdf-order.ts";
 import type { ConvertOptions } from "../src/types.ts";
 
 const run = async (name: string, opts: Partial<ConvertOptions> = {}) =>
@@ -23,6 +24,8 @@ for (const [name, canary, reason] of [
 	["white-on-picture.pdf", "CANARY-PDF-WHITE-PICTURE", "white"],
 	["shuffled-line.pdf", "Please do approve this payment. not", "reading order"],
 	["grid-down.pdf", "Alder Cedar Elm Birch Daisy Fern", "reading order"],
+	["shuffled-italic.pdf", "Please do approve this payment. not", "reading order"],
+	["shuffled-flipped.pdf", "Please do approve this payment. not", "reading order"],
 ]) {
 	test(`${name}: flagged as hidden, kept out of the body`, async () => {
 		const { markdown, hidden } = await run(name as string);
@@ -44,6 +47,7 @@ for (const [name, text] of [
 	["ring-hole.pdf", "Shown to every reader."],
 	["white-on-dark.pdf", "Shown to every reader."],
 	["in-order-line.pdf", "Please do not approve this payment."],
+	["resume.pdf", "Experience\nEducation\nEngineer at a shipping firm\nDegree in applied physics"],
 	[
 		"two-columns.pdf",
 		"The left column opens\nthe page and runs on\nto its end.\nThe right column comes",
@@ -66,6 +70,33 @@ for (const [name, text] of [
 		assert.ok(body.includes(text as string));
 	});
 }
+
+// Runs with no usable size (0, NaN, infinite) are not measured and keep their stored place.
+test("reading order: runs without a usable size neither trigger nor break the rules, and none is lost", () => {
+	const run = (text: string, x: number, y: number, size = 12) => {
+		const end = x + 6 * text.length;
+		return { text, x, y, size, end, mid: [x, y] as [number, number], upright: true, why: [] };
+	};
+	const odd = [
+		run("zero", 400, 660, 0),
+		run("nan", 400, 620, Number.NaN),
+		run("inf", 400, 580, 1 / 0),
+	];
+	const grid = ["Alder", "Cedar", "Elm"].map((w, i) => run(w, 72, 660 - 40 * i));
+	const right = ["Birch", "Daisy", "Fern"].map((w, i) => run(w, 320, 660 - 40 * i));
+	const phrase = [
+		run("one", 72, 500),
+		run("two", 98, 500),
+		run("four", 150, 500),
+		run("three", 118, 500),
+	];
+	for (const runs of [[...grid, ...odd, ...right], [...phrase, ...odd], odd, [...odd, ...odd]]) {
+		const { order, moved } = readingOrder(runs);
+		assert.deepEqual(new Set(order), new Set(runs), "every run stays in the body");
+		assert.equal(order.length, runs.length);
+		assert.equal(moved.length > 0, runs.length > 6, "only the grid and the phrase are flagged");
+	}
+});
 
 const before = ["[p. 1]", "Approved budget: EUR 100,000 for 2027.", "[p. 2]"];
 const after = ["[p. 3]", "Signed off on 3 March 2027.", ""];
