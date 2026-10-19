@@ -112,7 +112,7 @@ def version(candidate):
     try:
         return importlib.metadata.version(dist.get(candidate, candidate))
     except importlib.metadata.PackageNotFoundError:
-        return "tika-app" if candidate == "tika" else "unknown"
+        return "3.3.3" if candidate == "tika" else "unknown"
 
 
 def main():

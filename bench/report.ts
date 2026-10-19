@@ -318,6 +318,8 @@ ${provider(cache)}
 
 ## Speed (seconds per file, median of per-file medians)
 
+Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shared with other work) and start a new JVM for every file, so their times are not comparable with the other columns.
+
 ${byFormat(
 	rs,
 	(r) => r.seconds,
