@@ -116,7 +116,7 @@
       "package-lock.json",
       "bench/data/*",
       "bench/results.tsv",
-      "docs/BENCHMARK.md"
+      "docs/BENCHMARK.md", "assets/*"
     ],
     "generated": [],
     "warn_lines": 400,

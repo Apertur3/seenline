@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/plainview-mark-on-dark.svg">
+    <img src="assets/brand/plainview-mark-on-light.svg" alt="Plainview" width="64" height="64">
+  </picture>
+</p>
+
 # Plainview
 
 A fast, local document-to-Markdown converter for AI pipelines. PDF, Word, PowerPoint, Excel, CSV, HTML, email and subtitles go in; plain Markdown comes out, with a page, slide, sheet or row anchor on every line.
