@@ -1,5 +1,5 @@
 // Office conversion is deterministic and local. The linked AI understands this text later.
-import { PlainviewError } from "./error.ts";
+import { failure } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { MAX_ROWS, sheets } from "./office-sheets.ts";
 import { slides } from "./office-slides.ts";
@@ -46,8 +46,8 @@ export function convertOffice(
 		const result = `${lines.join("\n")}\n`;
 		if (Buffer.byteLength(result) > 5 * 1024 * 1024) throw new Error("text size");
 		return { markdown: result, pages: out.pages ?? 1 };
-	} catch {
-		throw new PlainviewError("invalid", OFFICE_FAILURE);
+	} catch (error) {
+		throw failure(error, OFFICE_FAILURE);
 	}
 }
 

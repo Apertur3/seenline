@@ -1,5 +1,5 @@
 // Local mail/web conversion shares the document hidden-content boundary.
-import { PlainviewError } from "./error.ts";
+import { failure, PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { type MailText, readHtml } from "./html.ts";
 import { decodeCharset, headerText, type MimePart, mimeParams, readMime } from "./mime.ts";
@@ -97,11 +97,11 @@ export function convertMail(bytes: Uint8Array, name: string): string {
 		const listed = unseen(body, out.hidden);
 		const result = [...body, ...(listed.length ? [HIDDEN_BLOCK, ...listed] : [])].join("\n").trim();
 		if (!result || Buffer.byteLength(result) > 5 * 1024 * 1024)
-			throw new Error("converted size or no text");
+			throw new Error(result ? "text size" : "no text");
 		return `${result}\n`;
-	} catch {
-		throw new PlainviewError(
-			"invalid",
+	} catch (error) {
+		throw failure(
+			error,
 			"could not read this file: damaged, unsupported or over-budget HTML/email; save as UTF-8 HTML or .eml",
 		);
 	}

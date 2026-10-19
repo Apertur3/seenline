@@ -11,6 +11,8 @@ import { subtitlesToText } from "./subtitles.ts";
 import type { ConvertOptions, DocumentText, OcrResult } from "./types.ts";
 
 const MIN_TEXT = 10;
+/** Said under the anchor of a page with (almost) no text layer when no text recognition read it. */
+export const NO_TEXT_LAYER = "(no readable text layer on this page; it may be a scan or an image)";
 const safe = (l: string) => (l === HIDDEN_BLOCK ? `${l} (written in the page)` : l);
 const page = (n: number, lines: string[]) => [`[p. ${n}]`, ...lines.map(safe)];
 const nonEmpty = (text: string) => text.split("\n").filter((l) => l.trim());
@@ -31,13 +33,11 @@ export async function documentToText(
 	}
 	if (!/\.(pdf|png|jpe?g|heic|bmp|gif|webp)$/i.test(name))
 		throw new PlainviewError("invalid", "could not read this file: unsupported format");
-	const result = /\.pdf$/i.test(name)
-		? await fromPdf(bytes, opts, ocr)
-		: await fromImage(bytes, ocr);
+	const result = /\.pdf$/i.test(name) ? await fromPdf(bytes, ocr) : await fromImage(bytes, ocr);
 	const { body, hidden, pages, readers } = result;
 	const listed = unseen(body, hidden);
 	const lines = listed.length > 0 ? [...body, HIDDEN_BLOCK, ...listed] : body;
-	if (lines.every((l) => l.trim() === "" || /^\[p\. \d+\]$/.test(l)))
+	if (lines.every((l) => l.trim() === "" || l === NO_TEXT_LAYER || /^\[p\. \d+\]$/.test(l)))
 		throw new PlainviewError("invalid", "could not read this file: no text found in it");
 	return { markdown: `${lines.join("\n")}\n`, pages, ...(readers && { readers }) };
 }
@@ -52,19 +52,23 @@ async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	};
 }
 
-async function fromPdf(bytes: Uint8Array, opts: ConvertOptions, ocr: () => Promise<OcrResult>) {
+async function fromPdf(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	const { pages, extras } = await readPdf(bytes);
 	const letters = (p: PdfPage) => p.lines.join("").replace(/[^\p{L}\p{N}]/gu, "").length;
 	const weak = pages.map((p) => letters(p) < MIN_TEXT);
 	const all = weak.every(Boolean);
-	const read: OcrResult = weak.some(Boolean)
+	// Without recognised text, a weak page keeps its few lines and says it was not read.
+	const read: OcrResult | null = weak.some(Boolean)
 		? await ocr().catch((error) => {
-				if (all || !opts.ocr) throw error;
-				return { pages: [], extras: [] };
+				if (all) throw error;
+				return null;
 			})
 		: { pages: [], extras: [] };
 	const body = pages.flatMap((p, i) =>
-		page(p.number, weak[i] ? nonEmpty(read.pages[i] ?? "") : p.lines),
+		page(
+			p.number,
+			!weak[i] ? p.lines : read ? nonEmpty(read.pages[i] ?? "") : [NO_TEXT_LAYER, ...p.lines],
+		),
 	);
 	const hidden = pages.flatMap((p) =>
 		p.hidden.map(
@@ -73,9 +77,9 @@ async function fromPdf(bytes: Uint8Array, opts: ConvertOptions, ocr: () => Promi
 	);
 	return {
 		body,
-		hidden: [...hidden, ...extras, ...read.extras],
+		hidden: [...hidden, ...extras, ...(read?.extras ?? [])],
 		pages: pages.length,
-		readers: read.reader
+		readers: read?.reader
 			? pages.map((_, i) => (weak[i] ? (read.reader as string) : "pdfjs"))
 			: undefined,
 	};

@@ -22,19 +22,30 @@ export function declarations(raw: string): Css {
 	}
 	return out;
 }
+// Properties that cannot change what a reader sees: no box, position, colour, visibility or generated text.
+const INERT =
+	/^(?:font-(?:weight|style|variant)|text-(?:decoration(?:-[a-z]+)?|align|transform|underline-offset)|list-style(?:-type|-position)?|counter-(?:increment|reset)|cursor|background-(?:size|repeat|position))$/;
+const inert = (raw: string) =>
+	raw
+		.split(";")
+		.every((d) => !d.trim() || INERT.test(/^\s*([a-z-]+)\s*:/i.exec(d)?.[1]?.toLowerCase() ?? ""));
+const linked = (n: HtmlNode): boolean =>
+	(n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? "")) ||
+	n.children.some((c) => typeof c !== "string" && linked(c));
 export function styleRules(root: HtmlNode): Rule[] {
+	// A linked stylesheet is unknown, so every element is flagged and no rule in the page can hide more.
+	if (linked(root)) return [{ selector: "*", css: { display: "none" } }];
 	const rules: Rule[] = [];
 	const walk = (n: HtmlNode) => {
-		if (n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? ""))
-			rules.push({ selector: "*", css: { display: "none" } });
 		if (n.tag === "style") {
 			const raw = n.children.join("").replace(/\/\*[\s\S]*?\*\//g, "");
 			let at = 0;
 			for (const m of raw.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
 				if (raw.slice(at, m.index).trim()) throw new Error("CSS rules");
 				for (const selector of (m[1] as string).split(",")) {
-					if (!/^[\w.*#\s-]+$/.test(selector)) throw new Error("unsupported CSS selector");
-					rules.push({ selector: selector.trim(), css: declarations(m[2] as string) });
+					if (/^[\w.*#\s-]+$/.test(selector))
+						rules.push({ selector: selector.trim(), css: declarations(m[2] as string) });
+					else if (!inert(m[2] as string)) throw new Error("unsupported CSS selector");
 				}
 				at = m.index + m[0].length;
 			}
@@ -137,7 +148,8 @@ export function visibility(
 			Object.assign(css, rule.css);
 			hidden ||= cssHidden(css);
 		}
-	Object.assign(css, declarations(n.attrs.style ?? ""));
+	// An element a rule already hides stays hidden, whatever its own style says.
+	if (!hidden) Object.assign(css, declarations(n.attrs.style ?? ""));
 	if (n.attrs.color) css.color = n.attrs.color.toLowerCase();
 	if (n.attrs.bgcolor) css["background-color"] = n.attrs.bgcolor.toLowerCase();
 	// Cascading conflicts are conservative: an applicable hiding rule always requires review.

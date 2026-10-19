@@ -210,7 +210,8 @@ export function slides(parts: Map<string, Xml>): OfficeText {
 	const size = first(presentation, "sldSz");
 	const bounds = [Number(attr(size, "cx") ?? 9144000), Number(attr(size, "cy") ?? 6858000)];
 	const rels = related(parts, "ppt/presentation.xml");
-	const ids = all(presentation, "sldId");
+	// Only the slide list: PowerPoint sections (p14:sectionLst) list the same slides again.
+	const ids = children(presentation, "sldIdLst").flatMap((l) => children(l, "sldId"));
 	if (!ids.length || ids.length > 300) throw new Error("slide count");
 	out.pages = ids.length;
 	for (const [i, id] of ids.entries()) {
