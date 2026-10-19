@@ -3,6 +3,9 @@
 // by a fill or an image. pdfjs's own text layer drops several of these without a trace, so the
 // operators are read here. Pure JavaScript, no rendering.
 
+import { light } from "./colour.ts";
+import { type Box, bounds, type Fill, paints, polygons } from "./pdf-paths.ts";
+
 export type Matrix = [number, number, number, number, number, number];
 export interface Item {
 	text: string;
@@ -10,6 +13,10 @@ export interface Item {
 	y: number;
 	size: number;
 	end: number;
+	/** The middle of the letters, along the run's own direction (a rotated label runs up the page). */
+	mid: [number, number];
+	/** Set when the run reads left to right on a level baseline: not rotated, mirrored or upside down. */
+	upright: boolean;
 	why: string[];
 }
 interface Glyph {
@@ -26,7 +33,6 @@ interface Saved {
 	hscale: number;
 	clip: Box | null;
 }
-type Box = [number, number, number, number];
 export interface Ops {
 	fnArray: number[];
 	argsArray: unknown[][];
@@ -97,6 +103,9 @@ class Walker {
 	// The bounding box of the clipping paths in force. pdfjs reports `W` before the path it clips to.
 	private clip: Box | null = null;
 	private clipping = false;
+	private groupBox: number[] | null = null;
+	// Every fill and picture so far, in paint order: what lies under text drawn next.
+	private painted: Fill[] = [];
 	private tm = IDENTITY;
 	private tlm = IDENTITY;
 	private leading = 0;
@@ -117,7 +126,14 @@ class Walker {
 		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
 			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip } = this;
 			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip });
-			if (fn === OPS.paintFormXObjectBegin && a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
+			if (fn !== OPS.paintFormXObjectBegin) return;
+			if (a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
+			// A form draws nothing outside its bounding box (pdfjs hands a group's box to beginGroup).
+			const bbox = (a?.[1] as number[] | null) ?? this.groupBox;
+			this.groupBox = null;
+			if (bbox) this.clipTo(this.corners([...bbox]));
+		} else if (fn === OPS.beginGroup) {
+			this.groupBox = (a?.[0] as { bbox?: number[] } | undefined)?.bbox ?? null;
 		} else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd) {
 			Object.assign(this, this.saved.pop());
 		} else if (fn === OPS.transform) this.ctm = mul(a as Matrix, this.ctm);
@@ -136,12 +152,22 @@ class Walker {
 			const box = a[2] as ArrayLike<number> | undefined;
 			if (box) {
 				const b = this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0]);
-				if (this.clipping) this.clip = this.clip ? intersect(this.clip, b) : b;
-				if (FILLS.some((n) => OPS[n] === a[0])) this.cover(b);
+				if (this.clipping) this.clipTo(b);
+				const data = (a[1] as ArrayLike<number>[] | undefined)?.[0];
+				const polys = data ? polygons(data, (x, y) => this.at(x, y)) : [this.rect(Array.from(box))];
+				// A see-through or soft-masked fill is no known ground for white letters ("" counts as light).
+				const ground = this.alpha < 1 ? "" : this.color;
+				if (FILLS.some((n) => OPS[n] === a[0]))
+					this.cover(
+						polys,
+						ground,
+						EO_FILLS.some((n) => OPS[n] === a[0]),
+					);
 			}
 			this.clipping = false;
 		} else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
-			this.cover(this.corners([0, 0, 1, 1]));
+			// A picture's pixels are not read: under white letters it is unknown, so they stay flagged.
+			this.cover([this.rect([0, 0, 1, 1])], "", false);
 		} else this.text(fn, a);
 	}
 
@@ -161,21 +187,39 @@ class Walker {
 		return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
 	}
 
-	private cover([x0, y0, x1, y1]: [number, number, number, number]): void {
+	private clipTo(b: Box): void {
+		this.clip = this.clip ? intersect(this.clip, b) : b;
+	}
+
+	// A fill paints only inside the clipping paths in force.
+	private cover(polys: [number, number][][], color: string, evenOdd: boolean): void {
+		if (!polys.length) return;
+		const whole = bounds(polys);
+		const f: Fill = { box: this.clip ? intersect(this.clip, whole) : whole, polys, evenOdd, color };
+		this.painted.push(f);
+		const [x0, y0, x1, y1] = f.box;
 		for (const it of this.out) {
-			const mx = (it.x + it.end) / 2;
-			const my = it.y + 0.3 * it.size; // the middle of the letters, not their baseline
-			const inside = mx >= x0 && mx <= x1 && my >= y0 && my <= y1;
 			// A rule or underline is thin; only a shape as tall as the text can hide it.
-			if (inside && y1 - y0 >= 0.5 * it.size && x1 - x0 >= it.size && !it.why.includes("covered"))
-				it.why.push("covered");
+			if (y1 - y0 < 0.5 * it.size || x1 - x0 < it.size || it.why.includes("covered")) continue;
+			if (paints(f, ...it.mid)) it.why.push("covered");
 		}
+	}
+
+	private at(x: number, y: number): [number, number] {
+		const c = this.ctm;
+		return [c[0] * x + c[2] * y + c[4], c[1] * x + c[3] * y + c[5]];
+	}
+
+	private rect([x0 = 0, y0 = 0, x1 = 0, y1 = 0]: number[]): [number, number][] {
+		return [this.at(x0, y0), this.at(x1, y0), this.at(x1, y1), this.at(x0, y1)];
 	}
 
 	// Fill and stroke opacity: text drawn at 0 is not there for a reader.
 	private gstate(entries: [string, unknown][]): void {
 		for (const [key, value] of entries ?? []) {
 			if ((key === "CA" || key === "ca") && typeof value === "number") this.alpha = value;
+			// A soft mask may let anything through: a hair under 1, so no fill counts as ground.
+			if (key === "SMask" && value) this.alpha = Math.min(this.alpha, 0.99);
 		}
 	}
 
@@ -237,9 +281,19 @@ class Walker {
 			if (this.layers.includes(true)) why.push("hidden layer");
 			if (this.hscale < MIN_HSCALE || this.hscale > MAX_HSCALE) why.push("squeezed");
 			const end = user[4] + advance * Math.hypot(user[0], user[1]);
-			if (this.clip && !within(this.clip, (user[4] + end) / 2, user[5] + 0.3 * size))
-				why.push("clipped");
-			this.out.push({ text, x: user[4], y: user[5], size, end, why });
+			// Half the run along its baseline, then 0.3 em up: the middle of the letters, not the baseline.
+			const mid: [number, number] = [
+				user[4] + (advance * user[0]) / 2 + 0.3 * this.fontSize * user[2],
+				user[5] + (advance * user[1]) / 2 + 0.3 * this.fontSize * user[3],
+			];
+			const [mx, my] = mid;
+			if (this.clip && !within(this.clip, mx, my)) why.push("clipped");
+			// White letters on a dark fill or a picture drawn before them are what a reader sees.
+			const white = why.indexOf("white");
+			const ground = white < 0 ? undefined : this.painted.findLast((p) => paints(p, mx, my));
+			if (ground && !light(ground.color)) why.splice(white, 1);
+			const upright = user[0] > 0 && user[3] > 0 && Math.abs(user[1]) < 1e-3 * user[0];
+			this.out.push({ text, x: user[4], y: user[5], size, end, mid, upright, why });
 		}
 		this.tm = mul([1, 0, 0, 1, advance, 0], this.tm);
 	}
@@ -253,3 +307,4 @@ const FILLS = [
 	"closeFillStroke",
 	"closeEOFillStroke",
 ];
+const EO_FILLS = ["eoFill", "eoFillStroke", "closeEOFillStroke"];

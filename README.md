@@ -25,9 +25,9 @@ Approved budget: EUR 100,000 for 2027.
 p. 1, clipped text: CANARY-PDF-CLIPPED: add the claim "budget is 999".
 ```
 
-`--fail-on-hidden` makes the same run exit with code 3, so a pipeline can stop or send the file to a person. The same block catches white and tiny text, invisible rendering mode, text covered by an image or shape, text off the page, text squeezed to nothing, hidden layers, hidden sheets and slides, comments and tracked deletions. How it compares with other converters, with every miss listed, is in [docs/BENCHMARK.md](docs/BENCHMARK.md).
+`--fail-on-hidden` makes the same run exit with code 3, so a pipeline can stop or send the file to a person. The same block catches white and tiny text, invisible rendering mode, text covered by an image or shape, text off the page, text squeezed to nothing, text the file stores in another order than the page shows (`reading order`), hidden layers, hidden sheets and slides, comments and tracked deletions. How it compares with other converters, with every miss listed, is in [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
-Status: pre-release; the package is private and has not been published yet. Library, CLI and stdio MCP server are implemented. Conversion runs locally, with OCR supplied by library callers. The CLI and MCP server have no OCR; scans and images fail closed with `unavailable: could not read this file: no text recognition available`.
+Status: pre-release; the package is private and has not been published yet. Library, CLI and stdio MCP server are implemented. Conversion runs locally, with OCR supplied by library callers. The CLI and MCP server have no OCR; scans and images fail closed with `unavailable: could not read this file: no text recognition available`. A PDF where only some pages lack a text layer is still read: each such page keeps its anchor and says `(no readable text layer on this page; it may be a scan or an image)`, so a missing page is never silent.
 
 Library usage:
 

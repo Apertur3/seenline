@@ -16,13 +16,19 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 			return "";
 		}
 		if (n.tag === "meta" || n.tag === "link" || n.tag === "base") {
-			out.hidden.push(
-				`HTML ${n.tag}: ${flat(
-					Object.entries(n.attrs)
-						.map(([k, v]) => `${k}=${v}`)
-						.join(" "),
-				)}`,
-			);
+			// A charset, or a link to an icon, a feed or another address, holds no text. Listed: any meta
+			// content and any link title (free text), and a stylesheet, which this reader cannot see into,
+			// so it hides the whole page here.
+			const link = n.attrs.title !== undefined || /stylesheet/i.test(n.attrs.rel ?? "");
+			const listed = n.tag === "base" || (n.tag === "meta" ? n.attrs.content !== undefined : link);
+			if (listed)
+				out.hidden.push(
+					`HTML ${n.tag}: ${flat(
+						Object.entries(n.attrs)
+							.map(([k, v]) => `${k}=${v}`)
+							.join(" "),
+					)}`,
+				);
 			return "";
 		}
 		const state = visibility(n, path, inherited, rules);

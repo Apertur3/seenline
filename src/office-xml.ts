@@ -83,6 +83,16 @@ export const attr = (n: Xml | undefined, key: string) => n?.attrs[key] ?? n?.att
 export const text = (n: Xml): string =>
 	n.children.map((c) => (typeof c === "string" ? c : text(c))).join("");
 export const flat = (s: string) => s.replace(/\s+/g, " ").trim();
+/** A theme part's colours by scheme name (dk1, lt1, accent1, ...), as RRGGBB. */
+export function themeColours(theme: Xml | undefined): Map<string, string | undefined> {
+	const scheme = theme && first(theme, "clrScheme");
+	return new Map(
+		(scheme ? nodes(scheme) : []).map((c) => [
+			local(c) ?? "",
+			attr(first(c, "srgbClr"), "val") ?? first(c, "sysClr")?.attrs.lastClr,
+		]),
+	);
+}
 
 export function packageXml(bytes: Uint8Array): Map<string, Xml> {
 	const files = officeZip(bytes);

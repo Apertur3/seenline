@@ -10,14 +10,14 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 0.0.0 | 2026-10-18 | 159/193 |  | convert() from src, no OCR callback (scans and images fail closed) |
-| markitdown | 0.1.8 | 2026-10-18 | 175/193 |  | stock; plugins disabled; no LLM |
-| docling | 2.140.0 | 2026-10-18 | 185/193 |  | standard local layout, table and OCR; page metadata exported |
-| unstructured | 0.27.28 | 2026-10-18 | 174/193 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
-| marker | 2.0.0 | 2026-10-18 | 103/193 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
-| tika | - | - | 0/193 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
-| pymupdf4llm | 1.28.2 | 2026-10-18 | 94/193 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
-| opendataloader | - | - | 0/193 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
+| plainview | 0.0.0 | 2026-10-19 | 179/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| markitdown | 0.1.8 | 2026-10-19 | 187/205 |  | stock; plugins disabled; no LLM |
+| docling | 2.140.0 | 2026-10-19 | 197/205 |  | standard local layout, table and OCR; page metadata exported |
+| unstructured | 0.27.28 | 2026-10-19 | 186/205 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
+| marker | 2.0.0 | 2026-10-19 | 115/205 |  | stock PdfConverter, paginated output, no LLM; model weights are fetched by the library at run time |
+| tika | - | - | 0/205 | not-run: RuntimeError: no Java runtime on this host | tika-app 3.3.3 text output (-t); needs a Java runtime |
+| pymupdf4llm | 1.28.2 | 2026-10-19 | 106/205 |  | to_markdown with page chunks; AGPL-3.0, run as an external tool, never bundled |
+| opendataloader | - | - | 0/205 | not-run: RuntimeError: no Java runtime on this host | markdown output, default content-safety filters (it strips hidden text); needs a Java runtime |
 
 `unsupported` means the file's format is outside the tool's declared formats; such files are left out of its totals.
 
@@ -48,8 +48,8 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_013 | extractor-side-payload | flagged | leaked | correct | correct | correct | not-run | correct | not-run |
 | EG_014 | extractor-side-payload | flagged | leaked | correct | leaked | correct | not-run | correct | not-run |
 | EG_015 | reading-order | failed-closed | correct | leaked | correct | stripped | not-run | correct | not-run |
-| EG_016 | reading-order | leaked | correct | stripped | correct | leaked | not-run | stripped | not-run |
-| EG_017 | reading-order | leaked | stripped | correct | leaked | leaked | not-run | stripped | not-run |
+| EG_016 | reading-order | flagged | correct | stripped | correct | leaked | not-run | stripped | not-run |
+| EG_017 | reading-order | flagged | stripped | correct | leaked | leaked | not-run | stripped | not-run |
 | EG_018 | font-decoding | failed-closed | correct | stripped | correct | correct | not-run | stripped | not-run |
 | EG_019 | font-decoding | failed-closed | correct | leaked | correct | correct | not-run | stripped | not-run |
 | EG_020 | font-decoding | failed-closed | correct | leaked | correct | stripped | not-run | correct | not-run |
@@ -58,21 +58,19 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_023 | font-decoding | failed-closed | stripped | leaked | stripped | stripped | not-run | stripped | not-run |
 | EG_024 | font-decoding | failed-closed | leaked | stripped | leaked | leaked | not-run | stripped | not-run |
 | EG_025 | font-decoding | failed-closed | stripped | stripped | stripped | stripped | not-run | correct | not-run |
-| **leaked** |  | 3 | 12 | 7 | 12 | 3 | 0 | 1 | 0 |
-| **flagged** |  | 11 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **leaked** |  | 1 | 12 | 7 | 12 | 3 | 0 | 1 | 0 |
+| **flagged** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **stripped** |  | 0 | 5 | 6 | 4 | 8 | 0 | 9 | 0 |
 | **failed-closed** |  | 10 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **correct** |  | 1 | 8 | 12 | 9 | 14 | 0 | 15 | 0 |
-| **flagged by the tool itself** |  | 11 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **flagged by the tool itself** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Plainview leaks on: EG_001_canary.pdf, EG_016_canary.pdf, EG_017_canary.pdf.
+Plainview leaks on: EG_001_canary.pdf.
 
 ### Known limits
 
 - EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
-- EG_016: leaked. Reading order. The payload is the order the text is stored in; the reader sees another order. Plainview follows stream order, so it cannot tell. Changing the order would change the anchor lines, which is a major version under the release contract.
-- EG_017: leaked. Reading order, same as EG_016.
-- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015, EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
+- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015 comes out flagged (the body in reading order, the stored order under reading order in the hidden block); EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
 - EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. Library callers can supply an OCR callback, which the harness does not do, so that path is not measured here.
 
 Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.
@@ -121,69 +119,76 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 | inj-img-mirrored.png | failed-closed | unsupported | stripped | failed-closed | stripped | not-run | unsupported | unsupported |
 | clipped.pdf | flagged | leaked | leaked | leaked | correct | not-run | correct | not-run |
 | squeezed.pdf | flagged | leaked | correct | leaked | leaked | not-run | correct | not-run |
+| form-covers.pdf | flagged | leaked | leaked | leaked | correct | not-run | leaked | not-run |
+| rotated-clipped.pdf | flagged | correct | leaked | correct | leaked | not-run | correct | not-run |
+| properties.pdf | flagged | correct | correct | correct | correct | not-run | correct | not-run |
+| frame-covers.pdf | flagged | leaked | leaked | leaked | correct | not-run | leaked | not-run |
+| ring-filled.pdf | flagged | leaked | leaked | leaked | correct | not-run | leaked | not-run |
+| white-on-light.pdf | flagged | leaked | leaked | leaked | correct | not-run | leaked | not-run |
+| white-on-picture.pdf | flagged | leaked | leaked | leaked | correct | not-run | leaked | not-run |
 | unicode-tag-chars.html | flagged | flagged | correct | flagged | failed-closed | not-run | unsupported | unsupported |
 | unicode-zero-width.html | flagged | correct | correct | correct | failed-closed | not-run | unsupported | unsupported |
 | unicode-bidi.html | flagged | flagged | leaked | flagged | failed-closed | not-run | unsupported | unsupported |
 | unicode-homoglyph.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
 | unicode-variation-bmp.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
 | unicode-variation-supp.html | flagged | flagged | flagged | flagged | failed-closed | not-run | unsupported | unsupported |
-| **leaked** | 0 | 21 | 17 | 24 | 4 | 0 | 3 | 0 |
-| **flagged** | 37 | 6 | 4 | 6 | 0 | 0 | 1 | 0 |
+| **leaked** | 0 | 26 | 23 | 29 | 5 | 0 | 8 | 0 |
+| **flagged** | 44 | 6 | 4 | 6 | 0 | 0 | 1 | 0 |
 | **stripped** | 0 | 6 | 16 | 6 | 19 | 0 | 12 | 0 |
 | **failed-closed** | 7 | 0 | 1 | 7 | 17 | 0 | 0 | 0 |
-| **correct** | 0 | 3 | 4 | 1 | 2 | 0 | 3 | 0 |
-| **flagged by the tool itself** | 37 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **correct** | 0 | 5 | 5 | 3 | 8 | 0 | 5 | 0 |
+| **flagged by the tool itself** | 44 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Fidelity (facts, rows, order, anchors found, visible text counted)
 
 | tool | files read | facts | rows | order | anchors |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 159/193 | 584/593 | 59/61 | 84/87 | 155/156 |
-| markitdown | 175/193 | 530/636 | 59/66 | 67/94 | 69/149 |
-| docling | 185/193 | 617/641 | 61/65 | 87/93 | 91/145 |
-| unstructured | 174/193 | 611/628 | 56/61 | 90/93 | 112/156 |
-| marker | 103/193 | 260/284 | 11/11 | 33/39 | 77/81 |
-| tika | 0/193 | 0/0 | 0/0 | 0/0 | 0/0 |
-| pymupdf4llm | 94/193 | 259/288 | 5/10 | 37/42 | 82/87 |
-| opendataloader | 0/193 | 0/0 | 0/0 | 0/0 | 0/0 |
+| plainview | 179/205 | 629/657 | 61/61 | 87/93 | 161/162 |
+| markitdown | 187/205 | 546/653 | 59/66 | 67/94 | 69/149 |
+| docling | 197/205 | 634/658 | 61/65 | 87/93 | 91/145 |
+| unstructured | 186/205 | 627/645 | 56/61 | 90/93 | 112/156 |
+| marker | 115/205 | 277/301 | 11/11 | 33/39 | 77/81 |
+| tika | 0/205 | 0/0 | 0/0 | 0/0 | 0/0 |
+| pymupdf4llm | 106/205 | 275/305 | 5/10 | 37/42 | 82/87 |
+| opendataloader | 0/205 | 0/0 | 0/0 | 0/0 | 0/0 |
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
 | format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 2854 (41 to 5957) | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | - | - | - |
-| docx | 3195 (224 to 16377) | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | - | - | - |
-| eml | 119 (74 to 175) | - | - | 13 (11 to 15) | - | - | - | - |
+| docx | 544 (61 to 12073) | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | - | - | - |
+| eml | 167 (79 to 296) | - | - | 13 (11 to 15) | - | - | - | - |
 | htm | 50 (50 to 50) | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | - | - | - |
-| html | 80 (16 to 7453) | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | - | - | - |
+| html | 552 (18 to 37199) | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | - | - | - |
 | jpg | - | - | 36 (22 to 38) | - | 40 (23 to 46) | - | - | - |
-| pdf | 135 (35 to 49229) | 42 (10 to 53318) | 56 (13 to 31208) | 47 (16 to 43280) | 43 (11 to 32063) | - | 46 (9 to 35371) | - |
+| pdf | 82 (35 to 44070) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | - | 38 (11 to 32880) | - |
 | png | - | - | 19 (17 to 58) | - | 19 (19 to 59) | - | - | - |
-| pptx | 2522 (128 to 5697) | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | - | - | - |
-| xlsx | 2280 (133 to 78272) | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | - | - | - |
+| pptx | 1833 (63 to 3567) | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | - | - | - |
+| xlsx | 929 (86 to 76059) | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | - | - | - |
 
-Common files:89 public files that Plainview, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
+Common files:95 public files that Plainview, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
 
 | format | files | plainview | markitdown | docling | unstructured | hidden block share (plainview) |
 | --- | --- | --- | --- | --- | --- | --- |
 | csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
-| docx | 20 | 5774 | 2831 | 2923 | 2264 | 32.8% |
-| html | 4 | 5232 | 4966 | 5019 | 4233 | 3.1% |
-| pdf | 36 | 15121 | 23157 | 13775 | 14770 | 0.4% |
-| pptx | 14 | 3156 | 2692 | 2085 | 2009 | 22.7% |
-| xlsx | 10 | 6469 | 3608 | 4171 | 2973 | 9.9% |
+| docx | 20 | 2894 | 2831 | 2923 | 2264 | 2.1% |
+| html | 7 | 24940 | 21583 | 17244 | 9042 | 0.0% |
+| pdf | 38 | 17860 | 24010 | 15441 | 17483 | 0.1% |
+| pptx | 15 | 2526 | 2694 | 2129 | 2032 | 1.1% |
+| xlsx | 10 | 4471 | 3608 | 4171 | 2973 | 0.0% |
 
 Hidden block on ordinary public files (Set A, files Plainview read): the entries are not verified as malicious, they are what Plainview lists. Package metadata, covered text and white text on slides are common in clean documents, so this is noise a user sees with `--fail-on-hidden`.
 
 | format | files | with a hidden block |
 | --- | --- | --- |
 | csv | 5 | 0 |
-| docx | 20 | 20 |
-| eml | 1 | 0 |
-| html | 4 | 3 |
-| pdf | 37 | 27 |
-| pptx | 14 | 14 |
-| xlsx | 10 | 10 |
+| docx | 20 | 15 |
+| eml | 3 | 0 |
+| html | 7 | 3 |
+| pdf | 39 | 22 |
+| pptx | 15 | 10 |
+| xlsx | 10 | 6 |
 
 Provider token counts of the native upload are a separate optional step (`provider-tokens.ts`); none were run for this table.
 
@@ -197,9 +202,9 @@ Provider token counts of the native upload are a separate optional step (`provid
 | htm | 0.000 | 0.003 | 0.002 | 0.001 | 0.023 | - | - | - |
 | html | 0.000 | 0.003 | 0.004 | 0.001 | 0.018 | - | - | - |
 | jpg | 0.000 | - | 0.990 | 0.115 | 1.683 | - | - | - |
-| pdf | 0.003 | 0.007 | 0.209 | 0.004 | 0.301 | - | 0.161 | - |
+| pdf | 0.002 | 0.005 | 0.085 | 0.003 | 0.118 | - | 0.158 | - |
 | png | 0.000 | - | 1.414 | 0.100 | 1.533 | - | - | - |
-| pptx | 0.021 | 0.021 | 0.090 | 0.020 | 0.014 | - | - | - |
+| pptx | 0.040 | 0.021 | 0.090 | 0.020 | 0.014 | - | - | - |
 | xlsx | 0.002 | 0.011 | 0.005 | 0.008 | 0.014 | - | - | - |
 
 ## Anchors (set D)
@@ -217,11 +222,11 @@ formats without anchors show 0.
 | htm | 1 | 0.0% |
 | html | 1 | 0.0% |
 | pdf | 6 | 5.1% |
-| pptx | 2 | 7.2% |
+| pptx | 2 | 12.1% |
 | rtf | 1 | 0.0% |
 | srt | 1 | 43.4% |
 | vtt | 1 | 43.8% |
-| xlsx | 2 | 14.6% |
+| xlsx | 2 | 20.2% |
 
 Accuracy, on fixtures where the true location is known. PDFs: each fact sits under its own `[p. N]` anchor.
 Office and mail files: the structure labels (heading, slide, sheet, header) are present. Subtitles: each source cue
@@ -234,8 +239,8 @@ appears with its own start and end time. A format whose fixture key states no lo
 | eml | 14/14 |
 | htm | 4/4 |
 | html | 7/7 |
-| pdf | 81/82 |
-| pptx | 25/25 |
+| pdf | 85/86 |
+| pptx | 27/27 |
 | xlsx | 14/14 |
 | srt and vtt cues | 7/7 |
 

@@ -51,7 +51,8 @@ function attributes(s: string): Record<string, string> {
 	while (at < s.length && s.slice(at).trim()) {
 		re.lastIndex = at;
 		const a = re.exec(s);
-		if (!a || ++count > 128) throw new Error("HTML attributes");
+		if (!a || ++count > 128)
+			throw new Error(a ? "HTML attribute count" : "malformed HTML attribute");
 		const key = (a[1] as string).toLowerCase();
 		if (Object.hasOwn(out, key)) throw new Error("duplicate HTML attribute");
 		out[key] = htmlEntities(a[2] ?? a[3] ?? a[4] ?? "");
@@ -70,7 +71,7 @@ function openTag(s: string, stack: HtmlNode[]): HtmlNode {
 	}
 	const node: HtmlNode = {
 		tag,
-		attrs: attributes(s.slice(tag.length + 1, -1).replace(/(?<=[\s"'])\/$/, "")),
+		attrs: attributes(s.slice(tag.length + 1, -1).replace(/(?<=^|[\s"'])\/$/, "")),
 		children: [],
 	};
 	return node;
@@ -80,7 +81,7 @@ export function htmlTree(raw: string): HtmlNode {
 	const root: HtmlNode = { tag: "", attrs: {}, children: [] },
 		stack = [root];
 	const token =
-		/<!--[\s\S]*?(?:-->|$)|<!doctype\s+html[^>]*>|<\/?[a-z][^<>"']*(?:(?:"[^"]*"|'[^']*')[^<>"']*)*>|[^<]+|</giy;
+		/<!--[\s\S]*?(?:-->|$)|<\?[^>]*>?|<!doctype\s+html[^>]*>|<\/?[a-z][^<>"']*(?:(?:"[^"]*"|'[^']*')[^<>"']*)*>|[^<]+|</giy;
 	let at = 0,
 		count = 0;
 	while (at < raw.length) {
@@ -90,11 +91,14 @@ export function htmlTree(raw: string): HtmlNode {
 		const s = m[0];
 		at = token.lastIndex;
 		let parent = stack.at(-1) as HtmlNode;
-		if (s.startsWith("<!--")) {
+		// An XML declaration or processing instruction is a comment to an HTML reader: never shown.
+		if (s.startsWith("<!--") || s.startsWith("<?")) {
 			parent.children.push({
 				tag: "!comment",
 				attrs: {},
-				children: [s.slice(4).replace(/-->$/, "")],
+				children: [
+					s.startsWith("<?") ? s.slice(2).replace(/>$/, "") : s.slice(4).replace(/-->$/, ""),
+				],
 			});
 			continue;
 		}

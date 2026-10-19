@@ -1,4 +1,4 @@
-// Minimal hand-built PDFs for the synthetic fixtures (one page, Helvetica as /F1, content stream given as text).
+// Minimal hand-built PDFs for the synthetic fixtures (Helvetica as /F1, content streams given as text).
 import { Buffer } from "node:buffer";
 
 export type Part = string | Buffer;
@@ -20,15 +20,24 @@ export interface Spec {
 	/** Objects 6, 7, ...: referenced by the strings above as "6 0 R" and so on. */
 	extra?: Part[];
 	info?: string;
+	/** Content streams of pages 2, 3, ...: plain pages after the extra objects. */
+	more?: string[];
 }
 export function pdf(s: Spec): Buffer {
+	const more = s.more ?? [];
+	const next = 6 + (s.extra?.length ?? 0);
+	const kids = ["3 0 R", ...more.map((_, i) => `${next + 2 * i} 0 R`)];
 	const objs: Part[] = [
 		`<< /Type /Catalog /Pages 2 0 R ${s.catalog ?? ""} >>`,
-		"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+		`<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${kids.length} >>`,
 		`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> ${s.resources ?? ""} >> ${s.page ?? ""} >>`,
 		stream("", s.content),
 		"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
 		...(s.extra ?? []),
+		...more.flatMap((content, i) => [
+			`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents ${next + 2 * i + 1} 0 R /Resources << /Font << /F1 5 0 R >> >> >>`,
+			stream("", content),
+		]),
 	];
 	const parts: Buffer[] = [buf("%PDF-1.7\n")];
 	const at: number[] = [];

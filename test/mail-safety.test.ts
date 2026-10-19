@@ -72,3 +72,58 @@ test("uncertain colour syntax stays flagged rather than passing white text norma
 		);
 	}
 });
+
+const flagged = (out: string, word: string) => {
+	const lines = out.split("\n");
+	return scan(lines).hidden.has(lines.findIndex((l) => l.includes(word)) + 1);
+};
+
+test("XHTML reads: the XML declaration is kept as a comment and <br/> closes itself", async () => {
+	const out = await convert(
+		'<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n<html><body><p>Line one<br/>Line two</p><hr/></body></html>',
+	);
+	assert.match(out.split(HIDDEN_BLOCK)[0] ?? "", /^Line one\nLine two\n/);
+	assert.ok(flagged(out, "xml version"));
+});
+
+test("an unmatched CSS selector is skipped only when its rule cannot hide text", async () => {
+	for (const inert of ["font-weight: bold; text-decoration: underline", "TEXT-ALIGN: center"]) {
+		const ok = await convert(`<style>ul > li { ${inert} }</style><ul><li>ITEM_SHOWN</li></ul>`);
+		assert.ok(ok.includes("ITEM_SHOWN") && !flagged(ok, "ITEM_SHOWN"), inert);
+	}
+	for (const rule of [
+		"ul > li { display: none }",
+		"li:first-child { color: white }",
+		"a[href] { font-weight: bold; margin-left: -9999px }",
+		'li::before { content: "x" }',
+	])
+		await assert.rejects(
+			convert(`<style>${rule}</style><ul><li>RULE_CANARY</li></ul>`),
+			(e: Error) =>
+				/unsupported CSS selector in a rule that can hide text/.test(e.message) &&
+				!e.message.includes("RULE_CANARY"),
+			rule,
+		);
+});
+
+test("with a linked stylesheet all text is flagged, so page CSS it overrides cannot fail it", async () => {
+	const out = await convert(
+		'<link rel="stylesheet" href="https://example.com/a.css"><style>@media screen { p { color: red } } ul > li { display: none }</style><p style="color: var(--x)">LINKED_CANARY</p>',
+	);
+	assert.ok(flagged(out, "LINKED_CANARY"));
+});
+
+test("HTML and mail failures name their class of cause and never echo the document", async () => {
+	const attrs = Array.from({ length: 129 }, (_, i) => `a${i}="1"`).join(" ");
+	for (const [name, raw, cause] of [
+		["a.html", `<p ${attrs}>SECRET_CAUSE</p>`, "an HTML element has too many attributes"],
+		["b.html", `<p title="${"SECRET_CAUSE".repeat(2000)}">x</p>`, "an HTML tag is too long"],
+		["c.eml", "Content-Transfer-Encoding: base64\r\n\r\nSECRET_CAUSE%%", "a damaged mail encoding"],
+		["d.eml", "Content-Type: text/plain; charset=SECRET_CAUSE\r\n\r\nx", "character encoding"],
+	])
+		await assert.rejects(
+			convertFile(Buffer.from(raw as string), { name: name as string }),
+			(e: Error) => e.message.includes(cause as string) && !e.message.includes("SECRET"),
+			name,
+		);
+});
