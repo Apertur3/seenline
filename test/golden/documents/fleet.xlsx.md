@@ -5,3 +5,5 @@ Truck | Km | Fuel (L)
 T-101 | 48210 | 5230
 [row 3]
 T-102 | 51877 | 5614
+[Hidden in the original]
+docProps/core.xml: openpyxl
