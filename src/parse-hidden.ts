@@ -75,9 +75,9 @@ function parseLine(line: string): HiddenText {
 }
 
 /**
- * Marks entries whose text reads like an instruction to an AI. Text one sentence split over
- * neighbouring entries of the same kind (a line or a word each) is read joined: the shortest run of
- * untagged entries, up to 12 and 400 characters, that matches.
+ * Marks entries whose text reads like an instruction to an AI. A sentence split over neighbouring
+ * entries of the same location and kind (a line or a word each) is read joined: the shortest run of
+ * untagged entries, up to 12 and 400 characters, that matches and does not cross a sentence end.
  */
 function withSuspect(entries: HiddenText[]): HiddenText[] {
 	const tags = entries.map((e) => suspect(e.text));
@@ -90,7 +90,11 @@ function withSuspect(entries: HiddenText[]): HiddenText[] {
 	for (let i = 0; i < entries.length; i++) {
 		for (
 			let j = i + 1;
-			j < i + 12 && !tags[i] && !tags[j] && group(entries[j]) === group(entries[i]);
+			j < i + 12 &&
+			!tags[i] &&
+			!tags[j] &&
+			group(entries[j]) === group(entries[i]) &&
+			!/[.!?;:]\s*$/.test(entries[j - 1]?.text ?? "");
 			j++
 		) {
 			if (joined(i, j).length > 400) break;

@@ -1,5 +1,5 @@
 {
-	"about": "Rules for suspect(): wording in hidden text that reads like an instruction to an AI. Patterns run in order on lowercased, normalised text; the first match names the reason. ' ~ ' stands for a gap of up to five words within one sentence. A signal for triage, not a verdict.",
+	"about": "Rules for suspect(): wording in hidden text that reads like an instruction to an AI. Patterns run in order on lowercased, normalised text; the first match names the reason. ' ~ ' stands for a gap of up to five words within one sentence. A signal for triage, not a verdict; tuned for precision, so paraphrases slip through.",
 	"lookalikes": {
 		"а": "a",
 		"е": "e",
@@ -26,18 +26,25 @@
 		"τ": "t",
 		"υ": "u",
 		"χ": "x",
-		"ε": "e"
+		"ε": "e",
+		"в": "b",
+		"к": "k",
+		"т": "t",
+		"м": "m",
+		"н": "h",
+		"ω": "w",
+		"η": "n"
 	},
 	"rules": {
 		"override": [
-			"\\b(ignore|disregard|forget|override|bypass|erase|discard|cancel|drop|abandon|neglect|skip) ~ (instruction|rule|directive|prompt|guideline|constraint|restriction|guardrail|safeguard|command|context|programming|(stated|requested|assigned|original|user'?s?) (task|request|question))",
+			"\\b(ignore|disregard|forget|dismiss|override|bypass|erase|delete|reset|set aside|discard|cancel|drop|abandon|neglect|skip) ~ (instruction|rule|directive|prompt|guideline|constraint|restriction|guardrail|safeguard|command|context|programming|(stated|requested|assigned|original|user'?s?) (task|request|question))",
 			"\\b(ignore|disregard|forget) (everything|anything|all|whatever) ~ (above|before|previous|prior|earlier|said|told)",
-			"\\b(previous|prior|earlier|preceding|above|original|existing|old|every|all) ~ (instruction|rule|directive|constraint|restriction|context|guideline)s? ~ (obsolete|cancell?ed|revoked|void|superseded|overridden|suspended|lifted|disabled|no longer)",
+			"\\b(previous|prior|earlier|preceding|above|original|existing|old|every|all) ~ (instruction|directive|constraint|restriction|context)s? ~ (obsolete|cancell?ed|revoked|void|superseded|overridden|suspended|lifted|disabled|no longer)",
 			"\\b(replaces|supersedes|overrides|outranks|outrank|takes precedence over|has highest priority|have highest priority) ~ (instruction|rule|directive|prompt|other)",
-			"\\b(new|replacement|updated) (instruction|directive)s?( set)? (follow|incoming|below|:)",
+			"\\b(new|replacement) (instruction|directive)s?( set)? (follow|incoming|:)",
 			"\\b(obey|comply with) ~ (next|following|new|replacement|embedded) (instruction|directive|command)",
-			"\\b(suppress|disable|bypass|skip|avoid|omit|without|no) ~ (refusals?|refusal behavio(u)?r|safety (disclaimers?|framing|filter(ing)?|polic(y|ies))|disclaimers?|caveats)\\b",
-			"\\bdo not (refuse|hedge|warn|acknowledge (that|this|it)|mention (safety|restrictions|polic))",
+			"\\b(suppress|disable|bypass|skip|avoid|omit|without|no) ~ (refusals?|refusal behavio(u)?r|safety (disclaimers?|framing|filter(ing)?|polic(y|ies)|warnings?|caveats))\\b",
+			"\\bdo not (refuse|acknowledge (that|this|it)|mention (safety|restrictions|polic))",
 			"\\b(you may not|never|do not) (say|state|admit) (that )?you (cannot|can't|are unable)",
 			"\\b(polic(y|ies)|restrictions|safeguards|filters|guardrails|safety rules) ~ (are|is) (now )?(suspended|lifted|disabled|waived|off)\\b",
 			"\\bunrestricted (response )?mode\\b",
@@ -45,13 +52,14 @@
 			"\\brefusal (behaviou?r|templates?|pathways?|language|responses?|mode)\\b",
 			"\\b(over|than) (the )?(assistant'?s?|default|standard|safety) ~ (rules|safeguards|filtering|guidelines)\\b",
 			"\\binstructions? ~ (has|have|takes?|gets?) (the )?(highest|top|absolute) priority\\b",
-			"\\b(instructions?|rules|directives?) (above|before|so far) (are|is) ~ (obsolete|cancell?ed|revoked|void|superseded|invalid|no longer)"
+			"\\b(instructions?|rules|directives?) (above|before|so far) (are|is) ~ (obsolete|cancell?ed|revoked|void|superseded|invalid|no longer)",
+			"\\b(do not|don't|never|stop|refrain from) (follow|obey|apply)(ing)? ~ (previous|prior|earlier|above|original|system|your) (instruction|rule|directive|guideline)"
 		],
 		"exfil": [
-			"\\b(reveal|repeat|print|output|disclose|leak|expose|dump|recite|write out|exfiltrate|surface|encode|send|forward|email|e-mail|upload|post|share)(s|ed|ing)? ~ (system (prompt|message)|(hidden|internal|secret|initial|initiali[sz]ation|startup|original|operating|controlling|confidential|private|privileged|concealed|non-user) ~ (prompts?|instructions?|rules|directives|messages?|configuration|config|text)|api keys?|private keys?|(access|session|auth|bearer|api) tokens?|conversation history|chat history|credentials?|passwords?|secrets?|secret-like)",
+			"(?<!\\b(not|never|don't) )\\b(reveal|repeat|print|output|disclose|leak|expose|dump|recite|write out|exfiltrate|surface|encode|send|forward|email|e-mail|upload|post|share)(s|ed|ing)? ~ (system (prompt|message)|(hidden|internal|secret|initial|initiali[sz]ation|startup|original|operating|controlling|confidential|private|privileged|concealed|non-user) ~ (prompts?|instructions?|rules|directives|messages?|configuration|config|text)|api keys?|private keys?|(access|session|auth|bearer|api) tokens?|conversation history|chat history|credentials?|passwords?|secrets?|secret-like)",
 			"\\b(identify|find|search|scan|audit|collect|gather|recover|query|inspect|show|display|return|list|enumerate|extract)(s|ed|ing)? ~ (system (prompt|message)|(hidden|internal|secret|initial|initiali[sz]ation|startup|original|operating|controlling|confidential|private|privileged|concealed|non-user) ~ (prompts?|instructions?|rules|directives|messages?|configuration|config|text)|api keys?|private keys?|(access|session|auth|bearer|api) tokens?|conversation history|chat history)",
 			"\\b(credentials?|api keys?|passwords?|secrets?|(access|session|auth|bearer) tokens?|system prompt) ~ (reveal|print|output|expose|send|forward|disclose)",
-			"(^|[.!?:;] |\\band )(send|forward|post|upload|email|e-mail|submit|transmit|exfiltrate) [^.:]{0,80}\\bto (https?://|www\\.|[\\w.-]+@[\\w-]+\\.\\w)",
+			"(^|[.!?:;] |\\band )(send|forward|post|upload|email|e-mail|submit|transmit|exfiltrate) ~ (conversation|chat|context|prompt|history|credentials?|passwords?|secrets?|tokens?|keys|data|contents|transcript|everything|summary|notes)\\b[^.:]{0,60}\\bto (https?://|www\\.|[\\w.-]+@[\\w-]+\\.\\w)",
 			"\\b(instructions|prompt|rules) (you were|you are|that) (given|following|launched|configured)",
 			"\\b(what|which) (exact )?instructions (were|are) you\\b",
 			"^(?=.*\\b(context|conversation|prompt|attachments|available to you|you can (find|recover|detect)|before (answering|responding))\\b)(?=.*\\b(reveal|print|output|show|expose|dump|list|enumerate|extract|identify|find|collect|gather|recover|return|pull out|exfiltrate|surface) ~ (sensitive|confidential|private|secret|privileged|internal|hidden)[- ](\\w+ )?(values?|strings?|identifiers|references|fields|notes|metadata|context|paths|files|state|material)\\b|(reveal|print|output|expose|dump|list|enumerate|extract|find|collect|return) ~ (credentials?|passwords?|secrets?|(session|access|api) (tokens?|keys?)))",
@@ -60,15 +68,16 @@
 			"\\b(privileged|confidential|hidden|concealed|internal) (context|instructions?|directives?) ~ (surfaced|revealed|disclosed|exposed)\\b"
 		],
 		"role": [
-			"\\byou are now (in|operating in) \\w+ mode\\b|\\byou are now (an?|the|my) (\\w+ )?(ai|assistant|model|bot|chatbot|agent|persona|character|dan|system)\\b|\\byou are no longer (bound|restricted|limited|an? ai|an? assistant)\\b",
+			"\\byou are now (in|operating in) \\w+ mode\\b|\\byou are now (an?|the|my) (\\w+ )?(ai|assistant|model|bot|chatbot|agent|persona|character|dan|system)\\b|\\byou are no longer (bound|restricted|limited|an? ai|an? assistant)\\b|\\b(from now on|henceforth),? you (are|will be|must be)\\b",
 			"\\b(act|behave|respond|answer) as (if you were |though you were )?(an? |the )?(unrestricted|unfiltered|jailbroken|different|new|evil|developer|admin|system)\\b",
 			"\\bpretend (to be|you are|that you)\\b",
-			"\\b(developer|god|jailbreak|unrestricted|unfiltered|debug|admin) mode\\b",
+			"\\b(god|jailbreak|unrestricted|unfiltered|dan) mode\\b",
 			"\\bsystem prompt\\b",
 			"<\\|?(system|im_start|im_end)\\|?>|\\[/?(inst|system)\\]",
-			"^(system|assistant) ?:",
+			"^(system|assistant) ?: ?(you |ignore|disregard|forget|new instructions)",
 			"\\b(govern(ing|s)?|control(s|ling)?|defines?|determines?) (your|how you) (behaviou?r|responses?|answers?|reply)\\b",
-			"\\binstruction hierarchy\\b"
+			"\\binstruction hierarchy\\b",
+			"\\b(adopt|assume|take on) (the )?(persona|identity|character) of\\b"
 		],
 		"verdict": [
 			"\\b(recommend|shortlist|hire|approve|accept|advance|select|rank) (this|the) (candidate|applicant|application|resume|cv|paper|submission|proposal|vendor|bid)\\b",
@@ -79,12 +88,12 @@
 			"\\bhire me\\b"
 		],
 		"addresses-ai": [
-			"\\b(dear|hey|hello|attention|note to|instructions? (for|to)|message (for|to)) (the )?(ai|a\\.i\\.|assistant|llm|chatbot|language model|ai model|bot|agent)s?\\b",
+			"\\b(dear|hey|hello|attention|note to|instructions? (for|to)|message (for|to)) (the )?(ai|a\\.i\\.|assistant|llm|chatbot|language model|ai model|bot|agent|model)s?\\b",
 			"\\bif you are (an? )?(ai|a\\.i\\.|assistant|llm|chatbot|language model|ai model|bot|agent|automated)\\b",
 			"\\b(ai|llm|assistant|language model|chatbot|ai model)s? (reading|processing|parsing|reviewing|summari[sz]ing|screening|evaluating) this\\b",
 			"\\b(the|this) (assistant|ai|llm|language model|chatbot) (must|should|shall|will|is to)\\b",
 			"\\b(in|for) your (summary|output)\\b",
-			"\\b(before|instead of|prior to) (answering|responding|replying|(completing|doing) the (user'?s?|requested|assigned) (task|request))\\b|\\b(when|while) summari[sz]ing\\b",
+			"\\b(before|instead of|prior to) (answering|responding|replying)( to the user| anything( else)?)? ?([,.!?;]|$)|\\b(before|instead of|prior to) (completing|doing) the (user'?s?|requested|assigned) (task|request)\\b|\\b(when|while) summari[sz]ing this (document|file|page|text|resume|cv|paper)\\b",
 			"^(?=.*\\b(hidden|embedded|concealed|invisible|secret|override)[- ](command |operational |workflow )?(text|instructions?|directives?|notes?|language)\\b)(?=.*\\b(summary|takeaway|headline|conclusion|central point|main intent|dominant|most important|emphasi[sz]e|foreground|highlight|prioriti[sz]e)\\b)",
 			"\\byour (real|actual|true|new) (task|job|goal|objective|instruction)s?\\b",
 			"\\binstead of (answering|summari[sz]ing|responding|completing|the requested)",
