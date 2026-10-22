@@ -1,6 +1,7 @@
 // Set M: model exposure. Each cell is one subscription-CLI call on one Split-View file, either the
 // original PDF (raw) or Plainview's Markdown (plainview), in its own empty directory. Opt-in, never in CI.
-//   node bench/models.ts run <name> <A|B> <raw|plainview>   sequential, resumable; names from clis.json
+//   node bench/models.ts run <name> <A|B> <raw|plainview[-framed|-describe]>   sequential, resumable
+//   (a -framed or -describe cell whose Markdown equals the plainview cell's reuses that answer)
 //   node bench/models.ts score                                             table and per-cell verdicts
 // Answers stay in PLAINVIEW_BENCH_CACHE/models; nothing here is committed or published.
 import assert from "node:assert/strict";
@@ -8,6 +9,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { convert } from "../src/index.ts";
+import type { ConvertOptions } from "../src/types.ts";
 import { data, SPLITVIEW } from "./corpus.ts";
 
 interface Model {
@@ -96,18 +98,34 @@ function parse(
 
 async function run(name: string, set: string, arm: string): Promise<void> {
 	const model = MODELS[name];
-	if (!model || (model.arms && !model.arms.includes(arm))) throw new Error(`no ${name} ${arm} arm`);
+	const [base = "", mode] = arm.split("-") as [string, ConvertOptions["hidden"]];
+	if (!model || (model.arms && !model.arms.includes(base)))
+		throw new Error(`no ${name} ${arm} arm`);
 	for (const { item, pdf, prompt } of cells(set)) {
 		const cell = dir(set, name, arm, item.gap);
 		if (existsSync(join(cell, "answer.json"))) continue;
 		mkdirSync(cell, { recursive: true });
 		const bytes = readFileSync(pdf);
 		let doc = "document.pdf";
-		if (arm === "plainview") {
+		if (base === "plainview") {
 			doc = "document.md";
 			try {
-				const { markdown } = await convert(bytes, { name: item.file, path: pdf });
+				const { markdown } = await convert(bytes, {
+					name: item.file,
+					path: pdf,
+					hidden: mode ?? "text",
+				});
 				writeFileSync(join(cell, doc), markdown);
+				const text = dir(set, name, base, item.gap);
+				if (
+					mode &&
+					existsSync(join(text, "answer.json")) &&
+					readFileSync(join(text, doc), "utf8") === markdown
+				) {
+					const reused = JSON.parse(readFileSync(join(text, "answer.json"), "utf8"));
+					writeFileSync(join(cell, "answer.json"), JSON.stringify({ ...reused, reused: base }));
+					continue;
+				}
 			} catch (e) {
 				// Nothing reaches the model when Plainview fails closed; recorded as such, not called.
 				writeFileSync(
@@ -205,19 +223,31 @@ function selfCheck(): void {
 function score(): void {
 	selfCheck();
 	const rows = [
-		"| set | model | arm | as content | flagged in answer | not exposed | no answer | content gaps | flagged gaps |",
-		"| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+		"| set | model | arm | as content | flagged in answer | not exposed | no answer | says hidden | content gaps | flagged gaps |",
+		"| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	];
 	for (const set of ["A", "B"])
 		for (const [name, model] of Object.entries(MODELS))
-			for (const arm of ["raw", "plainview"]) {
+			for (const arm of ["raw", "plainview", "plainview-framed", "plainview-describe"]) {
 				if (!existsSync(dir(set, name, arm))) continue;
 				const by: Record<string, string[]> = { content: [], flagged: [], clean: [], none: [] };
+				// Of the answered cells whose Markdown has a hidden block, the answers that say so (a flag word).
+				let says = 0;
+				let blocks = 0;
 				for (const { item } of cells(set)) {
 					const f = dir(set, name, arm, item.gap, "answer.json");
 					const a = existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : { status: "missing" };
 					const v = verdict(set, item, a, model.format);
 					by[v]?.push(item.gap);
+					const md = dir(set, name, arm, item.gap, "document.md");
+					if (
+						v !== "none" &&
+						existsSync(md) &&
+						readFileSync(md, "utf8").includes("[Hidden in the original]")
+					) {
+						blocks++;
+						if (M.flagWords.some((w) => a.answer?.toLowerCase().includes(w))) says++;
+					}
 					if (process.argv[3] === "--verbose" && a.status === "ok")
 						console.log(
 							`\n## ${set} ${name} ${arm} ${item.gap} ${v} [${(a.tools ?? []).join("; ")}]\n${a.answer}`,
@@ -225,7 +255,7 @@ function score(): void {
 				}
 				const n = (k: string) => by[k]?.length ?? 0;
 				rows.push(
-					`| ${set} | ${name} | ${arm} | ${n("content")} | ${n("flagged")} | ${n("clean")} | ${n("none")} | ${by.content?.join(" ")} | ${by.flagged?.join(" ")} |`,
+					`| ${set} | ${name} | ${arm} | ${n("content")} | ${n("flagged")} | ${n("clean")} | ${n("none")} | ${says} of ${blocks} | ${by.content?.join(" ")} | ${by.flagged?.join(" ")} |`,
 				);
 			}
 	console.log(rows.join("\n"));

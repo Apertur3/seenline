@@ -2,13 +2,14 @@
 //   npm run bench                    manifest, ours, report: no network, no Python
 //   npm run bench -- prepare         download the pinned corpora (the only networked step)
 //   sh bench/run-adapters.sh <cache> run the competitor adapters in isolated uv environments
+//   npm run bench -- modes           sets B and C under each --hidden mode, printed (into plainview-<mode>)
 //   npm run bench -- speed|anchors   sets F and D into the cache (speed packs and installs; --prefer-offline)
 //   npm run bench -- provider-tokens optional provider token counts (key read from the Keychain)
 // PLAINVIEW_BENCH_CACHE must be an absolute scratch directory outside the repository.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { corpus } from "./corpus.ts";
-import { ours } from "./ours.ts";
+import { modes, ours } from "./ours.ts";
 import { prepare } from "./prepare.ts";
 import { markdown, rows, tsv } from "./report.ts";
 
@@ -49,8 +50,9 @@ else if (command === "all") {
 	report();
 } else if (command === "manifest") manifest();
 else if (command === "ours") await ours(cache, corpus(cache));
+else if (command === "modes") process.stdout.write(await modes(cache, corpus(cache)));
 else if (command === "report") report();
 else
 	throw new Error(
-		"usage: run.ts [prepare | manifest | ours | report | speed | anchors | provider-tokens]",
+		"usage: run.ts [prepare | manifest | ours | modes | report | speed | anchors | provider-tokens]",
 	);

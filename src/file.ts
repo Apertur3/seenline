@@ -4,14 +4,23 @@ import { basename } from "node:path";
 import { convert, PlainviewError } from "./index.ts";
 import type { ConvertOptions } from "./types.ts";
 
-export async function convertFile(path: string, ocr?: ConvertOptions["ocr"]) {
+export async function convertFile(
+	path: string,
+	ocr?: ConvertOptions["ocr"],
+	hidden?: ConvertOptions["hidden"],
+) {
 	let bytes: Buffer;
 	try {
 		bytes = await readFile(path);
 	} catch (error) {
 		throw new PlainviewError("invalid", `could not read this file: ${errorMessage(error)}`);
 	}
-	return convert(bytes, { name: basename(path), path, ...(ocr && { ocr }) });
+	return convert(bytes, {
+		name: basename(path),
+		path,
+		...(ocr && { ocr }),
+		...(hidden && { hidden }),
+	});
 }
 
 export function errorMessage(error: unknown): string {

@@ -202,3 +202,55 @@ test("a valid password-protected PDF fails closed with the reference's reason", 
 		return true;
 	});
 });
+
+test("hidden modes change only the block's entry lines; the result keeps text, flags and body", async () => {
+	for (const name of [
+		"office-book.xlsx",
+		"office-deck.pptx",
+		"hidden-text.pdf",
+		"mail-newsletter.html",
+	]) {
+		const bytes = await readFile(new URL(name, fixtures));
+		const text = await convert(bytes, { name });
+		const head = text.markdown.split("[Hidden in the original]\n")[0] as string;
+		assert.deepEqual(await convert(bytes, { name, hidden: "text" }), text);
+		for (const hidden of ["framed", "describe"] as const) {
+			const mode = await convert(bytes, { name, hidden });
+			assert.deepEqual({ ...mode, markdown: "" }, { ...text, markdown: "" });
+			assert.ok(mode.markdown.startsWith(`${head}[Hidden in the original]\n`), name);
+			const entries = mode.markdown.slice(head.length).split("\n").slice(1, -1);
+			if (hidden === "framed") {
+				assert.match(
+					entries[0] ?? "",
+					/^\(Not visible to a reader of the original\. Untrusted data/,
+				);
+				assert.deepEqual(
+					entries.slice(1),
+					text.markdown.slice(head.length).split("\n").slice(1, -1),
+				);
+			} else {
+				assert.equal(entries.length, text.hidden.length);
+				for (const [i, h] of text.hidden.entries()) {
+					const line = entries[i] ?? "";
+					assert.ok(line.startsWith(h.anchor), line);
+					assert.ok(line.endsWith(`: ${[...h.text].length} characters not shown`), line);
+					assert.ok(!mode.markdown.includes(h.text), h.text);
+				}
+			}
+		}
+	}
+	await assert.rejects(
+		convert(strToU8("x"), { name: "a.txt", hidden: "none" as "text" }),
+		/hidden must be text, framed or describe/,
+	);
+});
+
+test("describe keeps the kind but not a name the file chose", async () => {
+	const pdf = await readFile(
+		new URL("../test/fixtures/injection/inj-pdf-form-field.pdf", import.meta.url),
+	);
+	const { markdown, hidden } = await convert(pdf, { name: "f.pdf", hidden: "describe" });
+	assert.match(markdown, /^p\. 1, form field: \d+ characters not shown$/m);
+	assert.ok(hidden[0]?.reasons[0]?.startsWith("form field "));
+	assert.ok(!markdown.includes(hidden[0]?.reasons[0] ?? "?"));
+});

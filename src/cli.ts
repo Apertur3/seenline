@@ -4,6 +4,8 @@ import { basename, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { convertFile, errorMessage, formatError } from "./file.ts";
 import { tesseract } from "./ocr.ts";
+import { HIDDEN_MODES } from "./parse-hidden.ts";
+import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
 const HELP = `Usage: plainview <file> [more files] [options]
@@ -14,6 +16,8 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
   --json             Write one JSON object per file to stdout
   --out <dir>        Write <name>.md files instead of stdout
   --fail-on-hidden   Exit 3 if any successful file has hidden content
+  --hidden <mode>    How the hidden block shows hidden text: text (default), framed (after
+                     an untrusted-data line) or describe (kind and size only; --json keeps the text)
   --ocr              Read scans and images with a local tesseract (PDF pages also need
                      pdftoppm from poppler); off by default, nothing leaves the machine
   --ocr-lang <lang>  Tesseract languages for --ocr, for example deu or eng+nld (default eng)
@@ -34,6 +38,7 @@ function parse(args: string[]) {
 			json: { type: "boolean" },
 			out: { type: "string" },
 			"fail-on-hidden": { type: "boolean" },
+			hidden: { type: "string" },
 			...OCR_OPTIONS,
 			help: { type: "boolean" },
 			version: { type: "boolean" },
@@ -43,6 +48,9 @@ function parse(args: string[]) {
 	if (positionals.length === 0) throw new Error("provide at least one file");
 	if (values.json && values.out !== undefined) throw new Error("use either --json or --out");
 	if (values.out === "") throw new Error("--out requires a nonempty directory");
+	const hidden = values.hidden as ConvertOptions["hidden"];
+	if (hidden !== undefined && !HIDDEN_MODES.includes(hidden))
+		throw new Error("--hidden takes text, framed or describe");
 	if (positionals.length > 1 && !values.json && values.out === undefined)
 		throw new Error("multiple files require --json or --out");
 	if (values.out !== undefined) {
@@ -50,7 +58,7 @@ function parse(args: string[]) {
 		if (new Set(outputs).size !== outputs.length)
 			throw new Error("input filenames would write the same output file");
 	}
-	return { values, files: positionals, ocr: ocrFrom(values) };
+	return { values, files: positionals, ocr: ocrFrom(values), hidden };
 }
 
 const OCR_OPTIONS = { ocr: { type: "boolean" }, "ocr-lang": { type: "string" } } as const;
@@ -85,7 +93,7 @@ async function run(args: string[]): Promise<number> {
 	} catch (error) {
 		return usage(errorMessage(error));
 	}
-	const { values, files, ocr } = options;
+	const { values, files, ocr, hidden: mode } = options;
 	if (values.help || values.version) {
 		process.stdout.write(values.help ? HELP : `${version}\n`);
 		return 0;
@@ -94,7 +102,7 @@ async function run(args: string[]): Promise<number> {
 	let hidden = false;
 	for (const file of files) {
 		try {
-			const { markdown, pages, hidden: entries, flags } = await convertFile(file, ocr);
+			const { markdown, pages, hidden: entries, flags } = await convertFile(file, ocr, mode);
 			if (values.out !== undefined) {
 				await mkdir(values.out, { recursive: true });
 				await writeFile(join(values.out, outputName(file)), markdown);

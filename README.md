@@ -60,6 +60,7 @@ npx plainview report.pdf
 npx plainview --json report.pdf workbook.xlsx
 npx plainview --out markdown report.pdf workbook.xlsx
 npx plainview --fail-on-hidden report.pdf
+npx plainview --hidden describe report.pdf
 npx plainview --ocr scan.pdf
 npx plainview --ocr --ocr-lang deu+eng brief.png
 npx plainview --help
@@ -67,6 +68,8 @@ npx plainview --version
 ```
 
 Plain stdout is exactly one file's Markdown. Multiple files require `--json` (one `{markdown, pages, hidden, flags}` JSON object per successful file, in input order) or `--out` (one `<name>.md` file per input). `--json` and `--out` are mutually exclusive. Output names must be distinct. A failed file produces only `<file>: <code>: <message>` on stderr; batches continue with the other files.
+
+`--hidden` sets how the `[Hidden in the original]` block shows hidden text: `text` (default, the text itself), `framed` (the same, after a line that calls it untrusted data) or `describe` (each entry keeps its location and kind and gives a character count instead of the text). In every mode the `hidden` list of `--json`, the library result and the MCP tool keeps the full text; the MCP tool takes the same `hidden` argument.
 
 Exit codes: `0` success, `1` file failure, `2` usage error, `3` hidden content when `--fail-on-hidden` is set. File failures take precedence over `3`. Hidden-block entries or scanner flags trigger `3`; successful output is still emitted. Use `--` before filenames beginning with a dash. No configuration files or environment variables are needed.
 

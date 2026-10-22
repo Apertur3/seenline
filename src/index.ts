@@ -4,7 +4,7 @@ import { extname, join } from "node:path";
 import { documentToText } from "./documents.ts";
 import { NotRead, PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK, scan } from "./hidden.ts";
-import { parseHidden } from "./parse-hidden.ts";
+import { HIDDEN_MODES, parseHidden, showHidden } from "./parse-hidden.ts";
 import type { ConvertOptions, ConvertResult, OcrResult } from "./types.ts";
 
 export { PlainviewError } from "./error.ts";
@@ -16,6 +16,8 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		throw new PlainviewError("invalid", "could not read this file: empty input");
 	if (opts.maxRows !== undefined && (!Number.isSafeInteger(opts.maxRows) || opts.maxRows < 1))
 		throw new PlainviewError("invalid", "maxRows must be a positive safe integer");
+	if (opts.hidden !== undefined && !HIDDEN_MODES.includes(opts.hidden))
+		throw new PlainviewError("invalid", "hidden must be text, framed or describe");
 	let scratch: string | undefined;
 	const ocr = async (pages?: number[]): Promise<OcrResult> => {
 		if (!opts.ocr)
@@ -44,8 +46,14 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		const result = await documentToText(input, opts, ocr);
 		const lines = result.markdown.replace(/\n$/, "").split("\n");
 		const block = lines.indexOf(HIDDEN_BLOCK);
+		const head = lines.slice(0, block + 1);
+		const end = result.markdown.endsWith("\n") ? "\n" : "";
 		return {
 			...result,
+			markdown:
+				block < 0 || (opts.hidden ?? "text") === "text"
+					? result.markdown
+					: [...head, ...showHidden(lines.slice(block + 1), opts.hidden)].join("\n") + end,
 			hidden: block < 0 ? [] : parseHidden(lines.slice(block + 1)),
 			flags: scan(lines).flags,
 		};

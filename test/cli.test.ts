@@ -160,6 +160,7 @@ test("CLI usage errors exit 2 before conversion and never write stdout", () => {
 		["--json", "--out", "output", fixture("report.pdf")],
 		["--out", "output", "report.pdf", "another/report.docx"],
 		["mcp", "--json"],
+		["--hidden", "none", fixture("report.pdf")],
 	]) {
 		const result = run(...args);
 		assert.equal(result.status, 2, `${args}: ${result.stderr}`);
@@ -182,4 +183,19 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	assert.equal(pkg.exports["./package.json"], "./package.json");
 	assert.equal(pkg.private, true);
 	assert.ok((await readFile(cli, "utf8")).startsWith("#!/usr/bin/env node\n"));
+});
+
+test("CLI --hidden describe keeps hidden text out of the Markdown and in --json's hidden list", async () => {
+	const name = "office-book.xlsx";
+	const result = run("--json", "--hidden", "describe", fixture(name));
+	assert.equal(result.status, 0, result.stderr);
+	const out = JSON.parse(result.stdout);
+	const text = await convert(await readFile(fixture(name)), { name });
+	assert.deepEqual(out.hidden, text.hidden);
+	assert.ok(out.hidden.length > 0);
+	for (const { text: payload } of out.hidden) assert.ok(!out.markdown.includes(payload));
+	assert.match(
+		out.markdown,
+		/\[Sheet: Budget\], \[row 3\], A3, hidden row: \d+ characters not shown/,
+	);
 });
