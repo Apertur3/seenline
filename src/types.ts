@@ -7,7 +7,8 @@ export interface OcrResult {
 export interface ConvertOptions {
 	name: string;
 	path?: string;
-	ocr?: (path: string) => Promise<OcrResult>;
+	/** For a PDF, `pages` lists the 1-based pages to read; return text at index page - 1. */
+	ocr?: (path: string, pages?: number[]) => Promise<OcrResult>;
 	maxRows?: number;
 }
 

@@ -32,4 +32,4 @@ All copied files are synthetic. `node scripts/office-fixtures.ts` and `node scri
 
 `python3 scripts/make-office.py` recreates the other Office binaries and QR image used by the document injection cases. It requires already installed `python-docx`, `python-pptx`, `openpyxl` and `qrcode` with Pillow. No Python tools are needed to run tests, build or regenerate goldens. The two legacy Office binaries are copied synthetic fixtures, exercised through system `textutil` on macOS.
 
-OCR uses deterministic stub output in this suite. Recognition quality, layout benchmarking and competitor comparisons belong to a later phase.
+OCR uses deterministic stub output in this suite. CLI and MCP `--ocr` tests put fake `tesseract` and `pdftoppm` scripts on PATH; one test runs the real programs and is skipped when they are not installed. Recognition quality, layout benchmarking and competitor comparisons belong to a later phase.

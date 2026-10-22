@@ -10,14 +10,14 @@ import type { ConvertOptions, ConvertResult, OcrResult } from "./types.ts";
 export { PlainviewError } from "./error.ts";
 export type { ConvertOptions, ConvertResult, HiddenText, OcrResult } from "./types.ts";
 
-/** Convert locally; optional OCR receives the supplied path or a private temporary copy. */
+/** Convert locally; optional OCR receives the supplied path or a private temporary copy, and for a PDF the page numbers to read. */
 export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<ConvertResult> {
 	if (input.length === 0)
 		throw new PlainviewError("invalid", "could not read this file: empty input");
 	if (opts.maxRows !== undefined && (!Number.isSafeInteger(opts.maxRows) || opts.maxRows < 1))
 		throw new PlainviewError("invalid", "maxRows must be a positive safe integer");
 	let scratch: string | undefined;
-	const ocr = async (): Promise<OcrResult> => {
+	const ocr = async (pages?: number[]): Promise<OcrResult> => {
 		if (!opts.ocr)
 			throw new PlainviewError(
 				"unavailable",
@@ -30,7 +30,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 			await writeFile(path, input, { flag: "wx", mode: 0o600 });
 		}
 		try {
-			const read = await opts.ocr(path);
+			const read = await opts.ocr(path, pages);
 			if (
 				!strings(read.pages) ||
 				!strings(read.extras) ||
@@ -38,7 +38,8 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 			)
 				throw new Error("shape");
 			return read;
-		} catch {
+		} catch (error) {
+			if (error instanceof PlainviewError) throw error;
 			throw new PlainviewError("invalid", "could not read this file: text recognition failed");
 		}
 	};

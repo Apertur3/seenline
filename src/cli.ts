@@ -3,16 +3,20 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { convertFile, errorMessage, formatError } from "./file.ts";
+import { tesseract } from "./ocr.ts";
 import { version } from "./version.ts";
 
 const HELP = `Usage: plainview <file> [more files] [options]
-       plainview mcp
+       plainview mcp [--ocr] [--ocr-lang <lang>]
 
-Convert local documents to Markdown. Scans require OCR and fail closed.
+Convert local documents to Markdown. Scans and images fail closed unless --ocr is set.
 
   --json             Write one JSON object per file to stdout
   --out <dir>        Write <name>.md files instead of stdout
   --fail-on-hidden   Exit 3 if any successful file has hidden content
+  --ocr              Read scans and images with a local tesseract (PDF pages also need
+                     pdftoppm from poppler); off by default, nothing leaves the machine
+  --ocr-lang <lang>  Tesseract languages for --ocr, for example deu or eng+nld (default eng)
   --help             Show this help
   --version          Show the package version
 
@@ -30,6 +34,7 @@ function parse(args: string[]) {
 			json: { type: "boolean" },
 			out: { type: "string" },
 			"fail-on-hidden": { type: "boolean" },
+			...OCR_OPTIONS,
 			help: { type: "boolean" },
 			version: { type: "boolean" },
 		},
@@ -45,7 +50,17 @@ function parse(args: string[]) {
 		if (new Set(outputs).size !== outputs.length)
 			throw new Error("input filenames would write the same output file");
 	}
-	return { values, files: positionals };
+	return { values, files: positionals, ocr: ocrFrom(values) };
+}
+
+const OCR_OPTIONS = { ocr: { type: "boolean" }, "ocr-lang": { type: "string" } } as const;
+
+function ocrFrom(values: { ocr?: boolean; "ocr-lang"?: string }) {
+	const lang = values["ocr-lang"];
+	if (lang !== undefined && !values.ocr) throw new Error("--ocr-lang requires --ocr");
+	if (lang !== undefined && !/^[A-Za-z0-9_]+(\+[A-Za-z0-9_]+)*$/.test(lang))
+		throw new Error("--ocr-lang takes tesseract language codes such as eng or eng+deu");
+	return values.ocr ? tesseract(lang ?? "eng") : undefined;
 }
 
 function outputName(file: string): string {
@@ -54,9 +69,14 @@ function outputName(file: string): string {
 
 async function run(args: string[]): Promise<number> {
 	if (args[0] === "mcp") {
-		if (args.length !== 1) return usage("mcp takes no options or filenames");
+		let ocr: ReturnType<typeof ocrFrom>;
+		try {
+			ocr = ocrFrom(parseArgs({ args: args.slice(1), options: OCR_OPTIONS }).values);
+		} catch (error) {
+			return usage(errorMessage(error));
+		}
 		const { startMcp } = await import("./mcp.ts");
-		await startMcp();
+		await startMcp(ocr);
 		return 0;
 	}
 	let options: ReturnType<typeof parse>;
@@ -65,7 +85,7 @@ async function run(args: string[]): Promise<number> {
 	} catch (error) {
 		return usage(errorMessage(error));
 	}
-	const { values, files } = options;
+	const { values, files, ocr } = options;
 	if (values.help || values.version) {
 		process.stdout.write(values.help ? HELP : `${version}\n`);
 		return 0;
@@ -74,7 +94,7 @@ async function run(args: string[]): Promise<number> {
 	let hidden = false;
 	for (const file of files) {
 		try {
-			const { markdown, pages, hidden: entries, flags } = await convertFile(file);
+			const { markdown, pages, hidden: entries, flags } = await convertFile(file, ocr);
 			if (values.out !== undefined) {
 				await mkdir(values.out, { recursive: true });
 				await writeFile(join(values.out, outputName(file)), markdown);

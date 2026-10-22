@@ -1,0 +1,184 @@
+// CLI and MCP OCR through fake tesseract and pdftoppm scripts on PATH; one real run when tesseract is installed.
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { after, before, test } from "node:test";
+import { fileURLToPath } from "node:url";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { tesseract } from "../src/ocr.ts";
+
+const cli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
+const fixture = (name: string) => fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url));
+const FAKE = {
+	// Prints how many bytes came in on stdin and its own arguments, so a test sees the page and that no path was passed.
+	tesseract: `case "$FAKE" in
+fail) exit 3 ;;
+hang) exec /bin/sleep 30 ;;
+flood) exec /bin/dd if=/dev/zero bs=1048576 count=40 2>/dev/null ;;
+esac
+n=$(/bin/cat | /usr/bin/wc -c)
+echo "Recognised $((n)) bytes: $*"`,
+	// Page N becomes N bytes of raster.
+	pdftoppm: `/usr/bin/head -c "$6" /dev/zero`,
+};
+let scratch = "";
+let both = "";
+let none = "";
+let onlyTesseract = "";
+
+before(async () => {
+	scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-test-"));
+	both = join(scratch, "both");
+	none = join(scratch, "none");
+	onlyTesseract = join(scratch, "tesseract");
+	for (const dir of [both, none, onlyTesseract]) await mkdir(dir);
+	for (const [dir, names] of [
+		[both, ["tesseract", "pdftoppm"]],
+		[onlyTesseract, ["tesseract"]],
+	] as const)
+		for (const name of names) {
+			await writeFile(join(dir, name), `#!/bin/sh\n${FAKE[name]}\n`);
+			await chmod(join(dir, name), 0o755);
+		}
+});
+after(() => rm(scratch, { recursive: true, force: true }));
+
+function run(path: string, args: string[], fake = "") {
+	const result = spawnSync(process.execPath, [cli, ...args], {
+		encoding: "utf8",
+		timeout: 20_000,
+		env: { PATH: path, FAKE: fake },
+	});
+	assert.ifError(result.error);
+	return result;
+}
+
+test("--ocr reads an image through tesseract on stdin, with the language flag", async () => {
+	const size = (await readFile(fixture("documents/screenshot.png"))).length;
+	const result = run(both, ["--ocr", fixture("documents/screenshot.png")]);
+	assert.equal(result.status, 0, result.stderr);
+	assert.equal(result.stdout, `Recognised ${size} bytes: stdin stdout -l eng\n`);
+	const deu = run(both, ["--ocr", "--ocr-lang", "deu+eng", fixture("documents/screenshot.png")]);
+	assert.match(deu.stdout, /stdin stdout -l deu\+eng\n$/);
+});
+
+test("--ocr reads only the weak PDF pages, each under its own anchor", () => {
+	const scan = run(both, ["--ocr", fixture("documents/scan.pdf")]);
+	assert.equal(scan.status, 0, scan.stderr);
+	assert.equal(scan.stdout, "[p. 1]\nRecognised 1 bytes: stdin stdout -l eng\n");
+	const weak = run(both, ["--ocr", fixture("pdf-hiding/weak-page.pdf")]);
+	assert.equal(weak.status, 0, weak.stderr);
+	assert.match(
+		weak.stdout,
+		/^\[p\. 1\]\n[^\n]+\n\[p\. 2\]\nRecognised 2 bytes: [^\n]+\n\[p\. 3\]\n/,
+	);
+});
+
+test("--ocr without tesseract or pdftoppm fails closed with what to install", () => {
+	for (const [path, file, hint] of [
+		[none, "documents/screenshot.png", "needs tesseract (install it, for example brew install"],
+		[onlyTesseract, "documents/scan.pdf", "needs pdftoppm (install poppler, for example brew"],
+	] as const) {
+		const result = run(path, ["--ocr", fixture(file)]);
+		assert.equal(result.status, 1);
+		assert.equal(result.stdout, "");
+		const message = result.stderr.slice(fixture(file).length);
+		assert.ok(message.startsWith(": unavailable: could not read this file: "), message);
+		assert.ok(message.includes(hint), message);
+		assert.doesNotMatch(message, /\/|\n\s+at /);
+	}
+	// A PDF with a text layer on other pages is still read; the unread page says so.
+	const weak = run(none, ["--ocr", fixture("pdf-hiding/weak-page.pdf")]);
+	assert.equal(weak.status, 0, weak.stderr);
+	assert.match(weak.stdout, /\[p\. 2\]\n\(no readable text layer/);
+});
+
+test("--ocr fails closed on a recogniser error, output over the cap, and a file that is no image", async () => {
+	for (const [fake, message] of [
+		["fail", "invalid: could not read this file: text recognition failed (tesseract exited"],
+		["flood", "invalid: could not read this file: text recognition output is over the size limit"],
+	]) {
+		const result = run(both, ["--ocr", fixture("documents/screenshot.png")], fake);
+		assert.equal(result.status, 1);
+		assert.equal(result.stdout, "");
+		assert.ok(result.stderr.includes(message as string), result.stderr);
+	}
+	// Tesseract reads a non-image as a list of files to open; it must never see one.
+	const list = join(scratch, "list.png");
+	await writeFile(list, `${fixture("documents/whiteboard.jpg")}\n`);
+	const result = run(both, ["--ocr", list]);
+	assert.equal(result.status, 1);
+	assert.equal(result.stdout, "");
+	assert.match(result.stderr, /unavailable: .*reads PNG, JPEG, GIF, BMP and WebP images only/);
+});
+
+test("a hung recogniser is killed at the timeout", async () => {
+	const saved = process.env;
+	process.env = { PATH: both, FAKE: "hang" };
+	try {
+		const started = Date.now();
+		await assert.rejects(tesseract("eng", 300)(fixture("documents/screenshot.png")), {
+			code: "invalid",
+			message: "could not read this file: text recognition timed out (tesseract)",
+		});
+		assert.ok(Date.now() - started < 5_000);
+	} finally {
+		process.env = saved;
+	}
+});
+
+test("OCR flags are opt-in and checked before conversion", () => {
+	for (const args of [
+		["--ocr-lang", "deu", fixture("documents/scan.pdf")],
+		["--ocr", "--ocr-lang", "eng;rm", fixture("documents/scan.pdf")],
+		["--ocr", "--ocr-lang", "-c", fixture("documents/scan.pdf")],
+		["--ocr", "--ocr-lang"],
+		["mcp", "--ocr-lang", "deu"],
+		["mcp", "--ocr", "file.pdf"],
+		["mcp", "--ocr=yes"],
+	]) {
+		const result = run(both, args);
+		assert.equal(result.status, 2, `${args}: ${result.stderr}`);
+		assert.equal(result.stdout, "");
+		assert.match(result.stderr, /usage/);
+	}
+	const off = run(both, [fixture("documents/scan.pdf")]);
+	assert.equal(off.status, 1);
+	assert.match(off.stderr, /unavailable: could not read this file: no text recognition available/);
+});
+
+test("plainview mcp --ocr reads a scan over stdio", async () => {
+	const client = new Client({ name: "ocr-test", version: "1.0.0" });
+	const transport = new StdioClientTransport({
+		command: process.execPath,
+		args: [cli, "mcp", "--ocr", "--ocr-lang", "nld"],
+		env: { PATH: both },
+		stderr: "pipe",
+	});
+	try {
+		await client.connect(transport);
+		const result = await client.callTool({
+			name: "convert_file",
+			arguments: { path: fixture("documents/scan.pdf") },
+		});
+		assert.ok(!result.isError, JSON.stringify(result.content));
+		assert.deepEqual(result.content, [
+			{ type: "text", text: "[p. 1]\nRecognised 1 bytes: stdin stdout -l nld\n" },
+		]);
+	} finally {
+		await client.close();
+	}
+});
+
+const real = ["tesseract", "pdftoppm"].every((cmd) => !spawnSync(cmd, ["-v"]).error);
+test("real tesseract reads the scanned invoice", {
+	skip: !real && "tesseract or pdftoppm not on PATH",
+}, () => {
+	const result = run(process.env.PATH ?? "", ["--ocr", fixture("documents/scan.pdf")]);
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, /^\[p\. 1\]\nInvoice 2026-0457\n/);
+	assert.match(result.stdout, /Total due: EUR 4,015\.00/);
+});

@@ -20,7 +20,7 @@ const nonEmpty = (text: string) => text.split("\n").filter((l) => l.trim());
 export async function documentToText(
 	bytes: Uint8Array,
 	opts: ConvertOptions,
-	ocr: () => Promise<OcrResult>,
+	ocr: (pages?: number[]) => Promise<OcrResult>,
 ): Promise<DocumentText> {
 	const { name } = opts;
 	if (/\.(html?|eml|msg)$/i.test(name)) return { markdown: convertMail(bytes, name), pages: 1 };
@@ -52,14 +52,14 @@ async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	};
 }
 
-async function fromPdf(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
+async function fromPdf(bytes: Uint8Array, ocr: (pages: number[]) => Promise<OcrResult>) {
 	const { pages, extras } = await readPdf(bytes);
 	const letters = (p: PdfPage) => p.lines.join("").replace(/[^\p{L}\p{N}]/gu, "").length;
 	const weak = pages.map((p) => letters(p) < MIN_TEXT);
 	const all = weak.every(Boolean);
 	// Without recognised text, a weak page keeps its few lines and says it was not read.
 	const read: OcrResult | null = weak.some(Boolean)
-		? await ocr().catch((error) => {
+		? await ocr(pages.filter((_, i) => weak[i]).map((p) => p.number)).catch((error) => {
 				if (all) throw error;
 				return null;
 			})
