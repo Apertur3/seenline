@@ -215,7 +215,7 @@ export const scrub = (text: string): string =>
 
 interface Limits {
 	leaked: { gap: string; reason: string }[];
-	failedClosedByFloor: { gaps: string[]; reason: string }[];
+	flagged: { gaps: string[]; reason: string }[];
 }
 
 /** Known limits of Plainview on Set B, with the reason; the text lives in bench/data/limits.json. */
@@ -225,9 +225,7 @@ function limits(): string {
 		"### Known limits",
 		"",
 		...l.leaked.map((x) => `- ${x.gap}: leaked. ${x.reason}`),
-		...l.failedClosedByFloor.map((x) => `- ${x.gaps.join(", ")}: failed closed. ${x.reason}`),
-		"",
-		"Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.",
+		...l.flagged.map((x) => `- ${x.gaps.join(", ")}: flagged. ${x.reason}`),
 	].join("\n");
 }
 

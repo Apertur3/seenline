@@ -17,9 +17,13 @@ export interface PdfPage {
 	number: number;
 	/** Text a reader of the page sees, one string per line, in reading order (pdf-order.ts). */
 	lines: string[];
-	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, clipped, squeezed, hidden layer; and the stored text of a page whose stored order is not its reading order (reading order). */
+	/** Text a reader does not see, each with the reasons: white, tiny, invisible, off-page, covered, clipped, squeezed, hidden layer, unreadable font; and the stored text of a page whose stored order is not its reading order (reading order). */
 	hidden: { text: string; why: string[] }[];
+	/** The page shows no text (drawn, even if not decodable), or pictures cover at least half of it: a scan when its text is short. */
+	scan: boolean;
 }
+
+const SCAN_PICTURED = 0.5;
 
 const MAX_PAGES = 300;
 
@@ -60,7 +64,9 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 		for (let n = 1; n <= doc.numPages; n++) {
 			const page = await doc.getPage(n);
 			const ops = await page.getOperatorList();
-			pages.push(arrange(n, walk(pdfjs.OPS, ops, page.view as Matrix, visible)));
+			const { items, pictured } = walk(pdfjs.OPS, ops, page.view as Matrix, visible);
+			const shown = items.some((it) => it.why.every((w) => w === "unreadable font"));
+			pages.push({ ...arrange(n, items), scan: !shown || pictured >= SCAN_PICTURED });
 		}
 		return { pages, extras: await extras(doc) };
 	} catch {
@@ -72,7 +78,7 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 
 // Visible runs in reading order (pdf-order.ts), grouped into lines: a new line when the baseline moves or
 // the text jumps back, as at a column change, and a wide gap on a line as " | " (table cells).
-function arrange(number: number, found: Item[]): PdfPage {
+function arrange(number: number, found: Item[]): Omit<PdfPage, "scan"> {
 	const hidden = found
 		.filter((it) => it.why.length > 0)
 		.map((it) => ({ text: it.text.trim(), why: it.why }));

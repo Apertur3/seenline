@@ -17,6 +17,8 @@ export interface Spec {
 	catalog?: string;
 	page?: string;
 	resources?: string;
+	/** More entries for page 1's font dictionary, after /F1. */
+	fonts?: string;
 	/** Objects 6, 7, ...: referenced by the strings above as "6 0 R" and so on. */
 	extra?: Part[];
 	info?: string;
@@ -30,7 +32,7 @@ export function pdf(s: Spec): Buffer {
 	const objs: Part[] = [
 		`<< /Type /Catalog /Pages 2 0 R ${s.catalog ?? ""} >>`,
 		`<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${kids.length} >>`,
-		`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> ${s.resources ?? ""} >> ${s.page ?? ""} >>`,
+		`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R${s.fonts ? ` ${s.fonts}` : ""} >> ${s.resources ?? ""} >> ${s.page ?? ""} >>`,
 		stream("", s.content),
 		"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
 		...(s.extra ?? []),

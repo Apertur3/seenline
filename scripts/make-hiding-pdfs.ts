@@ -127,6 +127,51 @@ const FILES: Record<string, string | Spec> = {
 		[320, 646, "after it in the file,"],
 		[320, 632, "as a reader expects."],
 	])}`,
+	// A composite font with no /ToUnicode and no font program (its descriptor removed, as in Split-View
+	// EG_021): the codes of "REPORT" come out as three CJK characters that say nothing about the glyphs.
+	"font-unmapped.pdf": {
+		content: `${base}BT /F2 24 Tf 72 660 Td (REPORT) Tj ET\n`,
+		fonts: "/F2 6 0 R",
+		extra: [
+			"<< /Type /Font /Subtype /Type0 /BaseFont /Helvetica /Encoding /Identity-H /DescendantFonts [7 0 R] >>",
+			"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /Helvetica /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>",
+		],
+	},
+	// The same font with the /Subtype of the composite font removed (EG_019): pdfjs cannot load it.
+	"font-broken.pdf": {
+		content: `${base}BT /F2 24 Tf 72 660 Td (TESTCID) Tj ET\n`,
+		fonts: "/F2 6 0 R",
+		extra: [
+			"<< /Type /Font /BaseFont /Helvetica /Encoding /Identity-H /DescendantFonts [7 0 R] >>",
+			"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /Helvetica /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor << /Type /FontDescriptor /FontName /Helvetica >> >>",
+		],
+	},
+	// The visible twin: a composite font that is not in the file either, with a standard CMap that maps
+	// every code (Chinese text in the reader's own font, as many CJK files are made).
+	"font-cjk.pdf": {
+		content: `${base}BT /F2 24 Tf 72 660 Td <4E2D6587> Tj ET\n`,
+		fonts: "/F2 6 0 R",
+		extra: [
+			"<< /Type /Font /Subtype /Type0 /BaseFont /STSong-Light /Encoding /UniGB-UCS2-H /DescendantFonts [7 0 R] >>",
+			"<< /Type /Font /Subtype /CIDFontType0 /BaseFont /STSong-Light /CIDSystemInfo << /Registry (Adobe) /Ordering (GB1) /Supplement 4 >> /FontDescriptor << /Type /FontDescriptor /FontName /STSong-Light /Flags 4 /FontBBox [0 -200 1000 900] /ItalicAngle 0 /Ascent 880 /Descent -120 /CapHeight 700 /StemV 80 >> >>",
+		],
+	},
+	// The font of font-unmapped.pdf with a /ToUnicode for its letters; the ideographic space it leaves
+	// unmapped (code 3000, the space itself) draws nothing, so the run stays in the body.
+	"font-mapped.pdf": {
+		content: `${base}BT /F2 24 Tf 72 660 Td <52453000504F> Tj ET\n`,
+		fonts: "/F2 6 0 R",
+		extra: [
+			"<< /Type /Font /Subtype /Type0 /BaseFont /Helvetica /Encoding /Identity-H /DescendantFonts [7 0 R] /ToUnicode 8 0 R >>",
+			"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /Helvetica /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>",
+			stream(
+				"",
+				"/CIDInit /ProcSet findresource begin 12 dict begin begincmap 1 begincodespacerange <0000> <FFFF> endcodespacerange 2 beginbfchar <5245> <00520045> <504F> <0050004F> endbfchar endcmap end end",
+			),
+		],
+	},
+	// A one-line memo: a short text layer and no picture is the page's text, not a scan.
+	"short-page.pdf": T(72, 700, 14, "Approved."),
 	// Properties: placeholders and a one-word author are not listed, a free-text subject is.
 	"properties.pdf": {
 		content: base,
@@ -135,6 +180,10 @@ const FILES: Record<string, string | Spec> = {
 };
 for (const [name, spec] of Object.entries(FILES))
 	writeFileSync(join(OUT, name), pdf(typeof spec === "string" ? { content: spec } : spec));
-// Two text pages around one that holds only its page number, as a paper's figure pages do.
-const more = [T(300, 40, 10, "2 of 3"), T(72, 700, 14, "Signed off on 3 March 2027.")];
+// Two text pages around one that is a picture with only its page number, as a scanned page is.
+const picture = "q 500 0 0 600 56 120 cm BI /W 1 /H 1 /CS /G /BPC 8 ID \x80 EI Q\n";
+const more = [
+	`${picture}${T(300, 40, 10, "2 of 3")}`,
+	T(72, 700, 14, "Signed off on 3 March 2027."),
+];
 writeFileSync(join(OUT, "weak-page.pdf"), pdf({ content: base, more }));
