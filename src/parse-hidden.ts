@@ -123,6 +123,12 @@ const REASONS = new Set(
 		",",
 	),
 );
+// parseHidden drops " text" from these on a PDF page; describe puts it back so the kind reads as in text mode.
+const PDF_TEXT = new Set(
+	"white,tiny,invisible,off-page,covered,transparent,squeezed,unreadable font,clipped,reading order".split(
+		",",
+	),
+);
 const NOTICE = /^HTML (?:script|style) present \(code omitted\)$/;
 function kind(reasons: string[]): string {
 	const label = reasons.join(" and ");
@@ -152,7 +158,9 @@ export function showHidden(
 		const tag = entry.suspect ? ` [reads like an instruction to an AI: ${entry.suspect}]` : "";
 		if (mode === "framed" || NOTICE.test(line)) return line + tag;
 		const at = entry.anchor ? `${entry.anchor}, ` : "";
-		return `${at}${kind(entry.reasons)}: ${[...entry.text].length} characters not shown${tag}`;
+		const label = kind(entry.reasons);
+		const pdf = entry.anchor.startsWith("p. ") && entry.reasons.every((r) => PDF_TEXT.has(r));
+		return `${at}${pdf ? `${label} text` : label}: ${[...entry.text].length} characters not shown${tag}`;
 	});
 	return mode === "framed" ? [FRAME, ...shown] : shown;
 }
