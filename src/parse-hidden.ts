@@ -54,15 +54,15 @@ export function unseen(body: string[], hidden: string[]): string[] {
 		listed.add(hidden[i] as string);
 		return true;
 	});
-	const like = (j: number, i: number) => {
+	// The nearest listed entry NEAR or fewer steps away, when it is a word of the same location and kind.
+	const like = (i: number, step: number) => {
+		let j = i + step;
+		while (Math.abs(j - i) < NEAR && keep[j] !== true) j += step;
 		const [a, b] = [entries[j], entries[i]];
-		if (j < 0 || Math.abs(j - i) > NEAR || !a || !b || !word(j)) return false;
+		if (keep[j] !== true || !a || !b || !word(j)) return false;
 		return !!a.anchor && a.anchor === b.anchor && a.reasons.some((r) => b.reasons.includes(r));
 	};
-	return hidden.filter((_, i) => {
-		if (keep[i] !== false) return !!keep[i];
-		return like(keep.lastIndexOf(true, i), i) || like(keep.indexOf(true, i), i);
-	});
+	return hidden.filter((_, i) => (keep[i] === false ? like(i, -1) || like(i, 1) : !!keep[i]));
 }
 // How far (in entries) a listed word may be from a left-out one for both to be one hidden sentence.
 const NEAR = 4;

@@ -94,8 +94,10 @@ function arrange(number: number, found: Item[]): Omit<PdfPage, "scan"> {
 		const text = g
 			.map((it, i) => {
 				const prev = g[i - 1];
-				const space =
+				// A run's own trailing or leading space is a word space too.
+				const gap =
 					prev && Math.abs(it.y - prev.y) < 0.5 * it.size && it.x - prev.end > 0.15 * it.size;
+				const space = prev && (gap || /\s$/.test(prev.text) || /^\s/.test(it.text));
 				return (space ? " " : "") + it.text.trim();
 			})
 			.join("");

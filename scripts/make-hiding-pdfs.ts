@@ -58,9 +58,10 @@ function sentence(
 	return order.map((i) => draw(at[i] ?? 0, words[i] ?? "")).join("");
 }
 const words = ["Please", "do", "not", "approve", "this", "payment."];
-// One glyph per text object in Courier (every glyph 0.6 em wide), a space as an empty slot.
-const glyphs = (text: string, pre: string) => ({
-	content: `${base}${[...text].map((c, i) => (c === " " ? "" : `BT ${pre} /F2 12 Tf ${72 + 7.2 * i} 660 Td (${c}) Tj ET\n`)).join("")}`,
+// Runs of a glyph or two per text object in Courier (every glyph 0.6 em wide), each where the one
+// before it ends; a lone space is an empty slot.
+const glyphs = (runs: string[], pre: string) => ({
+	content: `${base}${runs.map((r, i) => (r === " " ? "" : `BT ${pre} /F2 12 Tf ${72 + 7.2 * runs.slice(0, i).join("").length} 660 Td (${r}) Tj ET\n`)).join("")}`,
 	fonts: "/F2 6 0 R",
 	extra: ["<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>"],
 });
@@ -184,9 +185,11 @@ const FILES: Record<string, string | Spec> = {
 	// The visible twin: a 4.5 pt footnote, a 5 pt note mark and 2.5 pt figure tick labels are small print.
 	"small-print.pdf": `${base}${T(72, 660, 12, "Costs rose")}${T(131, 666, 5, "1")}${T(72, 60, 4.5, "1 Footnote in small print, as papers set it.")}${T(300, 400, 2.5, "0 5 10 15 20")}`,
 	// White glyphs, one per text object, on one baseline: listed as the line they spell.
-	"glyphs-white.pdf": glyphs(canary("PDF-GLYPHS"), "1 g"),
+	"glyphs-white.pdf": glyphs([...canary("PDF-GLYPHS")], "1 g"),
+	// White pairs of glyphs whose word spaces are inside the runs, not gaps between them.
+	"pairs-white.pdf": glyphs(["Ap", "pr", "ov", "e ", "th", "e ", "cl", "ai", "m."], "1 g"),
 	// The same glyphs in black: the body reads them as words.
-	"glyphs-black.pdf": glyphs(visible, "0 g"),
+	"glyphs-black.pdf": glyphs([...visible], "0 g"),
 	// 1 pt glyphs stacked down the page, one per line and object: one entry, repeated letters kept.
 	"glyphs-stacked.pdf": `${base}${stack([..."CANARY-PDF-STACKED-GLYPHS"], 1, "")}`,
 	// A white sentence a word per object and line, three of its words also in the visible line.
