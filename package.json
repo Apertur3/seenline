@@ -4,6 +4,24 @@
   "private": true,
   "description": "Local document-to-Markdown converter with built-in hidden-content flagging",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Apertur3/plainview.git"
+  },
+  "homepage": "https://github.com/Apertur3/plainview#readme",
+  "bugs": {
+    "url": "https://github.com/Apertur3/plainview/issues"
+  },
+  "keywords": [
+    "document",
+    "markdown",
+    "pdf",
+    "docx",
+    "mcp",
+    "prompt-injection",
+    "hidden-text",
+    "llm"
+  ],
   "type": "module",
   "engines": {
     "node": ">=24.18"
