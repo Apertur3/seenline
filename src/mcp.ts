@@ -28,7 +28,12 @@ export function createServer(ocr?: ConvertOptions["ocr"]): McpServer {
 				pages: z.number().int().nonnegative(),
 				flags: z.array(z.string()),
 				hidden: z.array(
-					z.object({ anchor: z.string(), reasons: z.array(z.string()), text: z.string() }),
+					z.object({
+						anchor: z.string(),
+						reasons: z.array(z.string()),
+						text: z.string(),
+						suspect: z.string().optional(),
+					}),
 				),
 			},
 			annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },

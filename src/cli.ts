@@ -19,6 +19,8 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
   --hidden <mode>    How the hidden block shows hidden text: describe (default; location, kind
                      and size), text (the text itself) or framed (the text after an
                      untrusted-data line). --json keeps the text in every mode
+  --fail-on-suspect  Exit 4 if a hidden entry reads like an instruction to an AI (a rule-based
+                     signal for triage; explicit instructions only, not hidden keyword lists)
   --ocr              Read scans and images with a local tesseract (PDF pages also need
                      pdftoppm from poppler); off by default, nothing leaves the machine
   --ocr-lang <lang>  Tesseract languages for --ocr, for example deu or eng+nld (default eng)
@@ -27,8 +29,8 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
 
 Multiple files require --json or --out. These options are mutually exclusive.
 Use -- before filenames beginning with a dash (or ./mcp for a file named mcp).
-Exit codes: 0 success, 1 file failure, 2 usage error, 3 hidden content.
-File failures take precedence over hidden content. Failed files emit no output.
+Exit codes: 0 success, 1 file failure, 2 usage error, 3 hidden content, 4 suspect hidden text.
+Precedence: 1, then 4, then 3. Failed files emit no output.
 `;
 
 function parse(args: string[]) {
@@ -39,6 +41,7 @@ function parse(args: string[]) {
 			json: { type: "boolean" },
 			out: { type: "string" },
 			"fail-on-hidden": { type: "boolean" },
+			"fail-on-suspect": { type: "boolean" },
 			hidden: { type: "string" },
 			...OCR_OPTIONS,
 			help: { type: "boolean" },
@@ -101,6 +104,7 @@ async function run(args: string[]): Promise<number> {
 	}
 	let failed = false;
 	let hidden = false;
+	let suspect = false;
 	for (const file of files) {
 		try {
 			const { markdown, pages, hidden: entries, flags } = await convertFile(file, ocr, mode);
@@ -115,12 +119,15 @@ async function run(args: string[]): Promise<number> {
 				);
 			}
 			hidden ||= entries.length > 0 || flags.length > 0;
+			suspect ||= entries.some((e) => e.suspect);
 		} catch (error) {
 			process.stderr.write(`${file}: ${formatError(error)}\n`);
 			failed = true;
 		}
 	}
-	return failed ? 1 : values["fail-on-hidden"] && hidden ? 3 : 0;
+	if (failed) return 1;
+	if (values["fail-on-suspect"] && suspect) return 4;
+	return values["fail-on-hidden"] && hidden ? 3 : 0;
 }
 
 function usage(message: string): number {

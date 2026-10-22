@@ -24,6 +24,8 @@ export interface HiddenText {
 	anchor: string;
 	reasons: string[];
 	text: string;
+	/** Set when the text reads like an instruction to an AI (override, exfil, role, verdict, addresses-ai): a triage signal from fixed rules, not a verdict. */
+	suspect?: string;
 }
 
 export interface ConvertResult extends DocumentText {

@@ -11,6 +11,6 @@ Launch on 8 November
 
 Attachment: agenda.pdf; application/pdf; 12 bytes (not converted)
 [Hidden in the original]
-Mail: 43 characters not shown
+Mail: 43 characters not shown [reads like an instruction to an AI: override]
 HTML: 16 characters not shown
 Mail: 70 characters not shown

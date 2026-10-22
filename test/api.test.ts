@@ -203,6 +203,8 @@ test("a valid password-protected PDF fails closed with the reference's reason", 
 	});
 });
 
+const tag = (reason?: string) => (reason ? ` [reads like an instruction to an AI: ${reason}]` : "");
+
 test("hidden modes change only the block's entry lines; the result keeps text, flags and body", async () => {
 	for (const name of [
 		"office-book.xlsx",
@@ -230,7 +232,11 @@ test("hidden modes change only the block's entry lines; the result keeps text, f
 				);
 				assert.deepEqual(
 					entries.slice(1),
-					text.markdown.slice(head.length).split("\n").slice(1, -1),
+					text.markdown
+						.slice(head.length)
+						.split("\n")
+						.slice(1, -1)
+						.map((line, i) => line + tag(text.hidden[i]?.suspect)),
 				);
 			} else {
 				assert.equal(entries.length, text.hidden.length);
@@ -239,7 +245,10 @@ test("hidden modes change only the block's entry lines; the result keeps text, f
 					// A notice with no payload ("HTML script present (code omitted)") stays as it is.
 					if (line === h.text) continue;
 					assert.ok(line.startsWith(h.anchor), line);
-					assert.ok(line.endsWith(`: ${[...h.text].length} characters not shown`), line);
+					assert.ok(
+						line.endsWith(`: ${[...h.text].length} characters not shown${tag(h.suspect)}`),
+						line,
+					);
 					assert.ok(!mode.markdown.includes(h.text), h.text);
 				}
 			}

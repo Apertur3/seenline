@@ -1,4 +1,5 @@
 import { HIDDEN_BLOCK } from "./hidden.ts";
+import { suspect } from "./suspect.ts";
 import type { ConvertOptions, HiddenText } from "./types.ts";
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim();
@@ -49,28 +50,60 @@ export function unseen(body: string[], hidden: string[]): string[] {
 
 /** Preserve every hidden line, including opaque OCR extras and legacy conversion warnings. */
 export function parseHidden(lines: string[]): HiddenText[] {
-	return lines
-		.filter((line) => line && line !== HIDDEN_BLOCK)
-		.map((line) => {
-			const location =
-				/^(p\. \d+|slide \d+(?:, notes)?|\[Sheet: [^\]]*\](?:, \[row \d+\], [A-Z]+\d+)?), /;
-			const at = location.exec(line);
-			const rest = at ? line.slice(at[0].length) : line;
-			// A reason delimiter is a colon followed by a space; colons in metadata names stay intact.
-			const colon = rest.indexOf(": ");
-			let reason = colon < 0 ? rest : rest.slice(0, colon);
-			if (at?.[1]?.startsWith("p. ")) reason = reason.replace(/ text$/, "");
-			const labelled =
-				at ||
-				/^(?:hidden run|field code|tiny text|white or same-background text|tracked deletion|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
-					reason,
-				);
-			return {
-				anchor: at?.[1] ?? "",
-				reasons: labelled ? reason.split(" and ") : ["hidden content"],
-				text: labelled && colon >= 0 ? rest.slice(colon + 2) : rest,
-			};
-		});
+	return withSuspect(lines.filter((line) => line && line !== HIDDEN_BLOCK).map(parseLine));
+}
+
+function parseLine(line: string): HiddenText {
+	const location =
+		/^(p\. \d+|slide \d+(?:, notes)?|\[Sheet: [^\]]*\](?:, \[row \d+\], [A-Z]+\d+)?), /;
+	const at = location.exec(line);
+	const rest = at ? line.slice(at[0].length) : line;
+	// A reason delimiter is a colon followed by a space; colons in metadata names stay intact.
+	const colon = rest.indexOf(": ");
+	let reason = colon < 0 ? rest : rest.slice(0, colon);
+	if (at?.[1]?.startsWith("p. ")) reason = reason.replace(/ text$/, "");
+	const labelled =
+		at ||
+		/^(?:hidden run|field code|tiny text|white or same-background text|tracked deletion|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
+			reason,
+		);
+	return {
+		anchor: at?.[1] ?? "",
+		reasons: labelled ? reason.split(" and ") : ["hidden content"],
+		text: labelled && colon >= 0 ? rest.slice(colon + 2) : rest,
+	};
+}
+
+/**
+ * Marks entries whose text reads like an instruction to an AI. Text one sentence split over
+ * neighbouring entries of the same kind (a line or a word each) is read joined: the shortest run of
+ * untagged entries, up to 12 and 400 characters, that matches.
+ */
+function withSuspect(entries: HiddenText[]): HiddenText[] {
+	const tags = entries.map((e) => suspect(e.text));
+	const group = (e?: HiddenText) => e && `${e.anchor}|${e.reasons.join()}`;
+	const joined = (from: number, to: number) =>
+		entries
+			.slice(from, to + 1)
+			.map((e) => e.text)
+			.join(" ");
+	for (let i = 0; i < entries.length; i++) {
+		for (
+			let j = i + 1;
+			j < i + 12 && !tags[i] && !tags[j] && group(entries[j]) === group(entries[i]);
+			j++
+		) {
+			if (joined(i, j).length > 400) break;
+			if (!suspect(joined(i, j))) continue;
+			// The run starts as late as it can, so an unrelated line before it is not marked.
+			let from = j - 1;
+			while (!suspect(joined(from, j))) from--;
+			const tag = suspect(joined(from, j));
+			for (let k = from; k <= j; k++) tags[k] = tag;
+			break;
+		}
+	}
+	return entries.map((e, i) => (tags[i] ? { ...e, suspect: tags[i] } : e));
 }
 
 export const HIDDEN_MODES: NonNullable<ConvertOptions["hidden"]>[] = ["text", "framed", "describe"];
@@ -97,21 +130,25 @@ function kind(reasons: string[]): string {
  * The lines under the block heading as a mode shows them: as they are, after a framing line, or kind
  * and size only. For a legacy conversion, describe keeps the converted text (everything before the
  * converted file's own block) as text: it is the document, flagged only because its hiding could not
- * be checked; the converted file's own hidden entries are still described.
+ * be checked; the converted file's own hidden entries are still described. Framed and described
+ * entries that read like an instruction to an AI end with a tag naming the reason; text mode is unchanged.
  */
 export function showHidden(
 	lines: string[],
 	mode: ConvertOptions["hidden"] = "describe",
 	legacy = false,
 ): string[] {
-	if (mode === "framed") return [FRAME, ...lines];
-	if (mode !== "describe") return lines;
+	if (mode !== "framed" && mode !== "describe") return lines;
 	const nested = lines.indexOf(HIDDEN_BLOCK);
 	const kept = !legacy ? 0 : nested < 0 ? lines.length : nested;
-	return lines.map((line, i) => {
-		const [entry] = parseHidden([line]);
-		if (!entry || i < kept || NOTICE.test(line)) return line;
+	const entries = withSuspect(lines.map(parseLine));
+	const shown = lines.map((line, i) => {
+		const entry = entries[i] as HiddenText;
+		if (!line || line === HIDDEN_BLOCK || i < kept) return line;
+		const tag = entry.suspect ? ` [reads like an instruction to an AI: ${entry.suspect}]` : "";
+		if (mode === "framed" || NOTICE.test(line)) return line + tag;
 		const at = entry.anchor ? `${entry.anchor}, ` : "";
-		return `${at}${kind(entry.reasons)}: ${[...entry.text].length} characters not shown`;
+		return `${at}${kind(entry.reasons)}: ${[...entry.text].length} characters not shown${tag}`;
 	});
+	return mode === "framed" ? [FRAME, ...shown] : shown;
 }
