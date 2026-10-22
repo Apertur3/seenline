@@ -110,7 +110,7 @@ test("describe shows a label only when the readers wrote it, never a name or tex
 		"hidden content: 6 characters not shown",
 		"hidden content: 6 characters not shown",
 		"Mail: 1 characters not shown",
-		"p. 1, white and tiny: 1 characters not shown",
+		"p. 1, white and tiny text: 1 characters not shown",
 		"[Sheet: Budget], [row 3], A3, hidden row: 3 characters not shown",
 		"HTML script present (code omitted)",
 		"hidden content: 17 characters not shown",
