@@ -1,11 +1,12 @@
 // CrackedPDFs (arXiv:2607.19396, MIT): detection and false-positive run. The PDFs are adversarial
 // and are only ever parsed by convert(); they live in the cache, never in the repository.
-//   node bench/cracked.ts prepare | run [test|all] | report [test|all]   (PLAINVIEW_BENCH_CACHE as in run.ts)
+//   node bench/cracked.ts prepare | run [test|train|all] | report [test|train|all]   (PLAINVIEW_BENCH_CACHE as in run.ts)
 // Detected = a hidden entry or a scanner flag, the same test --fail-on-hidden applies.
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { convert } from "../src/index.ts";
+import { parseHidden } from "../src/parse-hidden.ts";
 import { data, digest } from "./corpus.ts";
 
 interface Cracked {
@@ -31,11 +32,17 @@ interface Row {
 	hiddenChars: number;
 	flags: string[];
 	reasons: string[];
+	/** A hidden entry reads like an instruction to an AI once the dataset's marker tokens are removed. */
+	suspect: string[];
 	ms: number;
 }
 
 const CRACKED = data<Cracked>("cracked.json");
 const TIMEOUT_MS = 60_000;
+// The dataset's own artefacts (its errata): marker tokens and "benign" self-labels, removed before
+// the suspect rules run so they cannot score on them.
+const MARKERS =
+	/\[?(DATASET_SAMPLE_ID|MESSAGE_TYPE)=[^\]\s]*\]?|<?\/?(SYSTEM_POLICY_DO_NOT_REMOVE|DOCUMENT_LAYOUT_NOTE)>?|benign[^.]*\.|no prompt directive/gi;
 
 export async function prepareCracked(cache: string): Promise<void> {
 	const dir = join(cache, "cracked");
@@ -67,7 +74,7 @@ function selection(dir: string, which: string): Meta[] {
 	const all = metas(dir);
 	if (which === "all") return all;
 	const test = new Set<string>(
-		JSON.parse(readFileSync(join(dir, "data-splits.json"), "utf8")).test_ids,
+		JSON.parse(readFileSync(join(dir, "data-splits.json"), "utf8"))[`${which}_ids`],
 	);
 	return all.filter((m) => test.has(m.pdf_id));
 }
@@ -87,6 +94,7 @@ export async function runCracked(cache: string, which = "test"): Promise<void> {
 			hiddenChars: 0,
 			flags: [],
 			reasons: [],
+			suspect: [],
 			ms: 0,
 		};
 		try {
@@ -102,6 +110,10 @@ export async function runCracked(cache: string, which = "test"): Promise<void> {
 			row.flags = r.flags;
 			row.reasons = [...new Set(r.hidden.flatMap((h) => h.reasons))];
 			row.detected = r.hidden.length > 0 || r.flags.length > 0;
+			const lines = r.hidden.map(
+				(h) => `${h.anchor}, ${h.reasons.join(" and ")} text: ${h.text.replace(MARKERS, " ")}`,
+			);
+			row.suspect = [...new Set(parseHidden(lines).flatMap((h) => h.suspect ?? []))];
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			Object.assign(row, {
@@ -195,6 +207,15 @@ export function reportCracked(cache: string, which = "test"): string {
 			`  F1 (confounder negatives) ${f1(ti.filter(det).length, tc.filter(det).length, ti.length - ti.filter(det).length)}`,
 		);
 	}
+	const tagged = (m: Meta) => (rows.get(m.pdf_id)?.suspect.length ?? 0) > 0;
+	const trate = (ms: Meta[]) =>
+		`${ms.filter(tagged).length}/${ms.length} ${pct(ms.filter(tagged).length, ms.length)}`;
+	lines.push(
+		`\nsuspect tag (markers removed): injected ${trate(inj)}, confounder ${trate(conf)}, original ${trate(orig)}`,
+	);
+	for (const key of ["message_type", "attack_family"] as const)
+		for (const v of [...new Set(inj.map((m) => m[key]))].sort())
+			lines.push(`  ${key} ${v}\t${trate(inj.filter((m) => m[key] === v))}`);
 	lines.push("\nmissed injected by family");
 	for (const m of inj.filter((x) => !det(x))) lines.push(`  ${m.attack_family}\t${m.pdf_id}`);
 	lines.push("\nfalse positives on confounders: reasons/flags");

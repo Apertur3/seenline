@@ -67,3 +67,13 @@ test("--fail-on-suspect exits 4 only for a tagged entry, independent of the mode
 	const json = JSON.parse(run("--json", tagged).stdout);
 	assert.ok(json.hidden.some((h: { suspect?: string }) => h.suspect === "override"));
 });
+
+test("the public-repo sweep leaves out only its own script, the lockfile and the detector rules", async () => {
+	const sweep = await readFile(new URL("../scripts/sweep.sh", import.meta.url), "utf8");
+	const excluded = new Set([...sweep.matchAll(/':!([^']+)'/g)].map((m) => m[1]));
+	assert.deepEqual([...excluded].sort(), [
+		"package-lock.json",
+		"scripts/sweep.sh",
+		"src/suspect.json",
+	]);
+});
