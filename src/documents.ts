@@ -1,5 +1,5 @@
 // Pure readers share one output contract; OCR is supplied by the caller.
-import { PlainviewError } from "./error.ts";
+import { NotRead, PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { imageMeta } from "./image-meta.ts";
 import { legacyOfficeToText } from "./legacy-office.ts";
@@ -57,10 +57,11 @@ async function fromPdf(bytes: Uint8Array, ocr: (pages: number[]) => Promise<OcrR
 	const letters = (p: PdfPage) => p.lines.join("").replace(/[^\p{L}\p{N}]/gu, "").length;
 	const weak = pages.map((p) => letters(p) < MIN_TEXT);
 	const all = weak.every(Boolean);
-	// Without recognised text, a weak page keeps its few lines and says it was not read.
+	// Without recognised text, a weak page keeps its few lines and says it was not read;
+	// a recogniser that names its own failure (a missing program, a timeout) fails the file.
 	const read: OcrResult | null = weak.some(Boolean)
 		? await ocr(pages.filter((_, i) => weak[i]).map((p) => p.number)).catch((error) => {
-				if (all) throw error;
+				if (all || (error instanceof PlainviewError && !(error instanceof NotRead))) throw error;
 				return null;
 			})
 		: { pages: [], extras: [] };

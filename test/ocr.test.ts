@@ -29,16 +29,19 @@ let scratch = "";
 let both = "";
 let none = "";
 let onlyTesseract = "";
+let onlyPdftoppm = "";
 
 before(async () => {
 	scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-test-"));
 	both = join(scratch, "both");
 	none = join(scratch, "none");
 	onlyTesseract = join(scratch, "tesseract");
-	for (const dir of [both, none, onlyTesseract]) await mkdir(dir);
+	onlyPdftoppm = join(scratch, "pdftoppm");
+	for (const dir of [both, none, onlyTesseract, onlyPdftoppm]) await mkdir(dir);
 	for (const [dir, names] of [
 		[both, ["tesseract", "pdftoppm"]],
 		[onlyTesseract, ["tesseract"]],
+		[onlyPdftoppm, ["pdftoppm"]],
 	] as const)
 		for (const name of names) {
 			await writeFile(join(dir, name), `#!/bin/sh\n${FAKE[name]}\n`);
@@ -91,10 +94,17 @@ test("--ocr without tesseract or pdftoppm fails closed with what to install", ()
 		assert.ok(message.includes(hint), message);
 		assert.doesNotMatch(message, /\/|\n\s+at /);
 	}
-	// A PDF with a text layer on other pages is still read; the unread page says so.
-	const weak = run(none, ["--ocr", fixture("pdf-hiding/weak-page.pdf")]);
-	assert.equal(weak.status, 0, weak.stderr);
-	assert.match(weak.stdout, /\[p\. 2\]\n\(no readable text layer/);
+	// With --ocr a PDF with one scanned page fails too; without it the page is marked as before.
+	const weak = run(onlyPdftoppm, ["--ocr", fixture("pdf-hiding/weak-page.pdf")]);
+	assert.equal(weak.status, 1);
+	assert.equal(weak.stdout, "");
+	assert.match(
+		weak.stderr,
+		/unavailable: could not read this file: text recognition needs tesseract/,
+	);
+	const off = run(none, [fixture("pdf-hiding/weak-page.pdf")]);
+	assert.equal(off.status, 0, off.stderr);
+	assert.match(off.stdout, /\[p\. 2\]\n\(no readable text layer/);
 });
 
 test("--ocr fails closed on a recogniser error, output over the cap, and a file that is no image", async () => {

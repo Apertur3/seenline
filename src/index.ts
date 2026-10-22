@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { documentToText } from "./documents.ts";
-import { PlainviewError } from "./error.ts";
+import { NotRead, PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK, scan } from "./hidden.ts";
 import { parseHidden } from "./parse-hidden.ts";
 import type { ConvertOptions, ConvertResult, OcrResult } from "./types.ts";
@@ -19,10 +19,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 	let scratch: string | undefined;
 	const ocr = async (pages?: number[]): Promise<OcrResult> => {
 		if (!opts.ocr)
-			throw new PlainviewError(
-				"unavailable",
-				"could not read this file: no text recognition available",
-			);
+			throw new NotRead("unavailable", "could not read this file: no text recognition available");
 		let path = opts.path;
 		if (path === undefined) {
 			scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-"));
@@ -40,7 +37,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 			return read;
 		} catch (error) {
 			if (error instanceof PlainviewError) throw error;
-			throw new PlainviewError("invalid", "could not read this file: text recognition failed");
+			throw new NotRead("invalid", "could not read this file: text recognition failed");
 		}
 	};
 	try {

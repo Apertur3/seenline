@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { NO_TEXT_LAYER } from "../src/documents.ts";
-import { convert } from "../src/index.ts";
+import { convert, PlainviewError } from "../src/index.ts";
 import { readingOrder } from "../src/pdf-order.ts";
 import type { ConvertOptions } from "../src/types.ts";
 
@@ -108,6 +108,10 @@ test("weak-page.pdf: without text recognition the near-empty page is marked, not
 		throw new Error("recogniser down");
 	};
 	assert.equal((await run("weak-page.pdf", { ocr })).markdown, markdown);
+	const named = async () => {
+		throw new PlainviewError("unavailable", "could not read this file: recogniser missing");
+	};
+	await assert.rejects(run("weak-page.pdf", { ocr: named }), /recogniser missing/);
 });
 
 test("weak-page.pdf: with text recognition the page is read as before, with no marker", async () => {

@@ -8,6 +8,9 @@ export class PlainviewError extends Error {
 	}
 }
 
+/** OCR was not given, or failed without a reason of its own: a PDF with other text pages marks the page instead. */
+export class NotRead extends PlainviewError {}
+
 // A reader's internal failure, named by its class of cause in plain words; never document content.
 const CAUSES: [RegExp, string][] = [
 	[/^unsupported CSS selector$/, "unsupported CSS selector in a rule that can hide text"],

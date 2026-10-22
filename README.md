@@ -41,7 +41,7 @@ Status: pre-release; the package is private and has not been published yet. Libr
 - Font remapping. A `/ToUnicode` map that sends a visible letter to a different code point leaves a text layer that is consistent with itself, so nothing in it differs from what an extractor returns. Catching it needs rendering the page and running OCR; Plainview does not do that.
 - Reading order. Detection covers two narrow shapes of text stored in a different order than shown. It has documented bypasses, and Plainview claims no protection against reordering in general.
 - Intent. The hidden block lists text; it does not judge it. It can include benign metadata such as comments and document properties.
-- Scans. Pages with too little text to trust are treated as scans and need OCR. The CLI and MCP server have none, so these files fail closed instead of passing partial text.
+- Scans. Pages with too little text to trust are treated as scans and need OCR. Without `--ocr` the CLI and MCP server fail these files closed instead of passing partial text.
 
 The measured misses are in [docs/BENCHMARK.md](docs/BENCHMARK.md).
 
