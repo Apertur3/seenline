@@ -18,7 +18,7 @@ interface Model {
 	model: string;
 	ref: string;
 	args: string[];
-	format: "result" | "items" | "steps";
+	format: "result" | "stream" | "items" | "steps";
 	arms?: string[];
 }
 interface Item {
@@ -50,7 +50,7 @@ if (!isAbsolute(cache))
 	throw new Error("Set PLAINVIEW_BENCH_CACHE to an absolute scratch directory");
 const dir = (...p: string[]) => join(cache, "models", ...p);
 /** The CLI wiring is machine-local: which logged-in CLIs exist and how they are called. */
-const MODELS: Record<string, Model> = existsSync(join(cache, "clis.json"))
+export const MODELS: Record<string, Model> = existsSync(join(cache, "clis.json"))
 	? JSON.parse(readFileSync(join(cache, "clis.json"), "utf8"))
 	: {};
 
@@ -81,9 +81,14 @@ function parse(
 			return [];
 		}
 	});
-	if (format === "result") {
-		const r = JSON.parse(out || "{}");
-		return { answer: r.result ?? "", model: Object.keys(r.modelUsage ?? {}).join(","), tools: [] };
+	if (format === "result" || format === "stream") {
+		const r =
+			format === "result" ? JSON.parse(out || "{}") : lines.find((e) => e.type === "result");
+		const uses = lines.flatMap((e) => (e.type === "assistant" ? e.message.content : []));
+		const tools = uses
+			.filter((c: { type: string }) => c.type === "tool_use")
+			.map((c: { name: string; input: unknown }) => `${c.name} ${JSON.stringify(c.input)}`);
+		return { answer: r?.result ?? "", model: Object.keys(r?.modelUsage ?? {}).join(","), tools };
 	}
 	if (format === "items") {
 		const items = lines.filter((e) => e.type === "item.completed").map((e) => e.item);
@@ -92,7 +97,9 @@ function parse(
 		return { answer: said.at(-1) ?? "", model: "", tools: ran };
 	}
 	const steps = lines.filter((e) => e.event === "step_update").map((e) => e.step_update);
-	const tools = steps.filter((s) => s.state !== "ACTIVE" && s.tool_name).map((s) => s.tool_name);
+	const tools = steps
+		.filter((s) => s.state !== "ACTIVE" && s.tool_name)
+		.map((s) => `${s.tool_name} ${JSON.stringify(s.tool_info?.parameters ?? {})}`);
 	const result = lines.find((e) => e.event === "result")?.result;
 	return { answer: result?.response ?? "", model: lines[0]?.init?.model ?? "", tools };
 }
@@ -136,39 +143,51 @@ async function run(name: string, set: string, arm: string): Promise<void> {
 				continue;
 			}
 		} else writeFileSync(join(cell, doc), bytes);
-		const text = prompt.replace("{ref}", model.ref.replace("{doc}", doc));
-		const started = Date.now();
-		const p = spawnSync(
-			model.cli,
-			model.args.map((a) => a.replace("{prompt}", text)),
-			{
-				cwd: cell,
-				encoding: "utf8",
-				timeout: 300_000,
-				maxBuffer: 64 << 20,
-			},
-		);
-		writeFileSync(join(cell, "out.txt"), `${p.stdout ?? ""}\n--- stderr ---\n${p.stderr ?? ""}`);
-		let parsed = { answer: "", model: "", tools: [] as string[] };
-		try {
-			parsed = parse(model.format, p.stdout ?? "");
-		} catch {}
-		const limited = !parsed.answer && /rate.?limit|quota|usage limit|\b429\b/i.test(p.stderr ?? "");
-		if (limited) {
-			console.error(
-				`${name}: rate or quota limit at ${set} ${arm} ${item.gap}; stopping this model`,
-			);
-			return;
-		}
-		const status = p.error ? "timeout" : parsed.answer ? "ok" : "empty";
-		const seconds = (Date.now() - started) / 1000;
-		parsed.model ||= model.model;
-		writeFileSync(
-			join(cell, "answer.json"),
-			JSON.stringify({ status, prompt: text, seconds, ...parsed }),
-		);
-		console.log(`${name} ${set} ${arm} ${item.gap} ${status} ${seconds.toFixed(0)}s`);
+		if (!call(name, cell, prompt.replace("{ref}", model.ref.replace("{doc}", doc)))) return;
 	}
+}
+
+// What a CLI gets from this shell: enough to find its login, no session tokens or sockets.
+const ENV = ["PATH", "HOME", "USER", "LOGNAME", "SHELL", "TMPDIR", "LANG", "LC_CTYPE", "TERM"];
+// Credential shapes, and command output, are dropped before anything is written: a document may ask for them.
+const SECRET =
+	/sk-[\w-]{16,}|gh[pousr]_\w{20,}|xox[abp]-[\w-]+|AKIA[0-9A-Z]{16}|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]+|-----BEGIN [A-Z ]+-----[\s\S]*?-----END [A-Z ]+-----/g;
+const redact = (s: string) =>
+	s.replace(SECRET, "[redacted]").replace(/("aggregated_output":)"(?:[^"\\]|\\.)*"/g, '$1""');
+
+/** One sequential CLI call in `cell`; writes answer.json and returns false on a rate or quota limit. */
+export function call(name: string, cell: string, text: string): boolean {
+	const model = MODELS[name] as Model;
+	const started = Date.now();
+	const p = spawnSync(
+		model.cli,
+		model.args.map((a) => a.replace("{prompt}", text)),
+		{
+			cwd: cell,
+			encoding: "utf8",
+			timeout: 300_000,
+			maxBuffer: 64 << 20,
+			env: Object.fromEntries(ENV.flatMap((k) => (process.env[k] ? [[k, process.env[k]]] : []))),
+		},
+	);
+	const out =
+		model.format === "stream" ? (p.stdout ?? "").replace(/^.*"type":"user".*$/gm, "") : p.stdout;
+	writeFileSync(join(cell, "out.txt"), redact(`${out ?? ""}\n--- stderr ---\n${p.stderr ?? ""}`));
+	let parsed = { answer: "", model: "", tools: [] as string[] };
+	try {
+		parsed = parse(model.format, p.stdout ?? "");
+	} catch {}
+	if (!parsed.answer && /rate.?limit|quota|usage limit|\b429\b/i.test(p.stderr ?? "")) {
+		console.error(`${name}: rate or quota limit at ${cell}; stopping this model`);
+		return false;
+	}
+	const status = p.error ? "timeout" : parsed.answer ? "ok" : "empty";
+	const seconds = (Date.now() - started) / 1000;
+	parsed.model ||= model.model;
+	const answer = JSON.stringify({ status, prompt: text, seconds, ...parsed });
+	writeFileSync(join(cell, "answer.json"), redact(answer));
+	console.log(`${name} ${cell} ${status} ${seconds.toFixed(0)}s`);
+	return true;
 }
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9:()一-鿿]/g, "");
@@ -268,7 +287,9 @@ function score(): void {
 	console.log(rows.join("\n"));
 }
 
-const [cmd, name = "", set = "A", arm = "raw"] = process.argv.slice(2);
-if (cmd === "run") await run(name, set, arm);
-else if (cmd === "score") score();
-else throw new Error("usage: models.ts run <model> <A|B> <raw|plainview> | score [--verbose]");
+if (import.meta.main) {
+	const [cmd, name = "", set = "A", arm = "raw"] = process.argv.slice(2);
+	if (cmd === "run") await run(name, set, arm);
+	else if (cmd === "score") score();
+	else throw new Error("usage: models.ts run <model> <A|B> <raw|plainview> | score [--verbose]");
+}

@@ -41,7 +41,7 @@ const CRACKED = data<Cracked>("cracked.json");
 const TIMEOUT_MS = 60_000;
 // The dataset's own artefacts (its errata): marker tokens and "benign" self-labels, removed before
 // the suspect rules run so they cannot score on them.
-const MARKERS =
+export const MARKERS =
 	/\[?(DATASET_SAMPLE_ID|MESSAGE_TYPE)=[^\]\s]*\]?|<?\/?(SYSTEM_POLICY_DO_NOT_REMOVE|DOCUMENT_LAYOUT_NOTE)>?|benign[^.]*\.|no prompt directive/gi;
 
 export async function prepareCracked(cache: string): Promise<void> {
