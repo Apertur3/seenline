@@ -93,7 +93,7 @@
 	},
 	"unseen": {
 		"body": ["We consider it, and say no."],
-		"hidden": ["p. 1, white text: consider", "p. 1, white text: con", "p. 2, white text: con", "p. 2, white text: con", "p. 3, tiny text: o"],
-		"kept": ["p. 1, white text: con", "p. 2, white text: con", "p. 3, tiny text: o"]
+		"hidden": ["p. 1, white text: consider", "p. 1, white text: con", "p. 2, white text: con", "p. 2, white text: con", "p. 3, tiny text: o", "p. 4, white text: consider"],
+		"kept": ["p. 1, white text: consider", "p. 1, white text: con", "p. 2, white text: con", "p. 3, tiny text: o"]
 	}
 }

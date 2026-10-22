@@ -41,7 +41,9 @@ export interface Ops {
 	argsArray: unknown[][];
 }
 
-const TINY_PT = 2;
+// Text under this size is tiny. Hidden text is often drawn at exactly 2 pt (CrackedPDFs' tiny payloads
+// are); the smallest text a reader sees in the benchmark's public PDFs is a figure's 2.48 pt axis labels.
+const TINY_PT = 2.25;
 // A page with more text runs than this is not a document, and covering is quadratic in it.
 const MAX_RUNS = 100_000;
 const OFF_PAGE_PT = 5;

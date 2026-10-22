@@ -187,6 +187,6 @@ test("white text: light grounds (contrast under 3) stay hidden, dark ones show i
 	for (const c of twins.grounds.dark) assert.ok(!light(c), c);
 });
 
-test("unseen: only whole words of the body, and only exact repeats, are left out", () => {
+test("unseen: only whole words of the body and exact repeats are left out, and not beside a listed word", () => {
 	assert.deepEqual(unseen(twins.unseen.body, twins.unseen.hidden), twins.unseen.kept);
 });

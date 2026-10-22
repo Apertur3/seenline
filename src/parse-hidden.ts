@@ -35,18 +35,38 @@ function contains(seen: string, text: string): boolean {
 /**
  * The hidden entries worth listing under a body. An entry is left out when it holds no text, when
  * its text stands as whole words in the visible body (a reader sees it there), or when it repeats an
- * earlier line exactly, location and reason included.
+ * earlier line exactly, location and reason included. A word left out so (not the line just before it
+ * again, as text drawn twice is) is listed after all when the nearest listed entry before or after it,
+ * at most NEAR entries away, is a word with its location (a page, slide or sheet) and a reason in
+ * common: it is part of a hidden sentence drawn a word per text object, where leaving out "may" or
+ * "not" changes what the sentence says.
  */
 export function unseen(body: string[], hidden: string[]): string[] {
 	const seen = norm(body.join(" "));
 	const listed = new Set<string>();
-	return hidden.filter((line) => {
-		const text = norm(parseHidden([line])[0]?.text ?? "");
-		if (!text || listed.has(line) || contains(seen, text)) return false;
-		listed.add(line);
+	const entries = hidden.map((line) => parseHidden([line])[0]);
+	const word = (i: number) =>
+		WORD.test(entries[i]?.text.trim() ?? "") && hidden[i] !== hidden[i - 1];
+	const keep = entries.map((e, i) => {
+		const text = norm(e?.text ?? "");
+		if (!text) return null;
+		if (listed.has(hidden[i] as string) || contains(seen, text)) return word(i) ? false : null;
+		listed.add(hidden[i] as string);
 		return true;
 	});
+	const like = (j: number, i: number) => {
+		const [a, b] = [entries[j], entries[i]];
+		if (j < 0 || Math.abs(j - i) > NEAR || !a || !b || !word(j)) return false;
+		return !!a.anchor && a.anchor === b.anchor && a.reasons.some((r) => b.reasons.includes(r));
+	};
+	return hidden.filter((_, i) => {
+		if (keep[i] !== false) return !!keep[i];
+		return like(keep.lastIndexOf(true, i), i) || like(keep.indexOf(true, i), i);
+	});
 }
+// How far (in entries) a listed word may be from a left-out one for both to be one hidden sentence.
+const NEAR = 4;
+const WORD = /^\p{L}[\p{L}'’-]*[.,;:!?]?$/u;
 
 /** Preserve every hidden line, including opaque OCR extras and legacy conversion warnings. */
 export function parseHidden(lines: string[]): HiddenText[] {
