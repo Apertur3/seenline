@@ -22,6 +22,8 @@ export interface Item {
 interface Glyph {
 	unicode: string;
 	width: number;
+	originalCharCode: number;
+	isInFont: boolean;
 }
 interface Saved {
 	ctm: Matrix;
@@ -32,6 +34,7 @@ interface Saved {
 	mode: number;
 	hscale: number;
 	clip: Box | null;
+	broken: boolean;
 }
 export interface Ops {
 	fnArray: number[];
@@ -78,20 +81,25 @@ function hiding(color: string, mode: number, size: number, x: number, y: number,
 	return why;
 }
 
-/** Everything one page shows, in content-stream order; `visible` says whether a layer is switched on. */
+/**
+ * Everything one page shows, in content-stream order; `visible` says whether a layer is switched on.
+ * `pictured` is the share of the page that pictures cover (overlaps count twice, so it can pass 1).
+ */
 export function walk(
 	OPS: Record<string, number>,
 	list: Ops,
 	view: Matrix,
 	visible: (layer: unknown) => boolean,
-): Item[] {
+): { items: Item[]; pictured: number } {
 	const w = new Walker(OPS, view, visible);
 	for (const [i, fn] of list.fnArray.entries()) w.step(fn, list.argsArray[i] as unknown[]);
-	return w.out;
+	const area = (view[2] - view[0]) * (view[3] - view[1]);
+	return { items: w.out, pictured: area > 0 ? w.pictured / area : 0 };
 }
 
 class Walker {
 	out: Item[] = [];
+	pictured = 0;
 	private saved: Saved[] = [];
 	private ctm = IDENTITY;
 	private fontSize = 0;
@@ -100,6 +108,8 @@ class Walker {
 	private alpha = 1;
 	private mode = 0;
 	private hscale = 1;
+	// The font in force could not be read at all (pdfjs draws nothing for it).
+	private broken = false;
 	// The bounding box of the clipping paths in force. pdfjs reports `W` before the path it clips to.
 	private clip: Box | null = null;
 	private clipping = false;
@@ -124,8 +134,8 @@ class Walker {
 	step(fn: number, a: unknown[]): void {
 		const { OPS } = this;
 		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
-			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip } = this;
-			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip });
+			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip, broken } = this;
+			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip, broken });
 			if (fn !== OPS.paintFormXObjectBegin) return;
 			if (a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
 			// A form draws nothing outside its bounding box (pdfjs hands a group's box to beginGroup).
@@ -165,9 +175,11 @@ class Walker {
 					);
 			}
 			this.clipping = false;
-		} else if (fn === OPS.paintImageXObject || fn === OPS.paintInlineImageXObject) {
+		} else if (PICTURES.some((n) => OPS[n] === fn)) {
+			const [x0, y0, x1, y1] = intersect(this.corners([0, 0, 1, 1]), this.view.slice(0, 4) as Box);
+			this.pictured += Math.max(0, x1 - x0) * Math.max(0, y1 - y0);
 			// A picture's pixels are not read: under white letters it is unknown, so they stay flagged.
-			this.cover([this.rect([0, 0, 1, 1])], "", false);
+			if (fn !== OPS.paintImageMaskXObject) this.cover([this.rect([0, 0, 1, 1])], "", false);
 		} else this.text(fn, a);
 	}
 
@@ -232,8 +244,10 @@ class Walker {
 		const { OPS } = this;
 		const parts = (i: number) => a[i] as (Glyph | number)[];
 		if (fn === OPS.beginText) this.tm = this.tlm = IDENTITY;
-		else if (fn === OPS.setFont) this.fontSize = a[1] as number;
-		else if (fn === OPS.setFillRGBColor) this.color = String(a[0]);
+		else if (fn === OPS.setFont) {
+			this.broken = a[0] === "g_font_error";
+			this.fontSize = a[1] as number;
+		} else if (fn === OPS.setFillRGBColor) this.color = String(a[0]);
 		else if (fn === OPS.setStrokeRGBColor) this.stroke = String(a[0]);
 		else if (fn === OPS.setGState) this.gstate(a[0] as [string, unknown][]);
 		else if (fn === OPS.setTextRenderingMode) this.mode = a[0] as number;
@@ -260,7 +274,8 @@ class Walker {
 	private show(parts: (Glyph | number)[]): void {
 		const user = mul(this.tm, this.ctm);
 		const size = this.fontSize * Math.hypot(user[2], user[3]);
-		let text = "";
+		let text = this.broken ? UNREAD : "";
+		let unmapped = this.broken;
 		let advance = 0; // in text space, before horizontal scaling
 		for (const part of parts) {
 			if (typeof part === "number") {
@@ -269,6 +284,14 @@ class Walker {
 			} else {
 				text += part.unicode;
 				advance += (part.width / 1000) * this.fontSize;
+				// A multi-byte code with no Unicode mapping and no glyph in the font: pdfjs passes the
+				// code itself on as text, which says nothing about the letter drawn. A space draws nothing.
+				const code = part.originalCharCode;
+				unmapped ||=
+					!part.isInFont &&
+					code > 0xff &&
+					part.unicode === String.fromCharCode(code) &&
+					!!part.unicode.trim();
 			}
 		}
 		advance *= this.hscale;
@@ -280,6 +303,7 @@ class Walker {
 			if (this.out.length >= MAX_RUNS) throw new Error("too much text");
 			if (this.layers.includes(true)) why.push("hidden layer");
 			if (this.hscale < MIN_HSCALE || this.hscale > MAX_HSCALE) why.push("squeezed");
+			if (unmapped) why.push("unreadable font");
 			const end = user[4] + advance * Math.hypot(user[0], user[1]);
 			// Half the run along its baseline, then 0.3 em up: the middle of the letters, not the baseline.
 			const mid: [number, number] = [
@@ -307,4 +331,7 @@ const FILLS = [
 	"closeFillStroke",
 	"closeEOFillStroke",
 ];
+const PICTURES = ["paintImageXObject", "paintInlineImageXObject", "paintImageMaskXObject"];
+// What a run drawn in a font pdfjs could not load says instead of its letters.
+const UNREAD = "(letters not decodable)";
 const EO_FILLS = ["eoFill", "eoFillStroke", "closeEOFillStroke"];

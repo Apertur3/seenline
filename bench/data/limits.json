@@ -1,19 +1,23 @@
 {
-	"note": "Known limits of Plainview on the Split-View set, with the reason. Gaps not listed here scored flagged or correct in the run. The 10-letter page floor makes short pages (these canaries carry 3 to 8 letters) fail closed without OCR; a diagnostic that skips the floor and reads the text layer directly is the source of the 'text layer alone' column.",
+	"note": "Known limits of Plainview on the Split-View set, with the reason. Gaps not listed here scored flagged or correct in the run with no further caveat.",
 	"leaked": [
 		{
 			"gap": "EG_001",
 			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3."
-		}
-	],
-	"failedClosedByFloor": [
-		{
-			"gaps": ["EG_003", "EG_015", "EG_018", "EG_019", "EG_020"],
-			"reason": "The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015 comes out flagged (the body in reading order, the stored order under reading order in the hidden block); EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning."
 		},
 		{
-			"gaps": ["EG_021", "EG_022", "EG_023", "EG_024", "EG_025"],
-			"reason": "Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. Library callers can supply an OCR callback, which the harness does not do, so that path is not measured here."
+			"gap": "EG_024",
+			"reason": "A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes."
+		}
+	],
+	"flagged": [
+		{
+			"gaps": ["EG_019", "EG_020"],
+			"reason": "The composite font lacks its /Subtype (EG_019 on the Type 0 font, EG_020 on the CIDFont), so pdfjs cannot load it and has no letters for the text. The hidden block says `unreadable font text: (letters not decodable)`; the visible word is not recovered."
+		},
+		{
+			"gaps": ["EG_021", "EG_022", "EG_023", "EG_025"],
+			"reason": "A composite font with no /ToUnicode and no font program in the file (descriptor, /CIDSystemInfo or /Type removed): its two-byte codes map to nothing, and the text layer holds the codes themselves as CJK characters. That text goes under `unreadable font`; the visible word is not recovered."
 		}
 	]
 }

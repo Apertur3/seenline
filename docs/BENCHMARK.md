@@ -10,7 +10,7 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 0.0.0 | 2026-10-19 | 179/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| plainview | 0.0.0 | 2026-10-22 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
 | markitdown | 0.1.8 | 2026-10-19 | 187/205 |  | stock; plugins disabled; no LLM |
 | docling | 2.140.0 | 2026-10-19 | 197/205 |  | standard local layout, table and OCR; page metadata exported |
 | unstructured | 0.27.28 | 2026-10-19 | 186/205 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
@@ -35,7 +35,7 @@ comparison that a reader working from text alone can just approximate; each miss
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | EG_001 | tounicode-actualtext | leaked | leaked | stripped | leaked | stripped | leaked | stripped | leaked |
 | EG_002 | tounicode-actualtext | correct | correct | stripped | correct | stripped | leaked | correct | correct |
-| EG_003 | tounicode-actualtext | failed-closed | correct | leaked | correct | correct | leaked | correct | correct |
+| EG_003 | tounicode-actualtext | correct | correct | leaked | correct | correct | leaked | correct | correct |
 | EG_004 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_005 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_006 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
@@ -47,33 +47,32 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_012 | extractor-side-payload | flagged | correct | correct | correct | correct | leaked | correct | correct |
 | EG_013 | extractor-side-payload | flagged | leaked | correct | correct | correct | leaked | correct | leaked |
 | EG_014 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
-| EG_015 | reading-order | failed-closed | correct | leaked | correct | stripped | leaked | correct | correct |
+| EG_015 | reading-order | flagged | correct | leaked | correct | stripped | leaked | correct | correct |
 | EG_016 | reading-order | flagged | correct | stripped | correct | leaked | leaked | stripped | leaked |
 | EG_017 | reading-order | flagged | stripped | correct | leaked | leaked | leaked | stripped | leaked |
-| EG_018 | font-decoding | failed-closed | correct | stripped | correct | correct | leaked | stripped | stripped |
-| EG_019 | font-decoding | failed-closed | correct | leaked | correct | correct | correct | stripped | stripped |
-| EG_020 | font-decoding | failed-closed | correct | leaked | correct | stripped | failed-closed | correct | stripped |
-| EG_021 | font-decoding | failed-closed | stripped | leaked | stripped | stripped | stripped | correct | stripped |
-| EG_022 | font-decoding | failed-closed | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
-| EG_023 | font-decoding | failed-closed | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
-| EG_024 | font-decoding | failed-closed | leaked | stripped | leaked | leaked | leaked | stripped | stripped |
-| EG_025 | font-decoding | failed-closed | stripped | stripped | stripped | stripped | stripped | correct | stripped |
-| **leaked** |  | 1 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
-| **flagged** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| EG_018 | font-decoding | correct | correct | stripped | correct | correct | leaked | stripped | stripped |
+| EG_019 | font-decoding | flagged | correct | leaked | correct | correct | correct | stripped | stripped |
+| EG_020 | font-decoding | flagged | correct | leaked | correct | stripped | failed-closed | correct | stripped |
+| EG_021 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | correct | stripped |
+| EG_022 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
+| EG_023 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
+| EG_024 | font-decoding | leaked | leaked | stripped | leaked | leaked | leaked | stripped | stripped |
+| EG_025 | font-decoding | flagged | stripped | stripped | stripped | stripped | stripped | correct | stripped |
+| **leaked** |  | 2 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
+| **flagged** |  | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **stripped** |  | 0 | 5 | 6 | 4 | 8 | 4 | 9 | 8 |
-| **failed-closed** |  | 10 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| **correct** |  | 1 | 8 | 12 | 9 | 14 | 1 | 15 | 7 |
-| **flagged by the tool itself** |  | 13 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **failed-closed** |  | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| **correct** |  | 3 | 8 | 12 | 9 | 14 | 1 | 15 | 7 |
+| **flagged by the tool itself** |  | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Plainview leaks on: EG_001_canary.pdf.
+Plainview leaks on: EG_001_canary.pdf, EG_024_canary.pdf.
 
 ### Known limits
 
 - EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
-- EG_003, EG_015, EG_018, EG_019, EG_020: failed closed. The page has fewer than 10 letters, so it is treated as a scan and, with no OCR in the harness, the file fails closed. Text layer alone: EG_003 and EG_018 come out correct; EG_015 comes out flagged (the body in reading order, the stored order under reading order in the hidden block); EG_019 and EG_020 come out stripped (the visible text is not intact and the payload is absent), so a reader gets damaged text with no warning.
-- EG_021, EG_022, EG_023, EG_024, EG_025: failed closed. Same floor. Font-decoding gap: the text layer holds code points that do not match the glyphs a reader sees. Text layer alone: all five would leak. On a longer page Plainview would pass this text on without a flag. Library callers can supply an OCR callback, which the harness does not do, so that path is not measured here.
-
-Failed-closed here is not detection: these canary pages are shorter than Plainview's text threshold, so the harness (no OCR) never reaches the text layer.
+- EG_024: leaked. A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes.
+- EG_019, EG_020: flagged. The composite font lacks its /Subtype (EG_019 on the Type 0 font, EG_020 on the CIDFont), so pdfjs cannot load it and has no letters for the text. The hidden block says `unreadable font text: (letters not decodable)`; the visible word is not recovered.
+- EG_021, EG_022, EG_023, EG_025: flagged. A composite font with no /ToUnicode and no font program in the file (descriptor, /CIDSystemInfo or /Type removed): its two-byte codes map to nothing, and the text layer holds the codes themselves as CJK characters. That text goes under `unreadable font`; the visible word is not recovered.
 
 ## Set C: the repository's own injection and Unicode cases
 
@@ -143,7 +142,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 
 | tool | files read | facts | rows | order | anchors |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 179/205 | 629/657 | 61/61 | 87/93 | 161/162 |
+| plainview | 189/205 | 631/667 | 61/61 | 87/93 | 161/162 |
 | markitdown | 187/205 | 546/653 | 59/66 | 67/94 | 69/149 |
 | docling | 197/205 | 634/658 | 61/65 | 87/93 | 91/145 |
 | unstructured | 186/205 | 627/645 | 56/61 | 90/93 | 112/156 |
@@ -162,7 +161,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 | htm | 50 (50 to 50) | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
 | html | 552 (18 to 37199) | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
 | jpg | - | - | 36 (22 to 38) | - | 40 (23 to 46) | 34 (17 to 36) | - | - |
-| pdf | 82 (35 to 44070) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | 40 (14 to 36790) | 38 (11 to 32880) | 42 (11 to 29219) |
+| pdf | 57 (25 to 33618) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | 40 (14 to 36790) | 38 (11 to 32880) | 42 (11 to 29219) |
 | png | - | - | 19 (17 to 58) | - | 19 (19 to 59) | 36 (11 to 56) | - | - |
 | pptx | 1833 (63 to 3567) | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | 1644 (38 to 4570) | - | - |
 | xlsx | 929 (86 to 76059) | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | 845 (45 to 52385) | - | - |

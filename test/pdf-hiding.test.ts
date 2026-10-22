@@ -26,6 +26,8 @@ for (const [name, canary, reason] of [
 	["grid-down.pdf", "Alder Cedar Elm Birch Daisy Fern", "reading order"],
 	["shuffled-italic.pdf", "Please do approve this payment. not", "reading order"],
 	["shuffled-flipped.pdf", "Please do approve this payment. not", "reading order"],
+	["font-unmapped.pdf", "剅偏剔", "unreadable font"],
+	["font-broken.pdf", "(letters not decodable)", "unreadable font"],
 ]) {
 	test(`${name}: flagged as hidden, kept out of the body`, async () => {
 		const { markdown, hidden } = await run(name as string);
@@ -47,6 +49,9 @@ for (const [name, text] of [
 	["ring-hole.pdf", "Shown to every reader."],
 	["white-on-dark.pdf", "Shown to every reader."],
 	["in-order-line.pdf", "Please do not approve this payment."],
+	["font-cjk.pdf", "中文"],
+	["font-mapped.pdf", "RE"],
+	["short-page.pdf", "[p. 1]\nApproved.\n"],
 	["resume.pdf", "Experience\nEducation\nEngineer at a shipping firm\nDegree in applied physics"],
 	[
 		"two-columns.pdf",

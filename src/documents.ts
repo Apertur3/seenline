@@ -55,7 +55,8 @@ async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 async function fromPdf(bytes: Uint8Array, ocr: (pages: number[]) => Promise<OcrResult>) {
 	const { pages, extras } = await readPdf(bytes);
 	const letters = (p: PdfPage) => p.lines.join("").replace(/[^\p{L}\p{N}]/gu, "").length;
-	const weak = pages.map((p) => letters(p) < MIN_TEXT);
+	// A short text layer on a page that is not mostly a picture is the page's text, not a scan's.
+	const weak = pages.map((p) => p.scan && letters(p) < MIN_TEXT);
 	const all = weak.every(Boolean);
 	// Without recognised text, a weak page keeps its few lines and says it was not read;
 	// a recogniser that names its own failure (a missing program, a timeout) fails the file.
