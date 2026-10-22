@@ -23,22 +23,27 @@ const LEET: Record<string, string> = {
 
 /** Text as a model would read it: tag characters decoded, invisibles, accents, lookalikes, leet and letter spacing undone. */
 export function normal(text: string): string {
-	return text
-		.replace(/[\u{E0020}-\u{E007E}]/gu, (c) =>
-			String.fromCodePoint((c.codePointAt(0) ?? 0) - 0xe0000),
-		)
-		.normalize("NFKD")
-		.replace(/[\p{Cf}\p{M}\p{Variation_Selector}]/gu, "")
-		.toLowerCase()
-		.replace(/\p{L}/gu, (c) => LOOKALIKE[c] ?? c)
-		.replace(/(?<=[a-z])[@$](?=[a-z])/g, (c) => LEET[c] ?? c)
-		.replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z\d]+\b/g, (w) =>
-			w.replace(/[0134579]/g, (d) => LEET[d] ?? d),
-		)
-		.replace(/\b(?:\p{L}[\t .*_·,:/|+~-](?=\p{L}\b))+\p{L}\b/gu, (run) =>
-			run.replace(/[^\p{L}]/gu, ""),
-		)
-		.replace(/[\s_*]+/g, " ");
+	return (
+		text
+			.replace(/[\u{E0020}-\u{E007E}]/gu, (c) =>
+				String.fromCodePoint((c.codePointAt(0) ?? 0) - 0xe0000),
+			)
+			.normalize("NFKD")
+			.replace(/[\p{Cf}\p{M}\p{Variation_Selector}]/gu, "")
+			.toLowerCase()
+			.replace(/\p{L}/gu, (c) => LOOKALIKE[c] ?? c)
+			// @ and $ for letters, at a word start or inside a word, but not the @ of an email address.
+			.replace(/(?<![\w@$])[@$](?=[a-z])|(?<=[a-z])[@$]{1,2}(?=[a-z])(?![a-z\d-]*\.[a-z])/g, (m) =>
+				[...m].map((c) => LEET[c] ?? c).join(""),
+			)
+			.replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z\d]+\b/g, (w) =>
+				w.replace(/[01345789]/g, (d) => LEET[d] ?? d),
+			)
+			.replace(/\b(?:\p{L}[\t .*_·,:/|+~-](?=\p{L}\b))+\p{L}\b/gu, (run) =>
+				run.replace(/[^\p{L}]/gu, ""),
+			)
+			.replace(/[\s_*]+/g, " ")
+	);
 }
 
 /** The reason class when hidden text reads like an instruction to an AI, else null. */
