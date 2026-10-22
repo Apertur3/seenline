@@ -89,10 +89,8 @@ const REASONS = new Set(
 const NOTICE = /^HTML (?:script|style) present \(code omitted\)$/;
 function kind(reasons: string[]): string {
 	const label = reasons.join(" and ");
-	if (/comments?\d*\.xml$/i.test(label)) return "comments";
-	return (
-		NAMED.exec(label)?.[0] ?? (reasons.every((r) => REASONS.has(r)) ? label : "hidden content")
-	);
+	const named = NAMED.exec(label)?.[0] ?? (/comments?\d*\.xml$/i.test(label) && "comments");
+	return named || (reasons.every((r) => REASONS.has(r)) ? label : "hidden content");
 }
 
 /** The lines under the block heading as a mode shows them: as they are, after a framing line, or kind and size only. */
