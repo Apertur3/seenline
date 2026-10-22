@@ -5,6 +5,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { HIDDEN_BLOCK } from "../src/hidden.ts";
 import { convert } from "../src/index.ts";
 import { parseHidden } from "../src/parse-hidden.ts";
 import { data, digest } from "./corpus.ts";
@@ -22,6 +23,8 @@ interface Meta {
 	spatial_regime: string;
 	structural_regime: string;
 	message_type: string;
+	message_variant_id: string;
+	chunk_strategy: string;
 }
 interface Row {
 	id: string;
@@ -34,6 +37,9 @@ interface Row {
 	reasons: string[];
 	/** A hidden entry reads like an instruction to an AI once the dataset's marker tokens are removed. */
 	suspect: string[];
+	/** The visible lines and the hidden entries' text (reading-order entries left out), for the payload check. */
+	body: string[];
+	hiddenText: string[];
 	ms: number;
 }
 
@@ -95,6 +101,8 @@ export async function runCracked(cache: string, which = "test"): Promise<void> {
 			flags: [],
 			reasons: [],
 			suspect: [],
+			body: [],
+			hiddenText: [],
 			ms: 0,
 		};
 		try {
@@ -114,6 +122,10 @@ export async function runCracked(cache: string, which = "test"): Promise<void> {
 				(h) => `${h.anchor}, ${h.reasons.join(" and ")} text: ${h.text.replace(MARKERS, " ")}`,
 			);
 			row.suspect = [...new Set(parseHidden(lines).flatMap((h) => h.suspect ?? []))];
+			row.body = r.markdown.split(`\n${HIDDEN_BLOCK}\n`)[0]?.split("\n") ?? [];
+			row.hiddenText = r.hidden
+				.filter((h) => h.reasons.some((x) => x !== "reading order"))
+				.map((h) => h.text);
 		} catch (e) {
 			const msg = e instanceof Error ? e.message : String(e);
 			Object.assign(row, {
@@ -206,6 +218,47 @@ export function reportCracked(cache: string, which = "test"): string {
 		lines.push(
 			`  F1 (confounder negatives) ${f1(ti.filter(det).length, tc.filter(det).length, ti.length - ti.filter(det).length)}`,
 		);
+	}
+	// Whether the payload itself reaches a hidden entry, not only some flag: the generator's off-page
+	// closing marker flags most files on its own. A variant's payload is the text, letters only, that its
+	// single-line files add over their benign original (visible or hidden), the most common reading.
+	const letters = (s: string) =>
+		s
+			.replace(MARKERS, " ")
+			.normalize("NFKD")
+			.toLowerCase()
+			.replace(/[^a-z0-9]/g, "");
+	const added = (m: Meta) => {
+		const r = rows.get(m.pdf_id);
+		const seen = new Set(rows.get(pairs.get(m.pair_id)?.benign_original?.pdf_id ?? "")?.body);
+		return letters(
+			[...(r?.body ?? []).filter((l) => !seen.has(l)), ...(r?.hiddenText ?? [])].join(" "),
+		);
+	};
+	const votes = new Map<string, Map<string, number>>();
+	for (const m of inj.filter((x) => x.chunk_strategy === "single_line")) {
+		const v = votes.get(m.message_variant_id) ?? new Map<string, number>();
+		v.set(added(m), (v.get(added(m)) ?? 0) + 1);
+		votes.set(m.message_variant_id, v);
+	}
+	const template = new Map(
+		[...votes].map(([id, v]) => [id, [...v].sort((a, b) => b[1] - a[1])[0]?.[0] ?? ""]),
+	);
+	const reached = (m: Meta) => {
+		const t = template.get(m.message_variant_id);
+		return !!t && letters(rows.get(m.pdf_id)?.hiddenText.join(" ") ?? "").includes(t);
+	};
+	const prate = (ms: Meta[]) =>
+		`${ms.filter(reached).length}/${ms.length} ${pct(ms.filter(reached).length, ms.length)}`;
+	const only = inj.filter((m) => det(m) && !reached(m));
+	lines.push(
+		`\npayload reaches a hidden entry: ${prate(inj)} (${template.size} variant templates; ${inj.filter((m) => !template.get(m.message_variant_id)).length} files without one)`,
+		`  flagged by other hidden text only (an off-page marker): ${only.length}/${inj.length} ${pct(only.length, inj.length)}`,
+		"  attack_family\tany hidden flag\tpayload in a hidden entry",
+	);
+	for (const v of [...new Set(inj.map((m) => m.attack_family))].sort()) {
+		const ms = inj.filter((m) => m.attack_family === v);
+		lines.push(`  ${v}\t${rate(ms)}\t${prate(ms)}`);
 	}
 	const tagged = (m: Meta) => (rows.get(m.pdf_id)?.suspect.length ?? 0) > 0;
 	const trate = (ms: Meta[]) =>

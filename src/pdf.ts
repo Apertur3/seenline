@@ -78,10 +78,33 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 
 // Visible runs in reading order (pdf-order.ts), grouped into lines: a new line when the baseline moves or
 // the text jumps back, as at a column change, and a wide gap on a line as " | " (table cells).
+// Hidden runs of one or two characters each, four or more in a row and mostly letters (a glyph per text
+// object), are one entry: the text they spell, a space where a gap on a baseline is a word space, with
+// the reasons of all of them. Apart, repeated letters would be dropped as repeats and single letters as
+// words the body shows. Shorter or mostly other runs (a figure's tick labels) stay one entry each.
 function arrange(number: number, found: Item[]): Omit<PdfPage, "scan"> {
-	const hidden = found
-		.filter((it) => it.why.length > 0)
-		.map((it) => ({ text: it.text.trim(), why: it.why }));
+	const groups: Item[][] = [];
+	const short = (it?: Item) => !!it && [...it.text.trim()].length <= 2;
+	for (const it of found.filter((x) => x.why.length > 0)) {
+		const last = groups.at(-1);
+		if (last && short(it) && short(last.at(-1))) last.push(it);
+		else groups.push([it]);
+	}
+	const hidden = groups.flatMap((g) => {
+		const text = g
+			.map((it, i) => {
+				const prev = g[i - 1];
+				// A run's own trailing or leading space is a word space too.
+				const gap =
+					prev && Math.abs(it.y - prev.y) < 0.5 * it.size && it.x - prev.end > 0.15 * it.size;
+				const space = prev && (gap || /\s$/.test(prev.text) || /^\s/.test(it.text));
+				return (space ? " " : "") + it.text.trim();
+			})
+			.join("");
+		const spelt = g.length >= 4 && 2 * (text.match(/\p{L}/gu)?.length ?? 0) > [...text].length;
+		if (spelt) return [{ text, why: [...new Set(g.flatMap((it) => it.why))] }];
+		return g.map((it) => ({ text: it.text.trim(), why: it.why }));
+	});
 	const { order, moved } = readingOrder(found.filter((it) => it.why.length === 0));
 	// The stored order goes in the block: it is what an extractor that follows the file reads.
 	if (moved.length > 0) hidden.push({ text: text(moved, " ").join(" "), why: ["reading order"] });

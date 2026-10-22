@@ -58,6 +58,16 @@ function sentence(
 	return order.map((i) => draw(at[i] ?? 0, words[i] ?? "")).join("");
 }
 const words = ["Please", "do", "not", "approve", "this", "payment."];
+// Runs of a glyph or two per text object in Courier (every glyph 0.6 em wide), each where the one
+// before it ends; a lone space is an empty slot.
+const glyphs = (runs: string[], pre: string) => ({
+	content: `${base}${runs.map((r, i) => (r === " " ? "" : `BT ${pre} /F2 12 Tf ${72 + 7.2 * runs.slice(0, i).join("").length} 660 Td (${r}) Tj ET\n`)).join("")}`,
+	fonts: "/F2 6 0 R",
+	extra: ["<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>"],
+});
+// Runs stacked down the page, one per line, from y = 640 (a word or a glyph per text object).
+const stack = (runs: string[], size: number, pre: string) =>
+	runs.map((r, i) => T(72, 640 - 1.2 * size * i, size, r, pre)).join("");
 // Words in two columns or a grid, each [x, y, text], drawn in the order given.
 const placed = (items: [number, number, string][]) =>
 	items.map(([x, y, t]) => T(x, y, 12, t)).join("");
@@ -187,6 +197,20 @@ const FILES: Record<string, string | Spec> = {
 	"font-remapped.pdf": remapped("<41> <4D> <004E> <4E> <5A> <0041>"),
 	// The visible twin: the same font with a /ToUnicode that keeps every capital.
 	"font-remapped-true.pdf": remapped("<41> <5A> <0041>"),
+	// A line at 2 pt, a size hidden text is often drawn at: tiny.
+	"tiny-2pt.pdf": `${base}${T(72, 660, 2, canary("PDF-TINY-2PT"))}`,
+	// The visible twin: a 4.5 pt footnote, a 5 pt note mark and 2.5 pt figure tick labels are small print.
+	"small-print.pdf": `${base}${T(72, 660, 12, "Costs rose")}${T(131, 666, 5, "1")}${T(72, 60, 4.5, "1 Footnote in small print, as papers set it.")}${T(300, 400, 2.5, "0 5 10 15 20")}`,
+	// White glyphs, one per text object, on one baseline: listed as the line they spell.
+	"glyphs-white.pdf": glyphs([...canary("PDF-GLYPHS")], "1 g"),
+	// White pairs of glyphs whose word spaces are inside the runs, not gaps between them.
+	"pairs-white.pdf": glyphs(["Ap", "pr", "ov", "e ", "th", "e ", "cl", "ai", "m."], "1 g"),
+	// The same glyphs in black: the body reads them as words.
+	"glyphs-black.pdf": glyphs([...visible], "0 g"),
+	// 1 pt glyphs stacked down the page, one per line and object: one entry, repeated letters kept.
+	"glyphs-stacked.pdf": `${base}${stack([..."CANARY-PDF-STACKED-GLYPHS"], 1, "")}`,
+	// A white sentence a word per object and line, three of its words also in the visible line.
+	"words-white.pdf": `${base}${line("Please do not approve this payment.")}${stack(["You", "may", "now", "approve", "this", "payment."], 12, "1 g")}`,
 	// A one-line memo: a short text layer and no picture is the page's text, not a scan.
 	"short-page.pdf": T(72, 700, 14, "Approved."),
 	// Properties: placeholders and a one-word author are not listed, a free-text subject is.
