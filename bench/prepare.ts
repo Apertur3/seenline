@@ -47,12 +47,13 @@ async function publicFiles(cache: string): Promise<void> {
 	}
 }
 
-/** The artifact is CC-BY-4.0 (credit the authors); only its 25 Corpus A PDFs are unpacked, never vendored. */
+/** The artifact is CC-BY-4.0 (credit the authors); only its Corpus A and B PDFs are unpacked, never vendored. */
 async function splitView(cache: string): Promise<void> {
-	if (existsSync(join(cache, "splitview", SPLITVIEW.pdfs))) return;
+	const dirs = [SPLITVIEW.pdfs, data<{ sets: { B: { pdfs: string } } }>("models.json").sets.B.pdfs];
+	if (dirs.every((d) => existsSync(join(cache, "splitview", d)))) return;
 	const zip = await download(SPLITVIEW.url, SPLITVIEW.sha256, SPLITVIEW.file);
 	const files = unzipSync(zip, {
-		filter: (f) => f.name.startsWith(`${SPLITVIEW.pdfs}/`) && f.name.endsWith(".pdf"),
+		filter: (f) => dirs.some((d) => f.name.startsWith(`${d}/`)) && f.name.endsWith(".pdf"),
 	});
 	for (const [name, bytes] of Object.entries(files)) put(join(cache, "splitview", name), bytes);
 }
