@@ -79,13 +79,21 @@ const FRAME =
 // Labels that carry a name the file chose (a key, a file name, a field name): describe keeps the kind only.
 const NAMED =
 	/^(?:image metadata|metadata|javascript|attachment|form field|Mail|HTML|docProps|customXml|Legacy conversion)\b/;
-const kind = (reason: string) =>
-	NAMED.exec(reason)?.[0] ??
-	(/comments?\d*\.xml$/i.test(reason)
-		? "comments"
-		: /^[a-z][a-z -]*$/.test(reason)
-			? reason
-			: "hidden content");
+// The reasons the readers write. Describe shows a label only when it is made of these, so text that
+// merely looks like a label (an OCR extra, a name with "and" in it) never reaches the Markdown.
+const REASONS = new Set(
+	"white,tiny,invisible,off-page,covered,transparent,hidden layer,squeezed,unreadable font,clipped,reading order,annotation,hidden run,tiny text,white text,white or same-background text,tracked deletion,field code,hidden row,hidden column,hidden sheet,hidden shape,off-slide shape,hidden slide,hidden content".split(
+		",",
+	),
+);
+const NOTICE = /^HTML (?:script|style) present \(code omitted\)$/;
+function kind(reasons: string[]): string {
+	const label = reasons.join(" and ");
+	if (/comments?\d*\.xml$/i.test(label)) return "comments";
+	return (
+		NAMED.exec(label)?.[0] ?? (reasons.every((r) => REASONS.has(r)) ? label : "hidden content")
+	);
+}
 
 /** The lines under the block heading as a mode shows them: as they are, after a framing line, or kind and size only. */
 export function showHidden(lines: string[], mode: ConvertOptions["hidden"]): string[] {
@@ -93,8 +101,8 @@ export function showHidden(lines: string[], mode: ConvertOptions["hidden"]): str
 	if (mode !== "describe") return lines;
 	return lines.map((line) => {
 		const [entry] = parseHidden([line]);
-		if (!entry) return line;
+		if (!entry || NOTICE.test(line)) return line;
 		const at = entry.anchor ? `${entry.anchor}, ` : "";
-		return `${at}${entry.reasons.map(kind).join(" and ")}: ${[...entry.text].length} characters not shown`;
+		return `${at}${kind(entry.reasons)}: ${[...entry.text].length} characters not shown`;
 	});
 }

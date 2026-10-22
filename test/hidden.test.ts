@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { HIDDEN_BLOCK, scan, visible } from "../src/hidden.ts";
+import { showHidden } from "../src/parse-hidden.ts";
 
 const tag = (s: string) =>
 	[...s].map((c) => String.fromCodePoint(0xe0000 + (c.codePointAt(0) ?? 0))).join("");
@@ -85,4 +86,33 @@ test("the copied raw Unicode and markup fixtures retain their scan classes", asy
 			await readFile(new URL(`./golden/scanner/${name}.json`, import.meta.url)),
 		);
 	}
+});
+
+test("describe shows a label only when the readers wrote it, never a name or text the file chose", () => {
+	const lines = [
+		"metadata first and last: X",
+		"attachment report and summary: X",
+		"p. 2, form field terms and conditions: X",
+		"javascript validate and submit: X",
+		"image captured by drone: coords",
+		"tiny text on receipt: secret",
+		"Mail header X-Note: X",
+		"p. 1, white and tiny text: X",
+		"[Sheet: Budget], [row 3], A3, hidden row: XYZ",
+		"HTML script present (code omitted)",
+		"an OCR extra line",
+	];
+	assert.deepEqual(showHidden(lines, "describe"), [
+		"metadata: 1 characters not shown",
+		"attachment: 1 characters not shown",
+		"p. 2, form field: 1 characters not shown",
+		"javascript: 1 characters not shown",
+		"hidden content: 6 characters not shown",
+		"hidden content: 6 characters not shown",
+		"Mail: 1 characters not shown",
+		"p. 1, white and tiny: 1 characters not shown",
+		"[Sheet: Budget], [row 3], A3, hidden row: 3 characters not shown",
+		"HTML script present (code omitted)",
+		"hidden content: 17 characters not shown",
+	]);
 });

@@ -232,6 +232,8 @@ test("hidden modes change only the block's entry lines; the result keeps text, f
 				assert.equal(entries.length, text.hidden.length);
 				for (const [i, h] of text.hidden.entries()) {
 					const line = entries[i] ?? "";
+					// A notice with no payload ("HTML script present (code omitted)") stays as it is.
+					if (line === h.text) continue;
 					assert.ok(line.startsWith(h.anchor), line);
 					assert.ok(line.endsWith(`: ${[...h.text].length} characters not shown`), line);
 					assert.ok(!mode.markdown.includes(h.text), h.text);
