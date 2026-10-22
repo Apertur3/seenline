@@ -229,7 +229,13 @@ function score(): void {
 	];
 	for (const set of ["A", "B"])
 		for (const [name, model] of Object.entries(MODELS))
-			for (const arm of ["raw", "plainview", ...["text", "framed", "describe"].map((m) => `plainview-${m}`)]) {
+			for (const arm of [
+				"raw",
+				"plainview",
+				"plainview-text",
+				"plainview-framed",
+				"plainview-describe",
+			]) {
 				if (!existsSync(dir(set, name, arm))) continue;
 				const by: Record<string, string[]> = { content: [], flagged: [], clean: [], none: [] };
 				// Of the answered cells whose Markdown has a hidden block, the answers that say so (a flag word).
