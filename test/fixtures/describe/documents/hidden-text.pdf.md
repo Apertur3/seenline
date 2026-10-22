@@ -1,7 +1,7 @@
 [p. 1]
 Quarterly memo: parking permits renew on 5 January 2027.
 [Hidden in the original]
-p. 1, white: 59 characters not shown
-p. 1, tiny: 60 characters not shown
-p. 1, off-page: 46 characters not shown
-p. 1, invisible: 40 characters not shown
+p. 1, white text: 59 characters not shown
+p. 1, tiny text: 60 characters not shown
+p. 1, off-page text: 46 characters not shown
+p. 1, invisible text: 40 characters not shown
