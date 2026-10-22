@@ -11,6 +11,7 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 | tool | version | date | files read | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
 | plainview | 0.0.0 | 2026-10-22 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| plainview-verify | 0.0.0 | 2026-10-22 | 102/205 |  | the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file |
 | markitdown | 0.1.8 | 2026-10-19 | 187/205 |  | stock; plugins disabled; no LLM |
 | docling | 2.140.0 | 2026-10-19 | 197/205 |  | standard local layout, table and OCR; page metadata exported |
 | unstructured | 0.27.28 | 2026-10-19 | 186/205 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
@@ -31,46 +32,46 @@ The authors' own counts for their runs (Docling 18 of 25, Unstructured 17 of 25,
 table below is a re-run. Gaps in the font-decoding and reading-order families depend on a render-versus-text
 comparison that a reader working from text alone can just approximate; each miss is a known limit, not a hidden one.
 
-| gap | family | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| EG_001 | tounicode-actualtext | leaked | leaked | stripped | leaked | stripped | leaked | stripped | leaked |
-| EG_002 | tounicode-actualtext | correct | correct | stripped | correct | stripped | leaked | correct | correct |
-| EG_003 | tounicode-actualtext | correct | correct | leaked | correct | correct | leaked | correct | correct |
-| EG_004 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
-| EG_005 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
-| EG_006 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
-| EG_007 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | stripped | correct |
-| EG_008 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
-| EG_009 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
-| EG_010 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | leaked | leaked |
-| EG_011 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
-| EG_012 | extractor-side-payload | flagged | correct | correct | correct | correct | leaked | correct | correct |
-| EG_013 | extractor-side-payload | flagged | leaked | correct | correct | correct | leaked | correct | leaked |
-| EG_014 | extractor-side-payload | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
-| EG_015 | reading-order | flagged | correct | leaked | correct | stripped | leaked | correct | correct |
-| EG_016 | reading-order | flagged | correct | stripped | correct | leaked | leaked | stripped | leaked |
-| EG_017 | reading-order | flagged | stripped | correct | leaked | leaked | leaked | stripped | leaked |
-| EG_018 | font-decoding | correct | correct | stripped | correct | correct | leaked | stripped | stripped |
-| EG_019 | font-decoding | flagged | correct | leaked | correct | correct | correct | stripped | stripped |
-| EG_020 | font-decoding | flagged | correct | leaked | correct | stripped | failed-closed | correct | stripped |
-| EG_021 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | correct | stripped |
-| EG_022 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
-| EG_023 | font-decoding | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
-| EG_024 | font-decoding | leaked | leaked | stripped | leaked | leaked | leaked | stripped | stripped |
-| EG_025 | font-decoding | flagged | stripped | stripped | stripped | stripped | stripped | correct | stripped |
-| **leaked** |  | 2 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
-| **flagged** |  | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **stripped** |  | 0 | 5 | 6 | 4 | 8 | 4 | 9 | 8 |
-| **failed-closed** |  | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| **correct** |  | 3 | 8 | 12 | 9 | 14 | 1 | 15 | 7 |
-| **flagged by the tool itself** |  | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| gap | family | plainview | plainview-verify | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| EG_001 | tounicode-actualtext | leaked | leaked | leaked | stripped | leaked | stripped | leaked | stripped | leaked |
+| EG_002 | tounicode-actualtext | correct | correct | correct | stripped | correct | stripped | leaked | correct | correct |
+| EG_003 | tounicode-actualtext | correct | correct | correct | leaked | correct | correct | leaked | correct | correct |
+| EG_004 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
+| EG_005 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
+| EG_006 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
+| EG_007 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | stripped | correct |
+| EG_008 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
+| EG_009 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
+| EG_010 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | leaked | leaked |
+| EG_011 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
+| EG_012 | extractor-side-payload | flagged | flagged | correct | correct | correct | correct | leaked | correct | correct |
+| EG_013 | extractor-side-payload | flagged | flagged | leaked | correct | correct | correct | leaked | correct | leaked |
+| EG_014 | extractor-side-payload | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
+| EG_015 | reading-order | flagged | flagged | correct | leaked | correct | stripped | leaked | correct | correct |
+| EG_016 | reading-order | flagged | flagged | correct | stripped | correct | leaked | leaked | stripped | leaked |
+| EG_017 | reading-order | flagged | flagged | stripped | correct | leaked | leaked | leaked | stripped | leaked |
+| EG_018 | font-decoding | correct | correct | correct | stripped | correct | correct | leaked | stripped | stripped |
+| EG_019 | font-decoding | flagged | flagged | correct | leaked | correct | correct | correct | stripped | stripped |
+| EG_020 | font-decoding | flagged | flagged | correct | leaked | correct | stripped | failed-closed | correct | stripped |
+| EG_021 | font-decoding | flagged | flagged | stripped | leaked | stripped | stripped | stripped | correct | stripped |
+| EG_022 | font-decoding | flagged | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
+| EG_023 | font-decoding | flagged | flagged | stripped | leaked | stripped | stripped | stripped | stripped | stripped |
+| EG_024 | font-decoding | leaked | leaked | leaked | stripped | leaked | leaked | leaked | stripped | stripped |
+| EG_025 | font-decoding | flagged | flagged | stripped | stripped | stripped | stripped | stripped | correct | stripped |
+| **leaked** |  | 2 | 2 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
+| **flagged** |  | 20 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **stripped** |  | 0 | 0 | 5 | 6 | 4 | 8 | 4 | 9 | 8 |
+| **failed-closed** |  | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
+| **correct** |  | 3 | 3 | 8 | 12 | 9 | 14 | 1 | 15 | 7 |
+| **flagged by the tool itself** |  | 20 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 Plainview leaks on: EG_001_canary.pdf, EG_024_canary.pdf.
 
 ### Known limits
 
-- EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3.
-- EG_024: leaked. A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes.
+- EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column plainview-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the scorer still counts it leaked.
+- EG_024: leaked. A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes. As for EG_001, `--verify` lists the page and the body keeps the text layer.
 - EG_019, EG_020: flagged. The composite font lacks its /Subtype (EG_019 on the Type 0 font, EG_020 on the CIDFont), so pdfjs cannot load it and has no letters for the text. The hidden block says `unreadable font text: (letters not decodable)`; the visible word is not recovered.
 - EG_021, EG_022, EG_023, EG_025: flagged. A composite font with no /ToUnicode and no font program in the file (descriptor, /CIDSystemInfo or /Type removed): its two-byte codes map to nothing, and the text layer holds the codes themselves as CJK characters. That text goes under `unreadable font`; the visible word is not recovered.
 
@@ -78,71 +79,72 @@ Plainview leaks on: EG_001_canary.pdf, EG_024_canary.pdf.
 
 Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 
-| file | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| hidden-text.pdf | flagged | leaked | leaked | leaked | correct | leaked | correct | leaked |
-| office-memo.docx | flagged | correct | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
-| office-deck.pptx | flagged | leaked | failed-closed | leaked | failed-closed | leaked | unsupported | unsupported |
-| office-book.xlsx | flagged | correct | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
-| mail-newsletter.html | flagged | leaked | correct | leaked | failed-closed | leaked | unsupported | unsupported |
-| mail-alternative.eml | flagged | unsupported | unsupported | failed-closed | unsupported | leaked | unsupported | unsupported |
-| mail-html.eml | flagged | unsupported | unsupported | leaked | unsupported | leaked | unsupported | unsupported |
-| inj-pdf-white.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
-| inj-pdf-tiny.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | stripped |
-| inj-pdf-offpage.pdf | flagged | leaked | stripped | leaked | stripped | leaked | stripped | stripped |
-| inj-pdf-invisible-mode.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
-| inj-pdf-transparent.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
-| inj-pdf-stroke-white.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
-| inj-pdf-covered.pdf | flagged | leaked | leaked | leaked | leaked | leaked | leaked | leaked |
-| inj-pdf-under-image.pdf | flagged | leaked | leaked | leaked | leaked | leaked | leaked | leaked |
-| inj-pdf-layer-off.pdf | flagged | leaked | leaked | leaked | stripped | leaked | stripped | stripped |
-| inj-pdf-annotation.pdf | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
-| inj-pdf-form-field.pdf | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
-| inj-pdf-metadata.pdf | flagged | stripped | stripped | stripped | stripped | stripped | stripped | stripped |
-| inj-pdf-attachment.pdf | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
-| inj-pdf-javascript.pdf | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
-| inj-pdf-ocr-layer.pdf | failed-closed | leaked | leaked | leaked | stripped | leaked | leaked | leaked |
-| inj-pdf-unicode.pdf | flagged | flagged | flagged | flagged | leaked | flagged | flagged | flagged |
-| inj-img-png-text.png | failed-closed | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
-| inj-img-exif.jpg | failed-closed | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
-| inj-img-qr.png | failed-closed | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
-| inj-img-tiny-corner.png | failed-closed | unsupported | stripped | failed-closed | stripped | leaked | unsupported | unsupported |
-| inj-docx-hidden-run.docx | flagged | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-docx-tiny.docx | flagged | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-docx-comment.docx | flagged | stripped | stripped | stripped | failed-closed | leaked | unsupported | unsupported |
-| inj-pptx-hidden-slide.pptx | flagged | leaked | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-pptx-tiny.pptx | flagged | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-xlsx-hidden-sheet.xlsx | flagged | leaked | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-xlsx-comment-hidden-row.xlsx | flagged | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
-| inj-img-lowcontrast.png | failed-closed | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
-| inj-img-mirrored.png | failed-closed | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
-| clipped.pdf | flagged | leaked | leaked | leaked | correct | leaked | correct | leaked |
-| squeezed.pdf | flagged | leaked | correct | leaked | leaked | leaked | correct | leaked |
-| form-covers.pdf | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| rotated-clipped.pdf | flagged | correct | leaked | correct | leaked | leaked | correct | leaked |
-| properties.pdf | flagged | correct | correct | correct | correct | correct | correct | correct |
-| frame-covers.pdf | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| ring-filled.pdf | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| white-on-light.pdf | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| white-on-picture.pdf | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| unicode-tag-chars.html | flagged | flagged | correct | flagged | failed-closed | flagged | unsupported | unsupported |
-| unicode-zero-width.html | flagged | correct | correct | correct | failed-closed | correct | unsupported | unsupported |
-| unicode-bidi.html | flagged | flagged | leaked | flagged | failed-closed | flagged | unsupported | unsupported |
-| unicode-homoglyph.html | flagged | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
-| unicode-variation-bmp.html | flagged | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
-| unicode-variation-supp.html | flagged | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
-| **leaked** | 0 | 26 | 23 | 29 | 5 | 37 | 8 | 16 |
-| **flagged** | 44 | 6 | 4 | 6 | 0 | 6 | 1 | 1 |
-| **stripped** | 0 | 6 | 16 | 6 | 19 | 6 | 12 | 8 |
-| **failed-closed** | 7 | 0 | 1 | 7 | 17 | 0 | 0 | 0 |
-| **correct** | 0 | 5 | 5 | 3 | 8 | 2 | 5 | 1 |
-| **flagged by the tool itself** | 44 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| file | plainview | plainview-verify | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| hidden-text.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | correct | leaked |
+| office-memo.docx | flagged | unsupported | correct | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
+| office-deck.pptx | flagged | unsupported | leaked | failed-closed | leaked | failed-closed | leaked | unsupported | unsupported |
+| office-book.xlsx | flagged | unsupported | correct | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| mail-newsletter.html | flagged | unsupported | leaked | correct | leaked | failed-closed | leaked | unsupported | unsupported |
+| mail-alternative.eml | flagged | unsupported | unsupported | unsupported | failed-closed | unsupported | leaked | unsupported | unsupported |
+| mail-html.eml | flagged | unsupported | unsupported | unsupported | leaked | unsupported | leaked | unsupported | unsupported |
+| inj-pdf-white.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
+| inj-pdf-tiny.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | stripped |
+| inj-pdf-offpage.pdf | flagged | flagged | leaked | stripped | leaked | stripped | leaked | stripped | stripped |
+| inj-pdf-invisible-mode.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
+| inj-pdf-transparent.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
+| inj-pdf-stroke-white.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | leaked |
+| inj-pdf-covered.pdf | flagged | flagged | leaked | leaked | leaked | leaked | leaked | leaked | leaked |
+| inj-pdf-under-image.pdf | flagged | flagged | leaked | leaked | leaked | leaked | leaked | leaked | leaked |
+| inj-pdf-layer-off.pdf | flagged | flagged | leaked | leaked | leaked | stripped | leaked | stripped | stripped |
+| inj-pdf-annotation.pdf | flagged | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
+| inj-pdf-form-field.pdf | flagged | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
+| inj-pdf-metadata.pdf | flagged | flagged | stripped | stripped | stripped | stripped | stripped | stripped | stripped |
+| inj-pdf-attachment.pdf | flagged | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
+| inj-pdf-javascript.pdf | flagged | flagged | stripped | stripped | stripped | stripped | leaked | stripped | stripped |
+| inj-pdf-ocr-layer.pdf | failed-closed | failed-closed | leaked | leaked | leaked | stripped | leaked | leaked | leaked |
+| inj-pdf-unicode.pdf | flagged | flagged | flagged | flagged | flagged | leaked | flagged | flagged | flagged |
+| inj-img-png-text.png | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
+| inj-img-exif.jpg | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
+| inj-img-qr.png | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
+| inj-img-tiny-corner.png | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | leaked | unsupported | unsupported |
+| inj-docx-hidden-run.docx | flagged | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-docx-tiny.docx | flagged | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-docx-comment.docx | flagged | unsupported | stripped | stripped | stripped | failed-closed | leaked | unsupported | unsupported |
+| inj-pptx-hidden-slide.pptx | flagged | unsupported | leaked | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-pptx-tiny.pptx | flagged | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-xlsx-hidden-sheet.xlsx | flagged | unsupported | leaked | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-xlsx-comment-hidden-row.xlsx | flagged | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| inj-img-lowcontrast.png | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
+| inj-img-mirrored.png | failed-closed | unsupported | unsupported | stripped | failed-closed | stripped | stripped | unsupported | unsupported |
+| clipped.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | correct | leaked |
+| squeezed.pdf | flagged | flagged | leaked | correct | leaked | leaked | leaked | correct | leaked |
+| form-covers.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
+| rotated-clipped.pdf | flagged | flagged | correct | leaked | correct | leaked | leaked | correct | leaked |
+| properties.pdf | flagged | flagged | correct | correct | correct | correct | correct | correct | correct |
+| frame-covers.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
+| ring-filled.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
+| white-on-light.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
+| white-on-picture.pdf | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
+| unicode-tag-chars.html | flagged | unsupported | flagged | correct | flagged | failed-closed | flagged | unsupported | unsupported |
+| unicode-zero-width.html | flagged | unsupported | correct | correct | correct | failed-closed | correct | unsupported | unsupported |
+| unicode-bidi.html | flagged | unsupported | flagged | leaked | flagged | failed-closed | flagged | unsupported | unsupported |
+| unicode-homoglyph.html | flagged | unsupported | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
+| unicode-variation-bmp.html | flagged | unsupported | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
+| unicode-variation-supp.html | flagged | unsupported | flagged | flagged | flagged | failed-closed | flagged | unsupported | unsupported |
+| **leaked** | 0 | 0 | 26 | 23 | 29 | 5 | 37 | 8 | 16 |
+| **flagged** | 44 | 25 | 6 | 4 | 6 | 0 | 6 | 1 | 1 |
+| **stripped** | 0 | 0 | 6 | 16 | 6 | 19 | 6 | 12 | 8 |
+| **failed-closed** | 7 | 1 | 0 | 1 | 7 | 17 | 0 | 0 | 0 |
+| **correct** | 0 | 0 | 5 | 5 | 3 | 8 | 2 | 5 | 1 |
+| **flagged by the tool itself** | 44 | 25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Fidelity (facts, rows, order, anchors found, visible text counted)
 
 | tool | files read | facts | rows | order | anchors |
 | --- | --- | --- | --- | --- | --- |
 | plainview | 189/205 | 631/667 | 61/61 | 87/93 | 161/162 |
+| plainview-verify | 102/205 | 280/293 | 5/5 | 39/41 | 85/86 |
 | markitdown | 187/205 | 546/653 | 59/66 | 67/94 | 69/149 |
 | docling | 197/205 | 634/658 | 61/65 | 87/93 | 91/145 |
 | unstructured | 186/205 | 627/645 | 56/61 | 90/93 | 112/156 |
@@ -153,28 +155,28 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B.
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
-| format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| csv | 2854 (41 to 5957) | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | 1932 (27 to 4961) | - | - |
-| docx | 544 (61 to 12073) | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
-| eml | 167 (79 to 296) | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
-| htm | 50 (50 to 50) | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
-| html | 552 (18 to 37199) | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
-| jpg | - | - | 36 (22 to 38) | - | 40 (23 to 46) | 34 (17 to 36) | - | - |
-| pdf | 57 (25 to 33618) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | 40 (14 to 36790) | 38 (11 to 32880) | 42 (11 to 29219) |
-| png | - | - | 19 (17 to 58) | - | 19 (19 to 59) | 36 (11 to 56) | - | - |
-| pptx | 1833 (63 to 3567) | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | 1644 (38 to 4570) | - | - |
-| xlsx | 929 (86 to 76059) | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | 845 (45 to 52385) | - | - |
+| format | plainview | plainview-verify | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| csv | 2854 (41 to 5957) | - | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | 1932 (27 to 4961) | - | - |
+| docx | 473 (37 to 11967) | - | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
+| eml | 159 (78 to 296) | - | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
+| htm | 50 (50 to 50) | - | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
+| html | 553 (18 to 19761) | - | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
+| jpg | - | - | - | 36 (22 to 38) | - | 40 (23 to 46) | 34 (17 to 36) | - | - |
+| pdf | 46 (25 to 33605) | 49 (26 to 33605) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | 40 (14 to 36790) | 38 (11 to 32880) | 42 (11 to 29219) |
+| png | - | - | - | 19 (17 to 58) | - | 19 (19 to 59) | 36 (11 to 56) | - | - |
+| pptx | 1692 (53 to 3478) | - | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | 1644 (38 to 4570) | - | - |
+| xlsx | 923 (62 to 76044) | - | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | 845 (45 to 52385) | - | - |
 
 Common files:95 public files that Plainview, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
 
 | format | files | plainview | markitdown | docling | unstructured | hidden block share (plainview) |
 | --- | --- | --- | --- | --- | --- | --- |
 | csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
-| docx | 20 | 2894 | 2831 | 2923 | 2264 | 2.1% |
-| html | 7 | 24940 | 21583 | 17244 | 9042 | 0.0% |
-| pdf | 38 | 17860 | 24010 | 15441 | 17483 | 0.1% |
-| pptx | 15 | 2526 | 2694 | 2129 | 2032 | 1.1% |
+| docx | 20 | 2373 | 2831 | 2923 | 2264 | 0.5% |
+| html | 7 | 10711 | 21583 | 17244 | 9042 | 0.0% |
+| pdf | 38 | 17860 | 24010 | 15441 | 17483 | 0.0% |
+| pptx | 15 | 2526 | 2694 | 2129 | 2032 | 0.7% |
 | xlsx | 10 | 4471 | 3608 | 4171 | 2973 | 0.0% |
 
 Hidden block on ordinary public files (Set A, files Plainview read): the entries are not verified as malicious, they are what Plainview lists. Package metadata, covered text and white text on slides are common in clean documents, so this is noise a user sees with `--fail-on-hidden`.
@@ -195,18 +197,18 @@ Provider token counts of the native upload are a separate optional step (`provid
 
 Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shared with other work) and start a new JVM for every file, so their times are not comparable with the other columns.
 
-| format | plainview | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| csv | 0.000 | 0.003 | 0.006 | 0.005 | - | 0.819 | - | - |
-| docx | 0.022 | 0.090 | 0.051 | 0.015 | 0.014 | 0.867 | - | - |
-| eml | 0.000 | - | - | 0.011 | - | 1.109 | - | - |
-| htm | 0.000 | 0.003 | 0.002 | 0.001 | 0.023 | 0.790 | - | - |
-| html | 0.000 | 0.003 | 0.004 | 0.001 | 0.018 | 0.690 | - | - |
-| jpg | 0.000 | - | 0.990 | 0.115 | 1.683 | 1.057 | - | - |
-| pdf | 0.002 | 0.005 | 0.085 | 0.003 | 0.118 | 1.140 | 0.158 | 0.403 |
-| png | 0.000 | - | 1.414 | 0.100 | 1.533 | 0.828 | - | - |
-| pptx | 0.025 | 0.021 | 0.090 | 0.020 | 0.014 | 2.789 | - | - |
-| xlsx | 0.002 | 0.011 | 0.005 | 0.008 | 0.014 | 1.230 | - | - |
+| format | plainview | plainview-verify | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| csv | 0.000 | - | 0.003 | 0.006 | 0.005 | - | 0.819 | - | - |
+| docx | 0.022 | - | 0.090 | 0.051 | 0.015 | 0.014 | 0.867 | - | - |
+| eml | 0.000 | - | - | - | 0.011 | - | 1.109 | - | - |
+| htm | 0.000 | - | 0.003 | 0.002 | 0.001 | 0.023 | 0.790 | - | - |
+| html | 0.000 | - | 0.003 | 0.004 | 0.001 | 0.018 | 0.690 | - | - |
+| jpg | 0.000 | - | - | 0.990 | 0.115 | 1.683 | 1.057 | - | - |
+| pdf | 0.002 | 0.570 | 0.005 | 0.085 | 0.003 | 0.118 | 1.140 | 0.158 | 0.403 |
+| png | 0.000 | - | - | 1.414 | 0.100 | 1.533 | 0.828 | - | - |
+| pptx | 0.026 | - | 0.021 | 0.090 | 0.020 | 0.014 | 2.789 | - | - |
+| xlsx | 0.002 | - | 0.011 | 0.005 | 0.008 | 0.014 | 1.230 | - | - |
 
 ## Anchors (set D)
 

@@ -9,6 +9,8 @@ export interface ConvertOptions {
 	path?: string;
 	/** For a PDF, `pages` lists the 1-based pages to read; return text at index page - 1. */
 	ocr?: (path: string, pages?: number[]) => Promise<OcrResult>;
+	/** For a PDF, reads the rendered pages that have a text layer (called as `ocr`) and lists a page whose text layer has words the page image shows differently as `text differs from page image`; any failure fails the file. */
+	verify?: (path: string, pages?: number[]) => Promise<OcrResult>;
 	maxRows?: number;
 	/** How the Markdown's hidden block shows hidden text (default describe); `hidden` in the result always keeps it. */
 	hidden?: "text" | "framed" | "describe";

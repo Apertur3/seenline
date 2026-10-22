@@ -69,6 +69,18 @@ const grid = (x: number, y: number): [number, number, string][] => [
 	[x, y - 40, "Daisy"],
 	[x, y - 80, "Fern"],
 ];
+// A Helvetica line whose /ToUnicode maps the capitals by the ranges given (bfrange entries) and the space to itself.
+const remapped = (ranges: string): Spec => ({
+	content: `${base}BT /F2 24 Tf 72 640 Td (STOP PAYMENT NOW) Tj ET\n`,
+	fonts: "/F2 6 0 R",
+	extra: [
+		"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /ToUnicode 7 0 R >>",
+		stream(
+			"",
+			`/CIDInit /ProcSet findresource begin 12 dict begin begincmap 1 begincodespacerange <00> <FF> endcodespacerange 1 beginbfchar <20> <0020> endbfchar ${ranges.split(" ").length / 3} beginbfrange ${ranges} endbfrange endcmap end end`,
+		),
+	],
+});
 const FILES: Record<string, string | Spec> = {
 	// Text drawn inside a 1 pt clip at the page corner: never on the page.
 	"clipped.pdf": `${base}q 0 0 1 1 re W n\n${line(canary("PDF-CLIPPED"))}Q\n`,
@@ -170,6 +182,11 @@ const FILES: Record<string, string | Spec> = {
 			),
 		],
 	},
+	// Helvetica with a /ToUnicode that sends each capital to the one 13 letters on (Split-View EG_001): the
+	// page shows STOP PAYMENT NOW, the text layer says FGBC CNLZRAG ABJ. Only --verify can see it.
+	"font-remapped.pdf": remapped("<41> <4D> <004E> <4E> <5A> <0041>"),
+	// The visible twin: the same font with a /ToUnicode that keeps every capital.
+	"font-remapped-true.pdf": remapped("<41> <5A> <0041>"),
 	// A one-line memo: a short text layer and no picture is the page's text, not a scan.
 	"short-page.pdf": T(72, 700, 14, "Approved."),
 	// Properties: placeholders and a one-word author are not listed, a free-text subject is.

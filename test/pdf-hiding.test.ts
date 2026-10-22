@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { NO_TEXT_LAYER } from "../src/documents.ts";
+import { HIDDEN_BLOCK } from "../src/hidden.ts";
 import { readingOrder } from "../src/pdf-order.ts";
 import type { ConvertOptions } from "../src/types.ts";
+import { differs } from "../src/verify.ts";
 import { convert, PlainviewError } from "./text-mode.ts";
 
 const run = async (name: string, opts: Partial<ConvertOptions> = {}) =>
@@ -117,6 +119,70 @@ test("weak-page.pdf: without text recognition the near-empty page is marked, not
 		throw new PlainviewError("unavailable", "could not read this file: recogniser missing");
 	};
 	await assert.rejects(run("weak-page.pdf", { ocr: named }), /recogniser missing/);
+});
+
+// Render and compare: words of the text layer the page image shows differently, not recognition noise.
+test("differs: flags text the image replaces, not recognition errors, misses or order", () => {
+	const headline = "Investigators link the renovation to arson.\nOn the first day of spring";
+	assert.deepEqual(differs(headline, "GrantFileQ2\n\nOn the first day of spring"), {
+		text: 4,
+		image: 1,
+	});
+	assert.ok(
+		differs("Entry passphrase: | ABCD\nThe archive", "Entry passphrase: D A B C\nThe archive"),
+	);
+	for (const [text, image] of [
+		[
+			"Work by M¨uller and Schütze, IBAN NL00 SYNT, a figure",
+			"Work by Miiller and Schutze, IBAN NLOO SYNT, a figure",
+		],
+		["Results\nstrictly valid misleading steps\nDiscussion", "Results\n\nDiscussion"],
+		[
+			"pumps cleared water\nbattery room stayed wet\narchive reopened",
+			"pumps cleared water archive reopened\nbattery room stayed wet",
+		],
+		["", "Text only a picture shows"],
+		// The image's stretch holds only words the text layer has elsewhere: nothing differs.
+		["Page one, five. Alpha intro omega", "Page one, five. Alpha five page omega"],
+	])
+		assert.equal(differs(text as string, image as string), null, String(text));
+	// An image with no word where the text layer has some, and a page too long to compare in bounded
+	// time and memory, are reported, not passed.
+	assert.deepEqual(differs("Approved budget 2027", ". ,"), { text: 2, image: 0 });
+	const long = Array(4001).fill("word").join(" ");
+	assert.equal(differs(long, long), "too long");
+});
+
+test("verify: a page whose image shows other words is listed, the body is kept; a match is silent", async () => {
+	const pages: number[][] = [];
+	const verify =
+		(said: string) =>
+		async (_: string, p: number[] = []) => {
+			pages.push(p);
+			const text = `Approved budget: EUR 100,000 for 2027.\n${said}`;
+			return { pages: Array.from({ length: Math.max(...p) }, () => text), extras: [] };
+		};
+	const plain = await run("font-remapped.pdf");
+	const flagged = await run("font-remapped.pdf", { verify: verify("STOP PAYMENT NOW") });
+	assert.equal(flagged.markdown.split(HIDDEN_BLOCK)[0], plain.markdown);
+	assert.deepEqual(flagged.hidden, [
+		{
+			anchor: "p. 1",
+			reasons: ["text differs from page image"],
+			text: "2 words only in the text layer, 2 words only in the page image",
+		},
+	]);
+	const same = await run("font-remapped.pdf", { verify: verify("FGBC CNLZRAG ABJ") });
+	assert.equal(same.markdown, plain.markdown);
+	// Pages without a text layer are not compared; a failing reader fails the file.
+	await run("weak-page.pdf", { verify: verify("") });
+	assert.deepEqual(pages, [[1], [1], [1, 3]]);
+	const down = async () => {
+		throw new Error("recogniser down");
+	};
+	await assert.rejects(run("font-remapped.pdf", { verify: down }), /text recognition failed/);
+	const short = async () => ({ pages: [], extras: [] });
+	await assert.rejects(run("font-remapped.pdf", { verify: short }), /text recognition failed/);
 });
 
 test("weak-page.pdf: with text recognition the page is read as before, with no marker", async () => {

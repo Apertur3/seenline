@@ -4,23 +4,17 @@ import { basename } from "node:path";
 import { convert, PlainviewError } from "./index.ts";
 import type { ConvertOptions } from "./types.ts";
 
-export async function convertFile(
-	path: string,
-	ocr?: ConvertOptions["ocr"],
-	hidden?: ConvertOptions["hidden"],
-) {
+/** What the CLI or MCP server passes on: text recognition for scans (`--ocr`) and for comparison (`--verify`), and the hidden mode. */
+export type Readers = Pick<ConvertOptions, "ocr" | "verify" | "hidden">;
+
+export async function convertFile(path: string, readers: Readers = {}) {
 	let bytes: Buffer;
 	try {
 		bytes = await readFile(path);
 	} catch (error) {
 		throw new PlainviewError("invalid", `could not read this file: ${errorMessage(error)}`);
 	}
-	return convert(bytes, {
-		name: basename(path),
-		path,
-		...(ocr && { ocr }),
-		...(hidden && { hidden }),
-	});
+	return convert(bytes, { name: basename(path), path, ...readers });
 }
 
 export function errorMessage(error: unknown): string {

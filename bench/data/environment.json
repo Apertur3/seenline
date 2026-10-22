@@ -27,6 +27,10 @@
 			],
 			"configuration": "convert() from src, no OCR callback (scans and images fail closed)"
 		},
+		"plainview-verify": {
+			"formats": ["pdf"],
+			"configuration": "the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file"
+		},
 		"markitdown": {
 			"formats": ["pdf", "docx", "pptx", "xlsx", "csv", "html", "htm", "txt", "md"],
 			"requirements": ["markitdown[pdf,docx,pptx,xlsx]==0.1.8"],

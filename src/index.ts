@@ -5,12 +5,12 @@ import { documentToText } from "./documents.ts";
 import { NotRead, PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK, scan } from "./hidden.ts";
 import { HIDDEN_MODES, parseHidden, showHidden } from "./parse-hidden.ts";
-import type { ConvertOptions, ConvertResult, OcrResult } from "./types.ts";
+import type { ConvertOptions, ConvertResult } from "./types.ts";
 
 export { PlainviewError } from "./error.ts";
 export type { ConvertOptions, ConvertResult, HiddenText, OcrResult } from "./types.ts";
 
-/** Convert locally; optional OCR receives the supplied path or a private temporary copy, and for a PDF the page numbers to read. */
+/** Convert locally; optional OCR and verify callbacks receive the supplied path or a private temporary copy, and for a PDF the page numbers to read. */
 export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<ConvertResult> {
 	if (input.length === 0)
 		throw new PlainviewError("invalid", "could not read this file: empty input");
@@ -19,17 +19,20 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 	if (opts.hidden !== undefined && !HIDDEN_MODES.includes(opts.hidden))
 		throw new PlainviewError("invalid", "hidden must be text, framed or describe");
 	let scratch: string | undefined;
-	const ocr = async (pages?: number[]): Promise<OcrResult> => {
-		if (!opts.ocr)
+	let copy: Promise<string> | undefined;
+	const local = async () => {
+		scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-"));
+		const path = join(scratch, `input${extname(opts.name)}`);
+		await writeFile(path, input, { flag: "wx", mode: 0o600 });
+		return path;
+	};
+	const recognise = (reader: ConvertOptions["ocr"]) => async (pages?: number[]) => {
+		if (!reader)
 			throw new NotRead("unavailable", "could not read this file: no text recognition available");
-		let path = opts.path;
-		if (path === undefined) {
-			scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-"));
-			path = join(scratch, `input${extname(opts.name)}`);
-			await writeFile(path, input, { flag: "wx", mode: 0o600 });
-		}
+		copy ??= opts.path === undefined ? local() : Promise.resolve(opts.path);
+		const path = await copy;
 		try {
-			const read = await opts.ocr(path, pages);
+			const read = await reader(path, pages);
 			if (
 				!strings(read.pages) ||
 				!strings(read.extras) ||
@@ -43,7 +46,12 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		}
 	};
 	try {
-		const result = await documentToText(input, opts, ocr);
+		const result = await documentToText(
+			input,
+			opts,
+			recognise(opts.ocr),
+			opts.verify && recognise(opts.verify),
+		);
 		const lines = result.markdown.replace(/\n$/, "").split("\n");
 		const block = lines.indexOf(HIDDEN_BLOCK);
 		const head = lines.slice(0, block + 1);

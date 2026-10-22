@@ -19,6 +19,7 @@ const FAKE = {
 fail) exit 3 ;;
 hang) exec /bin/sleep 30 ;;
 flood) exec /bin/dd if=/dev/zero bs=1048576 count=40 2>/dev/null ;;
+text:*) /bin/cat >/dev/null; echo "\${FAKE#text:}"; exit 0 ;;
 esac
 n=$(/bin/cat | /usr/bin/wc -c)
 echo "Recognised $((n)) bytes: $*"`,
@@ -161,6 +162,59 @@ test("OCR flags are opt-in and checked before conversion", () => {
 	assert.match(off.stderr, /unavailable: could not read this file: no text recognition available/);
 });
 
+const memo = fixture("pdf-hiding/short-page.pdf");
+const differs =
+	"[Hidden in the original]\np. 1, text differs from page image: 1 word only in the text layer, 1 word only in the page image\n";
+test("--verify lists a page whose image shows other words and fails closed without the tools", () => {
+	const same = run(both, ["--verify", "--fail-on-hidden", memo], "text:Approved.");
+	assert.equal(same.status, 0, same.stderr);
+	assert.equal(same.stdout, "[p. 1]\nApproved.\n");
+	const other = run(
+		both,
+		["--verify", "--ocr-lang", "nld", "--fail-on-hidden", memo],
+		"text:Rejected.",
+	);
+	assert.equal(other.status, 3, other.stderr);
+	assert.equal(other.stdout, `[p. 1]\nApproved.\n${differs}`);
+	for (const [path, hint] of [
+		[none, "needs pdftoppm (install poppler"],
+		[onlyPdftoppm, "needs tesseract (install it"],
+	] as const) {
+		const result = run(path, ["--verify", memo], "text:Approved.");
+		assert.equal(result.status, 1);
+		assert.equal(result.stdout, "");
+		assert.ok(result.stderr.includes(`: unavailable: could not read this file: text recognition`));
+		assert.ok(result.stderr.includes(hint), result.stderr);
+	}
+	// Without --verify no program runs and the output is unchanged.
+	assert.equal(run(none, [memo]).stdout, "[p. 1]\nApproved.\n");
+});
+
+test("plainview mcp --verify lists the page in the structured result", async () => {
+	const client = new Client({ name: "verify-test", version: "1.0.0" });
+	const transport = new StdioClientTransport({
+		command: process.execPath,
+		args: [cli, "mcp", "--verify"],
+		env: { PATH: both, FAKE: "text:Rejected." },
+		stderr: "pipe",
+	});
+	try {
+		await client.connect(transport);
+		const result = await client.callTool({ name: "convert_file", arguments: { path: memo } });
+		assert.ok(!result.isError, JSON.stringify(result.content));
+		assert.deepEqual(result.content, [{ type: "text", text: `[p. 1]\nApproved.\n${differs}` }]);
+		assert.deepEqual((result.structuredContent as { hidden: unknown }).hidden, [
+			{
+				anchor: "p. 1",
+				reasons: ["text differs from page image"],
+				text: "1 word only in the text layer, 1 word only in the page image",
+			},
+		]);
+	} finally {
+		await client.close();
+	}
+});
+
 test("plainview mcp --ocr reads a scan over stdio", async () => {
 	const client = new Client({ name: "ocr-test", version: "1.0.0" });
 	const transport = new StdioClientTransport({
@@ -198,4 +252,24 @@ test("real tesseract reads the scanned invoice", {
 	const listed = run(process.env.PATH ?? "", ["--ocr", list]);
 	assert.equal(listed.status, 1);
 	assert.doesNotMatch(listed.stdout + listed.stderr, /Sprint goals/);
+});
+
+test("real tesseract: --verify lists the remapped font and not its twin", {
+	skip: !real && "tesseract or pdftoppm not on PATH",
+}, () => {
+	const remapped = run(process.env.PATH ?? "", [
+		"--verify",
+		fixture("pdf-hiding/font-remapped.pdf"),
+	]);
+	assert.equal(remapped.status, 0, remapped.stderr);
+	assert.match(
+		remapped.stdout,
+		/\nFGBC CNLZRAG ABJ\n\[Hidden in the original\]\np\. 1, text differs from page image: /,
+	);
+	const twin = run(process.env.PATH ?? "", [
+		"--verify",
+		fixture("pdf-hiding/font-remapped-true.pdf"),
+	]);
+	assert.equal(twin.status, 0, twin.stderr);
+	assert.equal(twin.stdout, "[p. 1]\nApproved budget: EUR 100,000 for 2027.\nSTOP PAYMENT NOW\n");
 });

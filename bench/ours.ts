@@ -1,5 +1,6 @@
 // Plainview through convert(), the same call the CLI and the MCP server make. No OCR callback is
-// supplied, so scans and images fail closed; that is recorded, not hidden.
+// supplied, so scans and images fail closed; that is recorded, not hidden. The verify variant passes the
+// CLI's own `--verify` reader (a local tesseract and pdftoppm) and runs each PDF once.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { arch, cpus, platform, release, totalmem } from "node:os";
@@ -31,18 +32,19 @@ export async function ours(
 	entries: Entry[],
 	reps = REPS,
 	hidden: Mode = "describe",
+	verify?: ConvertOptions["verify"],
 ): Promise<void> {
-	const dir = dirOf(cache, hidden);
+	const dir = verify ? join(cache, "plainview-verify") : dirOf(cache, hidden);
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(
 		join(dir, "environment.json"),
 		JSON.stringify({
-			candidate: "plainview",
+			candidate: verify ? "plainview-verify" : "plainview",
 			version,
 			date: new Date().toISOString().slice(0, 10),
 			node: process.version,
 			...hardware(),
-			configuration: `convert() from src, no OCR callback, hidden ${hidden}`,
+			configuration: `convert() from src, no OCR callback, hidden ${hidden}${verify ? ", verify" : ""}`,
 		}),
 	);
 	for (const entry of entries) {
@@ -58,7 +60,12 @@ export async function ours(
 			status = "ok";
 			error = "";
 			try {
-				const result = await convert(bytes, { name: entry.file, path: entry.path, hidden });
+				const result = await convert(bytes, {
+					name: entry.file,
+					path: entry.path,
+					hidden,
+					...(verify && { verify }),
+				});
 				text = result.markdown;
 				held = result.hidden.map((h) => h.text);
 				signal = [...result.flags, ...(result.hidden.length ? ["hidden-block"] : [])];

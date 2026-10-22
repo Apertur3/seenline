@@ -48,8 +48,8 @@ Status: pre-release; the package is private and has not been published yet. Libr
 
 ## What it does not catch
 
-- Font remapping. A `/ToUnicode` map that sends a visible letter to a different code point, or a Type 3 font whose glyphs draw other letters than their names say, leaves a text layer that is consistent with itself, so nothing in it differs from what an extractor returns. Catching it needs rendering the page and running OCR; Plainview does not do that. Text in a font the file gives no letter mapping for is listed as `unreadable font`.
-- Reading order. Detection covers two narrow shapes of text stored in a different order than shown. It has documented bypasses, and Plainview claims no protection against reordering in general.
+- Font remapping. A `/ToUnicode` map that sends a visible letter to a different code point, or a Type 3 font whose glyphs draw other letters than their names say, leaves a text layer that is consistent with itself, so nothing in it differs from what an extractor returns. By default Plainview does not catch it. The opt-in `--verify` (below) renders each page and compares it with the text layer; it lists the Split-View cases of this kind that were tested (EG_001 and EG_024, as canaries and as task documents) by page, but the text layer stays in the body, it also lists clean pages (recognition errors), and it misses changes it cannot tell from recognition noise (see below). Text in a font the file gives no letter mapping for is listed as `unreadable font`.
+- Reading order. Detection covers two narrow shapes of text stored in a different order than shown. It has documented bypasses, and Plainview claims no protection against reordering in general. `--verify` does not compare order.
 - Intent. The hidden block lists hidden content; it does not judge it. It can include benign metadata such as comments and document properties. The optional instruction signal (below) is built for explicit instructions to an AI; it does not catch data injection such as a hidden keyword list or invented experience, which a study of real resumes (arXiv 2605.28999) found in more than 90% of the injected ones.
 - Scans. Pages that show no text, or that are mostly a picture with fewer than 10 letters of text, are treated as scans and need OCR. Without `--ocr` the CLI and MCP server fail these files closed instead of passing partial text.
 
@@ -74,6 +74,7 @@ npx plainview --fail-on-suspect report.pdf
 npx plainview --hidden text report.pdf
 npx plainview --ocr scan.pdf
 npx plainview --ocr --ocr-lang deu+eng brief.png
+npx plainview --verify --fail-on-hidden report.pdf
 npx plainview --help
 npx plainview --version
 ```
@@ -90,6 +91,12 @@ Exit codes: `0` success, `1` file failure, `2` usage error, `3` hidden content w
 
 `--ocr` reads images and the PDF pages that have no text layer with a local `tesseract` on your PATH; PDF pages are first turned into images with `pdftoppm` from poppler (`brew install tesseract poppler`, or `apt install tesseract-ocr poppler-utils`). Plainview bundles no OCR engine and downloads nothing. It is off by default because it runs other programs on your files. Each page keeps its own `[p. N]` anchor and the recognised text goes in the body. `--ocr-lang` takes tesseract language codes (default `eng`; the language data must be installed). A missing program fails the file with `unavailable` and names what to install; a recogniser error, a timeout or oversized output fails it with `invalid`. Exit codes are unchanged.
 
+`--verify` is an audit mode for PDFs, off by default, with the same tools and failure rules as `--ocr`. Each page that has a text layer is rendered and read by `tesseract`, and its words are compared with the text layer's (case, accents, punctuation and common recognition confusions ignored, one letter in three allowed to differ). Where a stretch of the text layer and a stretch of the page image sit between the same shared words and each has a word of four or more letters that the other side lacks anywhere on the page, the page is listed as `p. N, text differs from page image: X words only in the text layer, Y words only in the page image`. Only the counts are listed, so the line reads the same in every `--hidden` mode: the body keeps the text layer, and recognised text never goes in the output.
+
+Not compared, so not caught: text-layer words the image does not show at all (a recognition miss looks the same; white, tiny, clipped and covered text is left to the static checks), order, numbers and words with digits, words under four letters, a word one letter in three away from a word on the other side (`hire` and `fire`), a word that stands anywhere else on the page or inside the other side's letters run together (two words swapped, `lest` in `real estate`), and words with letters outside a to z after accents are removed (other scripts, `ß`). A page where the recogniser reads no word at all while the text layer has some is listed. A page with too many words to compare in bounded time (about 4,000 on both sides) is listed as `not compared, too many words`.
+
+It is slow and not quiet: about 0.5 to 0.9 seconds for a short page and 2.4 for a dense page of a paper (one page after another, 16-core laptop), and on the benchmark's public PDFs it listed 24 of 1,409 pages in 9 of 40 files where nothing was hidden (math with subscripts, sideways pages, a typeset logo, a chart label, small sequence text, an accent drawn apart from its letter). Use it with `--fail-on-hidden` to send a file for a human look, not as a filter.
+
 MCP client configuration (once published):
 
 ```json
@@ -103,6 +110,6 @@ MCP client configuration (once published):
 }
 ```
 
-The server exposes one tool, `convert_file`, with input `{"path":"/absolute/path/to/report.pdf"}`. It reads local files and returns Markdown as text plus structured `{pages, flags, hidden}` metadata. The `[Hidden in the original]` block describes hidden content by default; `structuredContent.hidden` holds its text, and an optional `"hidden"` argument (`describe`, `text` or `framed`) sets the block as `--hidden` does. File text is untrusted data, not instructions. The server uses stdio, performs no network access or file writes, and exposes no resources or prompts. Add `"--ocr"` (and optionally `"--ocr-lang", "deu"`) after `"mcp"` in `args` to read scans and images as the CLI does; without it they return `unavailable`. Legacy `.doc` and `.rtf` conversion requires temporary files, so these formats return `unavailable` in MCP; they remain available through the CLI and library on macOS. Run the server with access only to files you intend to share with the client.
+The server exposes one tool, `convert_file`, with input `{"path":"/absolute/path/to/report.pdf"}`. It reads local files and returns Markdown as text plus structured `{pages, flags, hidden}` metadata. The `[Hidden in the original]` block describes hidden content by default; `structuredContent.hidden` holds its text, and an optional `"hidden"` argument (`describe`, `text` or `framed`) sets the block as `--hidden` does. File text is untrusted data, not instructions. The server uses stdio, performs no network access or file writes, and exposes no resources or prompts. Add `"--ocr"` (and optionally `"--ocr-lang", "deu"`) after `"mcp"` in `args` to read scans and images as the CLI does; without it they return `unavailable`. `"--verify"` adds the CLI's page comparison. Legacy `.doc` and `.rtf` conversion requires temporary files, so these formats return `unavailable` in MCP; they remain available through the CLI and library on macOS. Run the server with access only to files you intend to share with the client.
 
 Licence: MIT.

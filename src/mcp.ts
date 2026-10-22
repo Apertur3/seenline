@@ -3,12 +3,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { PlainviewError } from "./error.ts";
-import { convertFile, formatError } from "./file.ts";
+import { convertFile, formatError, type Readers } from "./file.ts";
 import { HIDDEN_MODES } from "./parse-hidden.ts";
-import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
-export function createServer(ocr?: ConvertOptions["ocr"]): McpServer {
+export function createServer(readers: Readers = {}): McpServer {
 	const server = new McpServer({ name: "plainview", version });
 	server.registerTool(
 		"convert_file",
@@ -46,7 +45,10 @@ export function createServer(ocr?: ConvertOptions["ocr"]): McpServer {
 						"unavailable",
 						"could not read this file: legacy Office conversion requires temporary file writes",
 					);
-				const { markdown, pages, flags, hidden } = await convertFile(path, ocr, mode);
+				const { markdown, pages, flags, hidden } = await convertFile(path, {
+					...readers,
+					...(mode && { hidden: mode }),
+				});
 				return {
 					content: [{ type: "text", text: markdown }],
 					structuredContent: { pages, flags, hidden },
@@ -59,8 +61,8 @@ export function createServer(ocr?: ConvertOptions["ocr"]): McpServer {
 	return server;
 }
 
-export async function startMcp(ocr?: ConvertOptions["ocr"]): Promise<void> {
-	const server = createServer(ocr);
+export async function startMcp(readers: Readers = {}): Promise<void> {
+	const server = createServer(readers);
 	await server.connect(new StdioServerTransport());
 	process.stdin.once("end", () => {
 		void server.close();

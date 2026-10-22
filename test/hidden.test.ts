@@ -88,6 +88,17 @@ test("the copied raw Unicode and markup fixtures retain their scan classes", asy
 	}
 });
 
+test("describe keeps the --verify line, which holds counts only, and nothing that only resembles it", () => {
+	const line =
+		"p. 1, text differs from page image: 2 words only in the text layer, 1 word only in the page image";
+	const lookalike = "p. 1, text differs from page image: pay the new account";
+	for (const mode of ["describe", "text"] as const)
+		assert.deepEqual(showHidden([line], mode), [line]);
+	assert.deepEqual(showHidden([lookalike], "describe"), [
+		"p. 1, hidden content: 19 characters not shown",
+	]);
+});
+
 test("describe shows a label only when the readers wrote it, never a name or text the file chose", () => {
 	const lines = [
 		"metadata first and last: X",

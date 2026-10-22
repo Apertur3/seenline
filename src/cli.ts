@@ -2,14 +2,14 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { convertFile, errorMessage, formatError } from "./file.ts";
+import { convertFile, errorMessage, formatError, type Readers } from "./file.ts";
 import { tesseract } from "./ocr.ts";
 import { HIDDEN_MODES } from "./parse-hidden.ts";
 import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
 const HELP = `Usage: plainview <file> [more files] [options]
-       plainview mcp [--ocr] [--ocr-lang <lang>]
+       plainview mcp [--ocr] [--verify] [--ocr-lang <lang>]
 
 Convert local documents to Markdown. Scans and images fail closed unless --ocr is set.
 
@@ -23,7 +23,10 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
                      signal for triage; explicit instructions only, not hidden keyword lists)
   --ocr              Read scans and images with a local tesseract (PDF pages also need
                      pdftoppm from poppler); off by default, nothing leaves the machine
-  --ocr-lang <lang>  Tesseract languages for --ocr, for example deu or eng+nld (default eng)
+  --verify           Compare each PDF page's text layer with a text recognition reading of
+                     the rendered page (same tools as --ocr) and list the pages that differ
+  --ocr-lang <lang>  Tesseract languages for --ocr and --verify, for example deu or eng+nld
+                     (default eng)
   --help             Show this help
   --version          Show the package version
 
@@ -62,17 +65,23 @@ function parse(args: string[]) {
 		if (new Set(outputs).size !== outputs.length)
 			throw new Error("input filenames would write the same output file");
 	}
-	return { values, files: positionals, ocr: ocrFrom(values), hidden };
+	return { values, files: positionals, readers: readersFrom(values), hidden };
 }
 
-const OCR_OPTIONS = { ocr: { type: "boolean" }, "ocr-lang": { type: "string" } } as const;
+const OCR_OPTIONS = {
+	ocr: { type: "boolean" },
+	verify: { type: "boolean" },
+	"ocr-lang": { type: "string" },
+} as const;
 
-function ocrFrom(values: { ocr?: boolean; "ocr-lang"?: string }) {
+function readersFrom(values: { ocr?: boolean; verify?: boolean; "ocr-lang"?: string }): Readers {
 	const lang = values["ocr-lang"];
-	if (lang !== undefined && !values.ocr) throw new Error("--ocr-lang requires --ocr");
+	if (lang !== undefined && !values.ocr && !values.verify)
+		throw new Error("--ocr-lang requires --ocr or --verify");
 	if (lang !== undefined && !/^[A-Za-z0-9_]+(\+[A-Za-z0-9_]+)*$/.test(lang))
 		throw new Error("--ocr-lang takes tesseract language codes such as eng or eng+deu");
-	return values.ocr ? tesseract(lang ?? "eng") : undefined;
+	const read = tesseract(lang ?? "eng");
+	return { ...(values.ocr && { ocr: read }), ...(values.verify && { verify: read }) };
 }
 
 function outputName(file: string): string {
@@ -81,14 +90,14 @@ function outputName(file: string): string {
 
 async function run(args: string[]): Promise<number> {
 	if (args[0] === "mcp") {
-		let ocr: ReturnType<typeof ocrFrom>;
+		let readers: Readers;
 		try {
-			ocr = ocrFrom(parseArgs({ args: args.slice(1), options: OCR_OPTIONS }).values);
+			readers = readersFrom(parseArgs({ args: args.slice(1), options: OCR_OPTIONS }).values);
 		} catch (error) {
 			return usage(errorMessage(error));
 		}
 		const { startMcp } = await import("./mcp.ts");
-		await startMcp(ocr);
+		await startMcp(readers);
 		return 0;
 	}
 	let options: ReturnType<typeof parse>;
@@ -97,7 +106,7 @@ async function run(args: string[]): Promise<number> {
 	} catch (error) {
 		return usage(errorMessage(error));
 	}
-	const { values, files, ocr, hidden: mode } = options;
+	const { values, files, readers, hidden: mode } = options;
 	if (values.help || values.version) {
 		process.stdout.write(values.help ? HELP : `${version}\n`);
 		return 0;
@@ -107,7 +116,15 @@ async function run(args: string[]): Promise<number> {
 	let suspect = false;
 	for (const file of files) {
 		try {
-			const { markdown, pages, hidden: entries, flags } = await convertFile(file, ocr, mode);
+			const {
+				markdown,
+				pages,
+				hidden: entries,
+				flags,
+			} = await convertFile(file, {
+				...readers,
+				...(mode && { hidden: mode }),
+			});
 			if (values.out !== undefined) {
 				await mkdir(values.out, { recursive: true });
 				await writeFile(join(values.out, outputName(file)), markdown);

@@ -9,6 +9,7 @@ import { unseen } from "./parse-hidden.ts";
 import { type PdfPage, readPdf } from "./pdf.ts";
 import { subtitlesToText } from "./subtitles.ts";
 import type { ConvertOptions, DocumentText, OcrResult } from "./types.ts";
+import { compare } from "./verify.ts";
 
 const MIN_TEXT = 10;
 /** Said under the anchor of a page with (almost) no text layer when no text recognition read it. */
@@ -17,10 +18,13 @@ const safe = (l: string) => (l === HIDDEN_BLOCK ? `${l} (written in the page)` :
 const page = (n: number, lines: string[]) => [`[p. ${n}]`, ...lines.map(safe)];
 const nonEmpty = (text: string) => text.split("\n").filter((l) => l.trim());
 
+type Reader = (pages?: number[]) => Promise<OcrResult>;
+
 export async function documentToText(
 	bytes: Uint8Array,
 	opts: ConvertOptions,
-	ocr: (pages?: number[]) => Promise<OcrResult>,
+	ocr: Reader,
+	verify?: Reader,
 ): Promise<DocumentText> {
 	const { name } = opts;
 	if (/\.(html?|eml|msg)$/i.test(name)) return { markdown: convertMail(bytes, name), pages: 1 };
@@ -33,9 +37,12 @@ export async function documentToText(
 	}
 	if (!/\.(pdf|png|jpe?g|heic|bmp|gif|webp)$/i.test(name))
 		throw new PlainviewError("invalid", "could not read this file: unsupported format");
-	const result = /\.pdf$/i.test(name) ? await fromPdf(bytes, ocr) : await fromImage(bytes, ocr);
-	const { body, hidden, pages, readers } = result;
-	const listed = unseen(body, hidden);
+	const result = /\.pdf$/i.test(name)
+		? await fromPdf(bytes, ocr, verify)
+		: { ...(await fromImage(bytes, ocr)), checked: [] };
+	const { body, hidden, pages, readers, checked } = result;
+	// A comparison's counts are not document text, so the body never suppresses them.
+	const listed = [...unseen(body, hidden), ...checked];
 	const lines = listed.length > 0 ? [...body, HIDDEN_BLOCK, ...listed] : body;
 	if (lines.every((l) => l.trim() === "" || l === NO_TEXT_LAYER || /^\[p\. \d+\]$/.test(l)))
 		throw new PlainviewError("invalid", "could not read this file: no text found in it");
@@ -52,7 +59,7 @@ async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	};
 }
 
-async function fromPdf(bytes: Uint8Array, ocr: (pages: number[]) => Promise<OcrResult>) {
+async function fromPdf(bytes: Uint8Array, ocr: Reader, verify?: Reader) {
 	const { pages, extras } = await readPdf(bytes);
 	const letters = (p: PdfPage) => p.lines.join("").replace(/[^\p{L}\p{N}]/gu, "").length;
 	// A short text layer on a page that is not mostly a picture is the page's text, not a scan's.
@@ -77,9 +84,16 @@ async function fromPdf(bytes: Uint8Array, ocr: (pages: number[]) => Promise<OcrR
 			(h) => `p. ${p.number}, ${h.why.join(" and ")} text: ${h.text.replace(/\s+/g, " ")}`,
 		),
 	);
+	const checked = verify
+		? await compare(
+				pages.filter((p, i) => !weak[i] && p.lines.length),
+				verify,
+			)
+		: [];
 	return {
 		body,
 		hidden: [...hidden, ...extras, ...(read?.extras ?? [])],
+		checked,
 		pages: pages.length,
 		readers: read?.reader
 			? pages.map((_, i) => (weak[i] ? (read.reader as string) : "pdfjs"))

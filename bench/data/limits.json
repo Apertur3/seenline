@@ -3,11 +3,11 @@
 	"leaked": [
 		{
 			"gap": "EG_001",
-			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3."
+			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column plainview-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the scorer still counts it leaked."
 		},
 		{
 			"gap": "EG_024",
-			"reason": "A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes."
+			"reason": "A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too (25 in the public PDFs of Set A); like EG_001 it needs the glyph shapes. As for EG_001, `--verify` lists the page and the body keeps the text layer."
 		}
 	],
 	"flagged": [

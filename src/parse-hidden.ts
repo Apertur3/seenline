@@ -129,7 +129,9 @@ const PDF_TEXT = new Set(
 		",",
 	),
 );
-const NOTICE = /^HTML (?:script|style) present \(code omitted\)$/;
+// Notices that carry no document text: they read the same in every mode. The verify line holds counts only.
+const NOTICE =
+	/^(?:HTML (?:script|style) present \(code omitted\)|p\. \d+, text differs from page image: (?:\d+ words? only in the text layer, \d+ words? only in the page image|not compared, too many words))$/;
 function kind(reasons: string[]): string {
 	const label = reasons.join(" and ");
 	const named = NAMED.exec(label)?.[0] ?? (/comments?\d*\.xml$/i.test(label) && "comments");
