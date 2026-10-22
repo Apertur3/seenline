@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { HIDDEN_BLOCK, scan } from "../src/hidden.ts";
-import { convert as convertFile } from "../src/index.ts";
+import { convert as convertFile } from "./text-mode.ts";
 
 const convert = (html: string) =>
 	convertFile(Buffer.from(html), { name: "synthetic.html" }).then((r) => r.markdown);

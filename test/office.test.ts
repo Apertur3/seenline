@@ -4,7 +4,7 @@ import { strToU8, unzipSync, zipSync } from "fflate";
 import { officeFixtures } from "../scripts/office-fixtures.ts";
 import { officeKey } from "../scripts/office-key.ts";
 import { HIDDEN_BLOCK, scan } from "../src/hidden.ts";
-import { convert } from "../src/index.ts";
+import { convert } from "./text-mode.ts";
 
 const convertOffice = async (bytes: Uint8Array, name: string) =>
 	(await convert(bytes, { name })).markdown;

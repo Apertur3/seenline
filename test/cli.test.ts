@@ -23,9 +23,9 @@ function run(...args: string[]) {
 	return result;
 }
 
-test("built CLI emits exactly the golden Markdown and no diagnostics for readable files", async () => {
+test("built CLI --hidden text emits exactly the golden Markdown and no diagnostics", async () => {
 	for (const name of ["report.pdf", "office-memo.docx", "office-book.xlsx"]) {
-		const result = run(fixture(name));
+		const result = run("--hidden", "text", fixture(name));
 		assert.equal(result.status, 0, result.stderr);
 		assert.equal(result.stderr, "");
 		assert.equal(result.stdout, await golden(name));
@@ -49,7 +49,14 @@ test("CLI --out writes multiple Markdown files without stdout", async () => {
 	const scratch = await mkdtemp(join(tmpdir(), "plainview-cli-"));
 	try {
 		const out = join(scratch, "nested", "output");
-		const result = run("--out", out, fixture("report.pdf"), fixture("office-book.xlsx"));
+		const result = run(
+			"--hidden",
+			"text",
+			"--out",
+			out,
+			fixture("report.pdf"),
+			fixture("office-book.xlsx"),
+		);
 		assert.equal(result.status, 0, result.stderr);
 		assert.equal(result.stdout, "");
 		assert.equal(result.stderr, "");
@@ -128,7 +135,7 @@ test("CLI empty, damaged, unsupported and unwritable files fail closed", async (
 
 test("CLI --fail-on-hidden preserves output, detects scanner flags and gives file errors priority", async () => {
 	const hidden = fixture("office-book.xlsx");
-	const flagged = run("--fail-on-hidden", hidden);
+	const flagged = run("--fail-on-hidden", "--hidden", "text", hidden);
 	assert.equal(flagged.status, 3);
 	assert.equal(flagged.stdout, await golden("office-book.xlsx"));
 	assert.equal(flagged.stderr, "");
@@ -143,7 +150,7 @@ test("CLI --fail-on-hidden preserves output, detects scanner flags and gives fil
 		assert.equal(result.status, 3);
 		assert.deepEqual(JSON.parse(result.stdout).hidden, []);
 		assert.deepEqual(JSON.parse(result.stdout).flags, ["zero-width"]);
-		assert.equal(run("--fail-on-hidden", "--out", scratch, hidden).status, 3);
+		assert.equal(run("--fail-on-hidden", "--hidden", "text", "--out", scratch, hidden).status, 3);
 		assert.equal(await readFile(join(scratch, "office-book.md"), "utf8"), flagged.stdout);
 	} finally {
 		await rm(scratch, { recursive: true, force: true });

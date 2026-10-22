@@ -24,13 +24,13 @@ export const hardware = () => ({
 type Mode = NonNullable<ConvertOptions["hidden"]>;
 const MODES: Mode[] = ["text", "framed", "describe"];
 const dirOf = (cache: string, mode: Mode) =>
-	join(cache, mode === "text" ? "plainview" : `plainview-${mode}`);
+	join(cache, mode === "describe" ? "plainview" : `plainview-${mode}`);
 
 export async function ours(
 	cache: string,
 	entries: Entry[],
 	reps = REPS,
-	hidden: Mode = "text",
+	hidden: Mode = "describe",
 ): Promise<void> {
 	const dir = dirOf(cache, hidden);
 	mkdirSync(dir, { recursive: true });

@@ -3,7 +3,7 @@ import test from "node:test";
 import { mailFixtures } from "../scripts/mail-fixtures.ts";
 import { mailKey } from "../scripts/mail-key.ts";
 import { HIDDEN_BLOCK, scan } from "../src/hidden.ts";
-import { convert as convertFile } from "../src/index.ts";
+import { convert as convertFile } from "./text-mode.ts";
 
 const fixtures = mailFixtures();
 const convert = (name: string, bytes = fixtures[name] as Uint8Array) =>

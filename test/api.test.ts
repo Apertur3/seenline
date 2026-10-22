@@ -211,7 +211,11 @@ test("hidden modes change only the block's entry lines; the result keeps text, f
 		"mail-newsletter.html",
 	]) {
 		const bytes = await readFile(new URL(name, fixtures));
-		const text = await convert(bytes, { name });
+		const text = await convert(bytes, { name, hidden: "text" });
+		assert.deepEqual(
+			await convert(bytes, { name }),
+			await convert(bytes, { name, hidden: "describe" }),
+		);
 		const head = text.markdown.split("[Hidden in the original]\n")[0] as string;
 		assert.deepEqual(await convert(bytes, { name, hidden: "text" }), text);
 		for (const hidden of ["framed", "describe"] as const) {

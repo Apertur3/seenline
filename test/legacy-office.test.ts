@@ -3,7 +3,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { convert } from "../src/index.ts";
+import { convert } from "./text-mode.ts";
 
 const documentToText = async (path: string, name: string, bytes: Uint8Array) =>
 	(await convert(bytes, { name, path })).markdown;

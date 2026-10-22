@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mailFixtures } from "../../scripts/mail-fixtures.ts";
 import { mailKey } from "../../scripts/mail-key.ts";
 import { HIDDEN_BLOCK, scan } from "../../src/hidden.ts";
-import { convert } from "../../src/index.ts";
+import { convert } from "../text-mode.ts";
 
 const fixtures = mailFixtures();
 const cases: { file: string; hidden: readonly string[] }[] = mailKey.filter(

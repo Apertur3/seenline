@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { officeFixtures } from "../../scripts/office-fixtures.ts";
 import { officeKey } from "../../scripts/office-key.ts";
 import { HIDDEN_BLOCK, scan } from "../../src/hidden.ts";
-import { convert } from "../../src/index.ts";
+import { convert } from "../text-mode.ts";
 
 const fixtures = officeFixtures();
 const cases: { file: string; hidden: readonly string[] }[] = officeKey.filter(

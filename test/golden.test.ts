@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { fixtureOcr } from "../scripts/ocr-stub.ts";
-import { convert } from "../src/index.ts";
+import { convert } from "./text-mode.ts";
 
 let count = 0;
 for (const group of ["documents", "injection", "subtitles"]) {

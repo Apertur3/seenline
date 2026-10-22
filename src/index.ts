@@ -48,12 +48,13 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		const block = lines.indexOf(HIDDEN_BLOCK);
 		const head = lines.slice(0, block + 1);
 		const end = result.markdown.endsWith("\n") ? "\n" : "";
+		const mode = opts.hidden ?? "describe";
+		// A legacy .doc or .rtf keeps all its converted text under the block, unverified rather than hidden.
+		const shown = showHidden(lines.slice(block + 1), mode, /\.(doc|rtf)$/i.test(opts.name));
 		return {
 			...result,
 			markdown:
-				block < 0 || (opts.hidden ?? "text") === "text"
-					? result.markdown
-					: [...head, ...showHidden(lines.slice(block + 1), opts.hidden)].join("\n") + end,
+				block < 0 || mode === "text" ? result.markdown : [...head, ...shown].join("\n") + end,
 			hidden: block < 0 ? [] : parseHidden(lines.slice(block + 1)),
 			flags: scan(lines).flags,
 		};

@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { DOCUMENT_CASES, OFFICE_CASES } from "../scripts/document-cases.ts";
 import { fixtureOcr } from "../scripts/ocr-stub.ts";
 import { HIDDEN_BLOCK, scan } from "../src/hidden.ts";
-import { convert, PlainviewError } from "../src/index.ts";
+import { convert, PlainviewError } from "./text-mode.ts";
 
 const fixtures = new URL("./fixtures/documents/", import.meta.url);
 test("a PDF keeps page anchors and table rows in reading order", async () => {

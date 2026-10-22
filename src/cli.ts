@@ -16,8 +16,9 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
   --json             Write one JSON object per file to stdout
   --out <dir>        Write <name>.md files instead of stdout
   --fail-on-hidden   Exit 3 if any successful file has hidden content
-  --hidden <mode>    How the hidden block shows hidden text: text (default), framed (after
-                     an untrusted-data line) or describe (kind and size only; --json keeps the text)
+  --hidden <mode>    How the hidden block shows hidden text: describe (default; location, kind
+                     and size), text (the text itself) or framed (the text after an
+                     untrusted-data line). --json keeps the text in every mode
   --ocr              Read scans and images with a local tesseract (PDF pages also need
                      pdftoppm from poppler); off by default, nothing leaves the machine
   --ocr-lang <lang>  Tesseract languages for --ocr, for example deu or eng+nld (default eng)

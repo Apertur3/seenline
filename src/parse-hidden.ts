@@ -93,13 +93,24 @@ function kind(reasons: string[]): string {
 	return named || (reasons.every((r) => REASONS.has(r)) ? label : "hidden content");
 }
 
-/** The lines under the block heading as a mode shows them: as they are, after a framing line, or kind and size only. */
-export function showHidden(lines: string[], mode: ConvertOptions["hidden"]): string[] {
+/**
+ * The lines under the block heading as a mode shows them: as they are, after a framing line, or kind
+ * and size only. For a legacy conversion, describe keeps the converted text (everything before the
+ * converted file's own block) as text: it is the document, flagged only because its hiding could not
+ * be checked; the converted file's own hidden entries are still described.
+ */
+export function showHidden(
+	lines: string[],
+	mode: ConvertOptions["hidden"],
+	legacy = false,
+): string[] {
 	if (mode === "framed") return [FRAME, ...lines];
 	if (mode !== "describe") return lines;
-	return lines.map((line) => {
+	const nested = lines.indexOf(HIDDEN_BLOCK);
+	const kept = !legacy ? 0 : nested < 0 ? lines.length : nested;
+	return lines.map((line, i) => {
 		const [entry] = parseHidden([line]);
-		if (!entry || NOTICE.test(line)) return line;
+		if (!entry || i < kept || NOTICE.test(line)) return line;
 		const at = entry.anchor ? `${entry.anchor}, ` : "";
 		return `${at}${kind(entry.reasons)}: ${[...entry.text].length} characters not shown`;
 	});

@@ -1,7 +1,8 @@
 // Set M: model exposure. Each cell is one subscription-CLI call on one Split-View file, either the
-// original PDF (raw) or Plainview's Markdown (plainview), in its own empty directory. Opt-in, never in CI.
-//   node bench/models.ts run <name> <A|B> <raw|plainview[-framed|-describe]>   sequential, resumable
-//   (a -framed or -describe cell whose Markdown equals the plainview cell's reuses that answer)
+// original PDF (raw) or Plainview's Markdown (plainview: the default hidden mode, as shipped), in its own
+// empty directory. Opt-in, never in CI.
+//   node bench/models.ts run <name> <A|B> <raw|plainview[-text|-framed|-describe]>   sequential, resumable
+//   (a cell whose Markdown equals the plainview-text cell's reuses that answer)
 //   node bench/models.ts score                                             table and per-cell verdicts
 // Answers stay in PLAINVIEW_BENCH_CACHE/models; nothing here is committed or published.
 import assert from "node:assert/strict";
@@ -113,17 +114,17 @@ async function run(name: string, set: string, arm: string): Promise<void> {
 				const { markdown } = await convert(bytes, {
 					name: item.file,
 					path: pdf,
-					hidden: mode ?? "text",
+					...(mode && { hidden: mode }),
 				});
 				writeFileSync(join(cell, doc), markdown);
-				const text = dir(set, name, base, item.gap);
+				const text = dir(set, name, "plainview-text", item.gap);
 				if (
-					mode &&
+					arm !== "plainview-text" &&
 					existsSync(join(text, "answer.json")) &&
 					readFileSync(join(text, doc), "utf8") === markdown
 				) {
 					const reused = JSON.parse(readFileSync(join(text, "answer.json"), "utf8"));
-					writeFileSync(join(cell, "answer.json"), JSON.stringify({ ...reused, reused: base }));
+					writeFileSync(join(cell, "answer.json"), JSON.stringify({ ...reused, reused: "text" }));
 					continue;
 				}
 			} catch (e) {
@@ -228,7 +229,7 @@ function score(): void {
 	];
 	for (const set of ["A", "B"])
 		for (const [name, model] of Object.entries(MODELS))
-			for (const arm of ["raw", "plainview", "plainview-framed", "plainview-describe"]) {
+			for (const arm of ["raw", "plainview", ...["text", "framed", "describe"].map((m) => `plainview-${m}`)]) {
 				if (!existsSync(dir(set, name, arm))) continue;
 				const by: Record<string, string[]> = { content: [], flagged: [], clean: [], none: [] };
 				// Of the answered cells whose Markdown has a hidden block, the answers that say so (a flag word).

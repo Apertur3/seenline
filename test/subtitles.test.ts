@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { convert, PlainviewError } from "../src/index.ts";
+import { convert, PlainviewError } from "./text-mode.ts";
 
 for (const ext of ["vtt", "srt"]) {
 	test(`${ext} preserves speakers, time spans, entities and cue order`, async () => {

@@ -35,7 +35,7 @@ test("MCP in-memory discovery, golden conversion and fail-closed tool errors", a
 		for (const name of ["report.pdf", "office-book.xlsx"]) {
 			const result = await client.callTool({
 				name: "convert_file",
-				arguments: { path: fixture(name) },
+				arguments: { path: fixture(name), hidden: "text" },
 			});
 			const golden = await readFile(
 				new URL(`./golden/documents/${name}.md`, import.meta.url),
@@ -49,7 +49,7 @@ test("MCP in-memory discovery, golden conversion and fail-closed tool errors", a
 		const book = fixture("office-book.xlsx");
 		const described = await client.callTool({
 			name: "convert_file",
-			arguments: { path: book, hidden: "describe" },
+			arguments: { path: book },
 		});
 		const { hidden } = await convert(await readFile(book), { name: "office-book.xlsx" });
 		assert.deepEqual((described.structuredContent as { hidden: unknown }).hidden, hidden);

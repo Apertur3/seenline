@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { NO_TEXT_LAYER } from "../src/documents.ts";
-import { convert, PlainviewError } from "../src/index.ts";
 import { readingOrder } from "../src/pdf-order.ts";
 import type { ConvertOptions } from "../src/types.ts";
+import { convert, PlainviewError } from "./text-mode.ts";
 
 const run = async (name: string, opts: Partial<ConvertOptions> = {}) =>
 	convert(await readFile(new URL(`./fixtures/pdf-hiding/${name}`, import.meta.url)), {
