@@ -101,7 +101,7 @@ function kind(reasons: string[]): string {
  */
 export function showHidden(
 	lines: string[],
-	mode: ConvertOptions["hidden"],
+	mode: ConvertOptions["hidden"] = "describe",
 	legacy = false,
 ): string[] {
 	if (mode === "framed") return [FRAME, ...lines];
