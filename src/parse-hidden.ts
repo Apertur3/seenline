@@ -94,7 +94,7 @@ function withSuspect(entries: HiddenText[]): HiddenText[] {
 			!tags[i] &&
 			!tags[j] &&
 			group(entries[j]) === group(entries[i]) &&
-			!/[.!?]\s*$/.test(entries[j - 1]?.text ?? "");
+			!/[.!?;]["')\]’”]*\s*$/.test(entries[j - 1]?.text ?? "");
 			j++
 		) {
 			if (joined(i, j).length > 400) break;

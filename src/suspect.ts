@@ -31,9 +31,10 @@ export function normal(text: string): string {
 			.normalize("NFKD")
 			.replace(/[\p{Cf}\p{M}\p{Variation_Selector}]/gu, "")
 			.toLowerCase()
+			.replace(/[‘’ʼ]/g, "'")
 			.replace(/\p{L}/gu, (c) => LOOKALIKE[c] ?? c)
 			// @ and $ for letters, at a word start or inside a word, but not the @ of an email address.
-			.replace(/(?<![\w@$])[@$](?=[a-z])|(?<=[a-z])[@$]{1,2}(?=[a-z])(?![a-z\d-]*\.[a-z])/g, (m) =>
+			.replace(/(?<![\w@$])[@$]+(?=[a-z])|(?<=[a-z])(?:\$|@(?![a-z\d-]*\.[a-z]))+(?=[a-z])/g, (m) =>
 				[...m].map((c) => LEET[c] ?? c).join(""),
 			)
 			.replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z\d]+\b/g, (w) =>
