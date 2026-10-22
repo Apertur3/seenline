@@ -45,7 +45,10 @@ export function tesseract(lang: string, timeout = 60_000) {
 				if (code === 0) {
 					clearTimeout(timer);
 					done(Buffer.concat(chunks));
-				} else fail(`text recognition failed (${cmd} exited with an error)`);
+				} else
+					fail(
+						`text recognition failed (${cmd} exited with an error${cmd === "tesseract" ? `; is the language data for ${lang} installed?` : ""})`,
+					);
 			});
 			child.stdin?.on("error", () => {});
 			child.stdin?.end(input);

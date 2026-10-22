@@ -1,6 +1,7 @@
 // CLI and MCP OCR through fake tesseract and pdftoppm scripts on PATH; one real run when tesseract is installed.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -181,4 +182,10 @@ test("real tesseract reads the scanned invoice", {
 	assert.equal(result.status, 0, result.stderr);
 	assert.match(result.stdout, /^\[p\. 1\]\nInvoice 2026-0457\n/);
 	assert.match(result.stdout, /Total due: EUR 4,015\.00/);
+	// Text after a valid signature is decoded as that format and fails; it is never read as a list of files.
+	const list = join(scratch, "signed.bmp");
+	writeFileSync(list, `BM\n${fixture("documents/whiteboard.jpg")}\n`);
+	const listed = run(process.env.PATH ?? "", ["--ocr", list]);
+	assert.equal(listed.status, 1);
+	assert.doesNotMatch(listed.stdout + listed.stderr, /Sprint goals/);
 });
