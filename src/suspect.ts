@@ -3,9 +3,17 @@
 // fabricated facts (data injection) are never tagged.
 import data from "./suspect.json" with { type: "json" };
 
-const GAP = "[^\\w.!?;]+(?:[\\w'’-]+[^\\w.!?;]+){0,5}";
-const RULES = Object.entries(data.rules).flatMap(([reason, sources]) =>
-	sources.map((s) => [reason, new RegExp(s.replaceAll(" ~ ", GAP), "u")] as const),
+// A gap of up to n words within one sentence; a dot or ? inside a word (a link, an address) joins it.
+const gap = (n: number) => `[^\\w.!?;]+(?:[\\w'’-]+(?:[.?][\\w'’-]+)*[^\\w.!?;]+){0,${n}}`;
+const PARTS: Record<string, string> = data.parts;
+// A <NAME> stands for a part, which may hold parts itself; an unknown name fails at load.
+const expand = (s: string): string =>
+	s
+		.replace(/<([A-Z]+)>/g, (_, k: string) => expand(PARTS[k] as string))
+		.replaceAll(" ~~ ", gap(12))
+		.replaceAll(" ~ ", gap(5));
+const RULES = data.rules.flatMap(({ reason, patterns }) =>
+	patterns.map((s) => [reason, new RegExp(expand(s), "u")] as const),
 );
 const LOOKALIKE: Record<string, string> = data.lookalikes;
 const LEET: Record<string, string> = {
