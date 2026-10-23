@@ -1,3 +1,4 @@
+import { Console } from "node:console";
 import { isAbsolute } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -63,7 +64,7 @@ export function createServer(readers: Readers = {}): McpServer {
 
 export async function startMcp(readers: Readers = {}): Promise<void> {
 	// Stdout carries JSON-RPC only: a library that logs must not break the client's stream.
-	console.log = console.info = console.debug = console.error;
+	Object.assign(console, new Console(process.stderr));
 	const server = createServer(readers);
 	await server.connect(new StdioServerTransport());
 	process.stdin.once("end", () => {

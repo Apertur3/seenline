@@ -174,7 +174,15 @@ test("pdftoppm output that is no image, a weak BMP signature and a file over its
 	bmp.writeUInt32LE(40, 14);
 	const read = await withFake("", () => tesseract("eng")("x.bmp", undefined, bmp));
 	assert.deepEqual(read.pages, ["Recognised 58 bytes: stdin stdout -l eng\n"]);
-	for (const fake of [Buffer.from("BM\n/etc/hosts\n".padEnd(40)), bmp.subarray(0, 40)])
+	// A stream writer leaves the size field 0; that is still a BMP.
+	const streamed = Buffer.from(bmp).fill(0, 2, 6);
+	const unsized = await withFake("", () => tesseract("eng")("x.bmp", undefined, streamed));
+	assert.deepEqual(unsized.pages, read.pages);
+	for (const fake of [
+		Buffer.from("BM\n/etc/hosts\n".padEnd(40)),
+		bmp.subarray(0, 40),
+		Buffer.from("RIFFWEBP"),
+	])
 		await withFake("", () =>
 			assert.rejects(tesseract("eng")("x.bmp", undefined, fake), { code: "unavailable" }),
 		);

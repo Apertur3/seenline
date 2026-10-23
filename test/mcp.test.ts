@@ -132,7 +132,7 @@ test("built plainview mcp speaks stdio with no extra stdout or diagnostics", asy
 
 test("built plainview mcp keeps library logging off stdout", async () => {
 	// Logs on every console channel from the moment the server reads stdin, as a chatty library would.
-	const preload = `data:text/javascript,process.stdin.once("newListener",()=>setInterval(()=>{console.log("noise");console.info("noise");console.debug("noise")},5).unref())`;
+	const preload = `data:text/javascript,process.stdin.once("newListener",()=>setInterval(()=>{console.log("noise");console.info("noise");console.debug("noise");console.dir("noise");console.table(["noise"]);console.count("noise")},5).unref())`;
 	const client = new Client({ name: "stdio-noise-test", version: "1.0.0" });
 	const errors: Error[] = [];
 	client.onerror = (error) => errors.push(error);

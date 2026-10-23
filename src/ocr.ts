@@ -16,20 +16,20 @@ const INSTALL: Record<string, string> = {
 		"text recognition of PDF pages needs pdftoppm (install poppler, for example brew install poppler or apt install poppler-utils)",
 };
 // Tesseract treats input that is not an image as a list of file names and reads those, so only known
-// image signatures go in; a BMP also needs a size field within the file and a known DIB header size.
+// image signatures go in; a BMP also needs a size field within the file (0 from a stream writer)
+// and a known DIB header size.
 const isImage = (bytes: Uint8Array) => {
 	const b = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 	const head = b.subarray(0, 12).toString("latin1");
 	if (head.startsWith("BM"))
 		return (
 			b.length >= 26 &&
-			b.readUInt32LE(2) >= 26 &&
 			b.readUInt32LE(2) <= b.length &&
 			[12, 16, 40, 52, 56, 64, 108, 124].includes(b.readUInt32LE(14))
 		);
 	return (
 		["\x89PNG\r\n\x1a\n", "\xff\xd8\xff", "GIF87a", "GIF89a"].some((s) => head.startsWith(s)) ||
-		(head.startsWith("RIFF") && head.endsWith("WEBP"))
+		(head.startsWith("RIFF") && head.slice(8) === "WEBP")
 	);
 };
 
