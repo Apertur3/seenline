@@ -64,12 +64,15 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 		for (let n = 1; n <= doc.numPages; n++) {
 			const page = await doc.getPage(n);
 			const ops = await page.getOperatorList();
-			const { items, pictured } = walk(pdfjs.OPS, ops, page.view as Matrix, visible);
+			const fonts = (id: string) =>
+				page.commonObjs.has(id) ? page.commonObjs.get(id)?.fontMatrix : undefined;
+			const { items, pictured } = walk(pdfjs.OPS, ops, page.view as Matrix, visible, fonts);
 			const shown = items.some((it) => it.why.every((w) => w === "unreadable font"));
 			pages.push({ ...arrange(n, items), scan: !shown || pictured >= SCAN_PICTURED });
 		}
 		return { pages, extras: await extras(doc) };
-	} catch {
+	} catch (error) {
+		if (error instanceof PlainviewError) throw error;
 		throw new PlainviewError("invalid", "could not read this file: damaged PDF");
 	} finally {
 		await task.destroy();
