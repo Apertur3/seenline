@@ -113,9 +113,15 @@ const FILES: Record<string, string | Spec> = {
 	// A white fill at opacity 0 over the text: nothing covers it.
 	"cover-transparent.pdf": gs("/ca 0", `${line(visible)}q /GS1 gs 1 g 60 650 400 30 re f Q\n`),
 	// A yellow highlight in Multiply over the text: the text shows through.
-	"highlight-multiply.pdf": gs("/BM /Multiply", `${line(visible)}q /GS1 gs 1 1 0 rg 60 650 400 30 re f Q\n`),
+	"highlight-multiply.pdf": gs(
+		"/BM /Multiply",
+		`${line(visible)}q /GS1 gs 1 1 0 rg 60 650 400 30 re f Q\n`,
+	),
 	// A black box in Multiply over the text: black over anything is black.
-	"cover-multiply.pdf": gs("/BM /Multiply", `${line(canary("PDF-MULTIPLY"))}q /GS1 gs 0 g 60 650 400 30 re f Q\n`),
+	"cover-multiply.pdf": gs(
+		"/BM /Multiply",
+		`${line(canary("PDF-MULTIPLY"))}q /GS1 gs 0 g 60 650 400 30 re f Q\n`,
+	),
 	// Black text in Screen on the white page: it comes out white.
 	"text-screen.pdf": gs("/BM /Screen", `q /GS1 gs ${line(canary("PDF-SCREEN"))}Q\n`),
 	// A clip of the page with a hole (even-odd) where the text is: nothing of it is drawn.
