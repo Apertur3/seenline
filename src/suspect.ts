@@ -15,6 +15,16 @@ const expand = (s: string): string =>
 const RULES = data.rules.flatMap(({ reason, patterns }) =>
 	patterns.map((s) => [reason, new RegExp(expand(s), "u")] as const),
 );
+const SQUASHED = data.squashed.map(
+	({ reason, patterns }) => [reason, new RegExp(patterns.join("|"), "g")] as const,
+);
+// Words run together (glyphs joined without a gap, letters spaced one per space): each run
+// without spaces that is mostly letters, read as its letters only.
+const runs = (t: string) =>
+	t.split(" ").flatMap((r) => {
+		const letters = r.replace(/[^\p{L}]/gu, "");
+		return letters.length >= 16 && letters.length * 5 >= r.length * 4 ? [letters] : [];
+	});
 const LOOKALIKE: Record<string, string> = data.lookalikes;
 const LEET: Record<string, string> = {
 	"0": "o",
@@ -48,7 +58,9 @@ export function normal(text: string): string {
 			.replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z\d]+\b/g, (w) =>
 				w.replace(/[01345789]/g, (d) => LEET[d] ?? d),
 			)
-			.replace(/\b(?:\p{L}[\t .*_·,:/|+~-](?=\p{L}\b))+\p{L}\b/gu, (run) =>
+			// Single letters with one separator, the same one throughout, so a space or a doubled
+			// separator between spaced words keeps them apart.
+			.replace(/(?<![\p{L}\d])\p{L}([\t .*_·,:/|+~-])\p{L}(?:\1\p{L})*(?![\p{L}\d])/gu, (run) =>
 				run.replace(/[^\p{L}]/gu, ""),
 			)
 			.replace(/[\s_*]+/g, " ")
@@ -62,5 +74,13 @@ export function suspect(text: string): string | null {
 		normal(text),
 		...(/\p{Cf}/u.test(text) ? [normal(text.replace(/\p{Cf}/gu, " "))] : []),
 	];
-	return RULES.find(([, pattern]) => forms.some((t) => pattern.test(t)))?.[0] ?? null;
+	const rule = RULES.find(([, pattern]) => forms.some((t) => pattern.test(t)))?.[0];
+	if (rule) return rule;
+	// Without word boundaries short phrases match by chance: a signature phrase of 16 letters or more.
+	const squashed = forms.flatMap(runs);
+	return (
+		SQUASHED.find(([, re]) =>
+			squashed.some((s) => [...s.matchAll(re)].some((m) => m[0].length >= 16)),
+		)?.[0] ?? null
+	);
 }

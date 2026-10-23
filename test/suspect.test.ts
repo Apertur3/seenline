@@ -16,6 +16,25 @@ test("suspect() names the reason class, also through normalisation tricks, and l
 	for (const [text, reason] of cases) assert.equal(suspect(text), reason, text);
 });
 
+test("hostile runs of letters and separators stay fast (no regex backtracking stall)", () => {
+	const n = 100_000;
+	for (const s of [
+		"a".repeat(n),
+		"a ".repeat(n / 2),
+		"a.".repeat(n / 2),
+		"a.b-".repeat(n / 4),
+		". ".repeat(n / 2),
+		"#".repeat(n),
+		"-".repeat(n),
+		"ignorethe".repeat(n / 9),
+		`reveal${"systemhidden".repeat(n / 12)}`,
+	]) {
+		const t = performance.now();
+		suspect(s);
+		assert.ok(performance.now() - t < 2000, s.slice(0, 12));
+	}
+});
+
 test("a sentence split over entries of one kind is read joined; an unrelated line before it or a sentence end is not crossed", () => {
 	const entries = parseHidden([
 		"p. 1, white text: Quarterly figures",
