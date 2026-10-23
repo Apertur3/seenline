@@ -1,6 +1,7 @@
 // Opt-in benchmark; nothing here runs in CI except the offline tests.
 //   npm run bench                    manifest, ours, report: no network, no Python
 //   npm run bench -- verify          ours with --verify on the PDFs, once each (needs tesseract, pdftoppm)
+//   npm run bench -- ocr             ours with --ocr on the PDFs and images, once each (same tools)
 //   npm run bench -- prepare         download the pinned corpora (the only networked step)
 //   sh bench/run-adapters.sh <cache> run the competitor adapters in isolated uv environments
 //   npm run bench -- modes           sets B and C under each --hidden mode, printed (into plainview-<mode>)
@@ -55,9 +56,13 @@ else if (command === "modes") process.stdout.write(await modes(cache, corpus(cac
 else if (command === "verify") {
 	const { tesseract } = await import("../src/ocr.ts");
 	const pdfs = corpus(cache).filter((e) => /\.pdf$/i.test(e.file));
-	await ours(cache, pdfs, 1, "describe", tesseract("eng"));
+	await ours(cache, pdfs, 1, "describe", { name: "verify", read: tesseract("eng") });
+} else if (command === "ocr") {
+	const { tesseract } = await import("../src/ocr.ts");
+	const files = corpus(cache).filter((e) => /\.(pdf|png|jpe?g|bmp|gif|webp)$/i.test(e.file));
+	await ours(cache, files, 1, "describe", { name: "ocr", read: tesseract("eng") });
 } else if (command === "report") report();
 else
 	throw new Error(
-		"usage: run.ts [prepare | manifest | ours | modes | verify | report | speed | anchors | provider-tokens]",
+		"usage: run.ts [prepare | manifest | ours | modes | verify | ocr | report | speed | anchors | provider-tokens]",
 	);
