@@ -77,8 +77,12 @@ export function visible(line: string): string {
 // Invisible characters that can spell text, as runs: tag characters, variation selectors, zero-width.
 const CARRIER =
 	/(?:[\u{E0000}-\u{E007F}]|\p{Variation_Selector}|[\u200B-\u200D\u2060\uFEFF\u00AD\u2061-\u2064\u180E])+/gu;
-const SCRIPT_LATIN = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}]/u;
+// Scripts that never shape or break with a joiner; a combining accent (Inherited) counts with them.
+const SCRIPT_LATIN =
+	/[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}\p{Script=Inherited}\p{Script=Common}]/u;
 const LETTER = /[\p{L}\p{M}]/u;
+const TAGS = /[\u{E0000}-\u{E007F}]/gu;
+const SELECTORS = /\p{Variation_Selector}/gu;
 const cp = (c: string) => c.codePointAt(0) ?? 0;
 
 // A run that is part of ordinary text: an emoji's selector or joiner, a subdivision flag's tag letters,
@@ -94,7 +98,12 @@ function ordinary(run: string, before: string, after: string): boolean {
 		return true;
 	if ([...run].length !== 1) return false;
 	if (run === "\u00AD") return true;
-	if (/\p{Variation_Selector}/u.test(run)) return !SCRIPT_LATIN.test(before);
+	// The emoji selectors after an emoji; any selector after an ideograph, a symbol or a Mongolian letter.
+	if (/\p{Variation_Selector}/u.test(run))
+		return (
+			(/[\uFE0E\uFE0F]/.test(run) && /\p{Emoji}/u.test(before)) ||
+			/[\p{Ideographic}\p{S}\p{Script=Mongolian}]/u.test(before)
+		);
 	if (/[\u200B-\u200D]/.test(run) && LETTER.test(before) && LETTER.test(after))
 		return !SCRIPT_LATIN.test(before) || !SCRIPT_LATIN.test(after);
 	return /[\u200B\u2060]/.test(run) && /[-\u2010-\u2015/]/.test(before);
@@ -149,15 +158,17 @@ export function carriers(body: string[]): { body: string[]; entries: string[] } 
 				const before = /^[\uD800-\uDBFF][\uDC00-\uDFFF]$/.test(lead) ? lead : lead.slice(-1);
 				const after = String.fromCodePoint(word.codePointAt(offset + run.length) ?? 0);
 				if (ordinary(run, before, after)) return run;
-				if (/[\u{E0000}-\u{E007F}]/u.test(run))
+				// Each kind is read from its own characters, so a run mixing them still spells its text.
+				const tags = run.match(TAGS)?.join("") ?? "";
+				const picked = run.match(SELECTORS)?.join("") ?? "";
+				const ascii = (c: string) => cp(c) > 0xe001f && cp(c) < 0xe007f;
+				if (tags)
 					add(
 						"tag characters",
-						[...run]
-							.map((c) => (cp(c) > 0xe001f ? String.fromCodePoint(cp(c) - 0xe0000) : ""))
-							.join(""),
+						[...tags].map((c) => (ascii(c) ? String.fromCodePoint(cp(c) - 0xe0000) : "")).join(""),
 					);
-				else if (/\p{Variation_Selector}/u.test(run)) add("variation selectors", selectors(run));
-				else hit = true;
+				if (picked) add("variation selectors", selectors(picked));
+				hit ||= [...run].length > [...tags].length + [...picked].length;
 				return "";
 			});
 			// The word as a model sees it, each removed character named.

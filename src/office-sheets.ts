@@ -62,7 +62,8 @@ function filler(parts: Map<string, Xml>, styles: Xml | undefined) {
 }
 
 // A custom number format that shows nothing of a cell: for text, a text (fourth) section without @;
-// for a number, only a format with every section empty (`;;;`), as a blank for zero is ordinary.
+// for a number, one whose every section shows nothing but blanks (`;;;`, `" ";" "`), as a blank or a
+// dash for zero alone is ordinary and a number carries no text.
 function formatHides(code: string | undefined, c: Xml, value: string): boolean {
 	if (!code || !value) return false;
 	const sections = code
@@ -71,7 +72,12 @@ function formatHides(code: string | undefined, c: Xml, value: string): boolean {
 		.split(";");
 	if (["s", "inlineStr", "str"].includes(c.attrs.t ?? ""))
 		return sections.length > 3 && !sections[3]?.includes("@");
-	return (!c.attrs.t || c.attrs.t === "n") && sections.every((s) => !s.trim());
+	const blank = code
+		.replace(/"([^"]*)"|\\(.)/g, "$1$2")
+		.replace(/[_*]./g, " ")
+		.replace(/\[[^\]]*\]/g, "")
+		.split(";");
+	return (!c.attrs.t || c.attrs.t === "n") && blank.every((s) => !s.trim());
 }
 
 function cellValue(c: Xml, shared: Xml[]): string {

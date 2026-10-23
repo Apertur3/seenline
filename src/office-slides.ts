@@ -93,7 +93,8 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 	const defaults = first(shape, "defRPr");
 	const why: string[] = [];
 	// Shrink on overflow scales every run of the shape (fontScale in thousandths of a percent).
-	const scale = Number(attr(first(shape, "normAutofit"), "fontScale") ?? 100000) / 100000;
+	const fit = attr(first(shape, "normAutofit"), "fontScale") ?? "100000";
+	const scale = fit.endsWith("%") ? Number.parseFloat(fit) / 100 : Number(fit) / 100000;
 	if (Number(attr(props, "sz") ?? attr(defaults, "sz") ?? 1200) * scale < 200)
 		why.push("tiny text");
 	const fill = (props && first(props, "solidFill")) ?? (defaults && first(defaults, "solidFill"));

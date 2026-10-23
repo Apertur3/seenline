@@ -33,13 +33,15 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 				);
 			return "";
 		}
-		if (n.tag === "input" && /^hidden$/i.test(n.attrs.type ?? "") && n.attrs.value?.trim())
-			out.hidden.push(`HTML input value: ${flat(n.attrs.value)}`);
 		const state = visibility(n, path, inherited, rules);
 		const unseen =
 			hidden ||
 			state.hidden ||
 			["!comment", "template", "noscript", "head", "title"].includes(n.tag);
+		// The value of a hidden input, or of one that hiding styles or a hidden parent take from view.
+		const type = /^hidden$/i.test(n.attrs.type ?? "");
+		if (n.tag === "input" && (type || unseen) && n.attrs.value?.trim())
+			out.hidden.push(`HTML input value: ${flat(n.attrs.value)}`);
 		// A closed <details> shows its summary only.
 		const shut = n.tag === "details" && !Object.hasOwn(n.attrs, "open");
 		let text = n.children

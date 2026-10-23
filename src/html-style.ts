@@ -120,27 +120,40 @@ function fontTiny(font: string | undefined): boolean {
 	)
 		return false;
 	const size =
-		/(?:^|\s)((?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)|0|(?:xx?-)?(?:small|large)|medium|larger|smaller)(?:\s*\/\s*\S+)?\s+\S/.exec(
+		/(?:^|\s)((?:\d*\.)?\d+[a-z%]+|0|(?:xx?-)?(?:small|large)|medium|larger|smaller)(?:\s*\/\s*\S+)?\s+\S/.exec(
 			font,
 		)?.[1];
+	// A unit the size check does not know (vw, cqw, lh) hides only at zero.
+	if (size && /^[\d.]+[a-z]+$/.test(size) && !/(?:px|pt|r?em|ex|ch)$/.test(size))
+		return Number.parseFloat(size) === 0;
 	return !size || tiny(size);
 }
-// A box of (almost) no height or width that clips what overflows it; a computed size counts as none.
+// A box of (almost) no height or width that clips what overflows it; a computed size (min(), max())
+// counts as none when it has a zero among its values.
 const collapsed = (css: Css) =>
-	/^(?:hidden|clip)\b/.test(css.overflow ?? css["overflow-y"] ?? css["overflow-x"] ?? "") &&
+	["overflow", "overflow-x", "overflow-y"].some((k) => /^(?:hidden|clip)\b/.test(css[k] ?? "")) &&
 	["height", "max-height", "width", "max-width", "line-height"].some((k) => {
 		const v = k === "line-height" && /^[\d.]+$/.test(css[k] ?? "") ? `${css[k]}em` : css[k];
 		if (!v) return false;
-		if (v.includes("(") || Number.parseFloat(v) === 0) return true;
+		if (v.includes("(")) return /[(,\s]0[a-z%]*\s*[,)]/.test(v);
+		if (Number.parseFloat(v) === 0) return true;
 		return /^(?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)?$/.test(v) && tiny(v);
 	});
 const faint = (opacity = "1") =>
+	opacity.includes("(") ||
 	Number.parseFloat(opacity) / (opacity.trim().endsWith("%") ? 100 : 1) < 0.1;
+// A value that changes nothing: a reset keyword, or a zoom or scale of half or more.
+const neutral = (k: string, v = "") =>
+	/^(?:none|initial|unset|inherit|revert|auto|normal|visible)$/.test(v) ||
+	(["zoom", "scale"].includes(k) &&
+		/^[\d.]+%?$/.test(v) &&
+		Number.parseFloat(v) / (v.endsWith("%") ? 100 : 1) >= 0.5);
 export function cssHidden(css: Css): boolean {
-	const foreground = color(css.color);
-	const colours = [css.color, css.background, css["background-color"]].filter(
-		(c): c is string => !!c,
-	);
+	// The letters' fill: -webkit-text-fill-color where it is set, else the colour.
+	const fill = css["-webkit-text-fill-color"];
+	const ink = fill && fill !== "currentcolor" && !neutral("", fill) ? fill : css.color;
+	const foreground = color(ink);
+	const colours = [ink, css.background, css["background-color"]].filter((c): c is string => !!c);
 	const uncertain = colours.some((c) => !/^(?:#[a-f\d]{6}|[a-z]+)$/.test(color(c)));
 	return (
 		uncertain ||
@@ -157,7 +170,7 @@ export function cssHidden(css: Css): boolean {
 		["left", "right", "top", "bottom", "text-indent"].some(
 			(k) => /^-/.test(css[k] ?? "") || Number.parseFloat(css[k] ?? "") > 10000,
 		) ||
-		["margin", "margin-left", "margin-top"].some((k) => Number.parseFloat(css[k] ?? "") < -999) ||
+		Object.entries(css).some(([k, v]) => k.startsWith("margin") && /(?:^|\s)-\d{4,}/.test(v)) ||
 		// Their effect on the letters is not worked out here, so the text is listed.
 		[
 			"clip",
@@ -171,8 +184,7 @@ export function cssHidden(css: Css): boolean {
 			"-webkit-mask-image",
 			"zoom",
 			"scale",
-			"-webkit-text-fill-color",
-		].some((k) => Object.hasOwn(css, k))
+		].some((k) => Object.hasOwn(css, k) && !neutral(k, css[k]))
 	);
 }
 export function visibility(
