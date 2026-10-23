@@ -100,7 +100,8 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 		why.push("tiny text");
 	// The letters' fill and outline (a:ln, which holds a fill of its own), each the run's or else the shape's.
 	const own = (x: Xml | undefined, k: string) => x && children(x, k)[0];
-	const sets = (x?: Xml) => ["solidFill", "noFill", "gradFill", "pattFill"].some((k) => own(x, k));
+	const sets = (x?: Xml) =>
+		["solidFill", "noFill", "gradFill", "pattFill", "blipFill", "grpFill"].some((k) => own(x, k));
 	const from = sets(props) ? props : defaults;
 	const fill = own(from, "solidFill");
 	const opaque = (f?: Xml) => {

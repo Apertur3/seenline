@@ -142,7 +142,7 @@ function none(v: string | undefined): boolean {
 	const f = /^(min|max|clamp)\(([^()]*)\)$/.exec(v);
 	if (f) {
 		// Inside a function a negative size is allowed, and comes out as zero.
-		const all = (f[2] as string).split(",").map((x) => x.trim().startsWith("-") || none(x.trim()));
+		const all = (f[2] as string).split(",").map((x) => /^-[\d.]/.test(x.trim()) || none(x.trim()));
 		const [a, b, c] = all; // clamp(min, value, max) is max(min, min(value, max))
 		if (f[1] === "clamp") return !!a && (!!b || !!c);
 		return f[1] === "min" ? all.some(Boolean) : all.every(Boolean);
@@ -163,14 +163,15 @@ const boxed = (css: Css, tag: string) =>
 	(css.display && !neutral("", css.display)
 		? !/^(?:inline|contents|(?:inline-)?table(?:-[a-z-]+)?)$/.test(css.display)
 		: BOX.test(tag));
-// A box of (almost) no height or width that clips what overflows it on that axis, a minimum size
-// counted. One axis hidden makes the other, if visible, scroll: it clips too.
+// A box of (almost) no height or width that clips or scrolls what overflows it on that axis, a minimum
+// size counted. One axis hidden or scrolling makes the other, if visible, scroll too (clip does not).
 const collapsed = (css: Css, tag: string) => {
 	if (!boxed(css, tag)) return false;
 	const [ox = "", oy = ox] = (css.overflow ?? "").split(/\s+/);
 	const [x, y] = [css["overflow-x"] ?? ox, css["overflow-y"] ?? oy];
 	const clips = (a: string, b: string) =>
-		/^(?:hidden|clip)$/.test(a) || (/^(?:visible)?$/.test(a) && /^(?:hidden|auto|scroll)$/.test(b));
+		/^(?:hidden|clip|auto|scroll)$/.test(a) ||
+		(/^(?:visible)?$/.test(a) && /^(?:hidden|auto|scroll)$/.test(b));
 	const lh = css["line-height"];
 	const lines = () => none(lh && /^[\d.]+$/.test(lh) ? `${lh}em` : lh) && !some(css.height);
 	const flat = () =>
