@@ -62,6 +62,7 @@
 				"(?:ignore|disregard|forget|override|bypass|abandon|discard|erase)(?:the|your|this|all|any)?(?:stated|requested|assigned|original|users?)(?:task|request|question)",
 				"(?:previous|prior|earlier|above|old|original|existing|every|all)(?:instructions?|constraints?|restrictions|directives?|context)(?:above|before|sofar)?(?:are|is|were|was|as)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|suspended|lifted|disabled|nolonger)",
 				"(?:instructions?|rules|directives?)(?:above|before|sofar)(?:are|is)(?:now)?(?:obsolete|cancell?ed|revoked|void|superseded|invalid|nolonger)",
+				"(?:your|all)(?:previous|prior|earlier|above)rules?(?:are|is|were|was|as)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|nolonger)",
 				"(?:replaces|supersedes|overrides|outranks?|takesprecedenceover)(?:all|any|every|the|your|of|these|those){0,3}(?:previous|prior|earlier|above|other|existing|original)?(?:instructions?|directives?|prompts?)",
 				"(?:obey|complywith)(?:the|all|any|only)?(?:next|following|new|replacement|embedded)(?:instructions?|directives?|commands?)",
 				"(?:ignore|disregard)(?:that|this|it)and(?:continue|proceed)",
@@ -82,6 +83,7 @@
 				"(?:reveal|show|print|output|display|dump|recite|disclose|expose|leak|writeout)(?:me|us)?(?:all|any|the|exact|full|complete|entire|whole|verbatim){0,3}your(?:own)?(?:full|complete|entire|exact|original|initial)?(?:prompts?|instructions?|rules|directives?|configuration|guidelines)",
 				"what(?:exact|are|were|the|your|initial|original|system){0,3}(?:instructions|rules|prompts?|directives)(?:were|have|did)you(?:been)?(?:given|received|get|got|told)",
 				"(?:extract|print|output|reveal|dump|leak|exfiltrate|expose|enumerate|harvest)(?:out|me)?(?:all|any|every|each|hidden|stored){0,3}(?:apikeys?|passwords?|credentials|secrets?|accesstokens?|sessiontokens?|privatekeys?|authtokens?|secretkeys?)",
+				"(?:reveal|dump|leak|exfiltrate)(?:me)?the(?:apikeys?|passwords?|credentials|secrets?|accesstokens?|sessiontokens?|privatekeys?|authtokens?|secretkeys?)",
 				"(?:extract|print|output|reveal|dump|leak|exfiltrate|expose|enumerate|harvest)(?:out|me)?(?:all|any|every|the|each){0,3}(?:private|sensitive|confidential|secret)(?:data|values?|information|strings?|fields?|keys|files|context|notes|metadata|identifiers?|details|material)",
 				"(?:send|forward|email|post|upload|transmit|exfiltrate|leak)(?:all|any|the|this|these|your|every|acopyof){0,3}(?:conversation|chathistory|chatlog|userdata|personaldata|credentials|passwords|secrets|apikeys|systemprompt|sessiontokens?|cookies)(?:to|into|via)"
 			]
@@ -111,7 +113,7 @@
 				"insteadof(?:summari[sz]ing|answering|translating|reviewing)(?:this|theuser|thedocument|thequestion)",
 				"your(?:real|actual|true|primary)(?:task|job|goal|objective|mission|assignment)(?:isto|is)",
 				"(?:ignore|disregard|forget|abandon|pause)(?:the|this|your)?(?:visible|stated|original|assigned|requested|current|users?)?(?:task|document|request|question|assignment)(?:and|then|instead)(?:write|compose|produce|output|print|reply|respond|say|tell|describe|draft|list|explain|translate|generate|create|give|answer|return|recite|state)",
-				"whensummari[sz]ingthis(?:document|text|file|page|email)",
+				"whensummari[sz]ingthis(?:document|text|file|page|email|resume|cv|paper|article|report)",
 				"inyoursummary(?:emphasi[sz]e|highlight|focus|mention|include|say|state|stress|foreground|prioriti[sz]e|omit|downplay)"
 			]
 		}

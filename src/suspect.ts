@@ -70,14 +70,18 @@ export function normal(text: string): string {
 
 /** The reason class when hidden text reads like an instruction to an AI, else null. */
 export function suspect(text: string): string | null {
-	// camelCase humps part words (a code name reads as words, not as a run below).
-	const t = text.replace(/(?<=\p{Ll}{2})(?=\p{Lu}\p{Ll}{2})/gu, " ");
 	// A format character inside a word hides it; between words it stands for a space: read both ways.
-	const forms = [normal(t), ...(/\p{Cf}/u.test(t) ? [normal(t.replace(/\p{Cf}/gu, " "))] : [])];
+	const read = (t: string) => [
+		normal(t),
+		...(/\p{Cf}/u.test(t) ? [normal(t.replace(/\p{Cf}/gu, " "))] : []),
+	];
+	const forms = read(text);
 	const rule = RULES.find(([, pattern]) => forms.some((f) => pattern.test(f)))?.[0];
 	if (rule) return rule;
 	// Without word boundaries short phrases match by chance: a signature phrase of 16 letters or more.
-	const squashed = forms.flatMap(runs);
+	// A camelCase word is a code name (printPasswordHash), not words run together.
+	const plain = text.split(/\s+/).filter((w) => !/\p{Ll}{2}\p{Lu}\p{Ll}{2}/u.test(w));
+	const squashed = read(plain.join(" ")).flatMap(runs);
 	return (
 		SQUASHED.find(([, re]) =>
 			squashed.some((s) => s.matchAll(re).some((m) => m[0].length >= 16)),
