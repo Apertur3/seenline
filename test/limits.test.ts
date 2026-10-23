@@ -43,6 +43,18 @@ const HOSTILE: [string, string][] = [
 		"subtitle tag openings",
 		`subtitlesToText("00:00:01.000 --> 00:00:02.000\\n" + "<".repeat(100_000))`,
 	],
+	[
+		"subtitle speaker openings",
+		`subtitlesToText("00:00:01.000 --> 00:00:02.000\\n" + "<v ".repeat(33_334))`,
+	],
+	[
+		"subtitle style comment openings",
+		`subtitlesToText("WEBVTT\\n\\nSTYLE\\n" + "/*a".repeat(100_000) + "\\n\\n00:00:01.000 --> 00:00:02.000\\nHi\\n")`,
+	],
+	[
+		"subtitle style brace openings",
+		`subtitlesToText("WEBVTT\\n\\nSTYLE\\n" + "::cue {".repeat(50_000) + "\\n\\n00:00:01.000 --> 00:00:02.000\\nHi\\n")`,
+	],
 	["Dutch reply lines", `convert(eml("Op " + "schreef ".repeat(12_500)), { name: "x.eml" })`],
 	[
 		"boundary blanks",

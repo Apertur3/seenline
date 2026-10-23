@@ -32,26 +32,31 @@ const inert = (raw: string) =>
 const linked = (n: HtmlNode): boolean =>
 	(n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? "")) ||
 	n.children.some((c) => typeof c !== "string" && linked(c));
+/** A style sheet's rules as [selectors, declarations]; anything else (an unclosed or nested block, a stray brace) throws. */
+export function cssRules(sheet: string): [string, string][] {
+	// An unclosed comment runs to the end, as in a browser; each pattern scans a character once.
+	const raw = sheet.replace(/\/\*[\s\S]*?(?:\*\/|$)/g, "");
+	let at = 0;
+	const out: [string, string][] = [];
+	for (const m of raw.matchAll(/([^{}]+)\{([^{}]*)\}/gy)) {
+		out.push([m[1] as string, m[2] as string]);
+		at = m.index + m[0].length;
+	}
+	if (raw.slice(at).trim()) throw new Error("CSS rules");
+	return out;
+}
 export function styleRules(root: HtmlNode): Rule[] {
 	// A linked stylesheet is unknown, so every element is flagged and no rule in the page can hide more.
 	if (linked(root)) return [{ selector: "*", css: { display: "none" } }];
 	const rules: Rule[] = [];
 	const walk = (n: HtmlNode) => {
-		if (n.tag === "style") {
-			// An unclosed comment runs to the end, as in a browser; each pattern scans a character once.
-			const raw = n.children.join("").replace(/\/\*[\s\S]*?(?:\*\/|$)/g, "");
-			let at = 0;
-			for (const m of raw.matchAll(/([^{}]+)\{([^{}]*)\}/gy)) {
-				if (raw.slice(at, m.index).trim()) throw new Error("CSS rules");
-				for (const selector of (m[1] as string).split(",")) {
+		if (n.tag === "style")
+			for (const [selectors, body] of cssRules(n.children.join("")))
+				for (const selector of selectors.split(",")) {
 					if (/^[\w.*#\s-]+$/.test(selector))
-						rules.push({ selector: selector.trim(), css: declarations(m[2] as string) });
-					else if (!inert(m[2] as string)) throw new Error("unsupported CSS selector");
+						rules.push({ selector: selector.trim(), css: declarations(body) });
+					else if (!inert(body)) throw new Error("unsupported CSS selector");
 				}
-				at = m.index + m[0].length;
-			}
-			if (raw.slice(at).trim()) throw new Error("CSS rules");
-		}
 		for (const c of n.children) if (typeof c !== "string") walk(c);
 	};
 	walk(root);

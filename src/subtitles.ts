@@ -3,7 +3,7 @@
 import { clock, formatCue } from "./cues.ts";
 import { PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
-import { cssHidden, declarations } from "./html-style.ts";
+import { cssHidden, cssRules, declarations } from "./html-style.ts";
 
 const TIMING =
 	/^\s*(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})\s+-->\s+(?:(\d+):)?(\d{2}):(\d{2})[.,](\d{3})/;
@@ -19,7 +19,7 @@ const ENTITIES: Record<string, string> = {
 // `<v Name>` is a speaker: it becomes "Name: ". Every other tag (italics, karaoke times, {\an8}) goes.
 function plain(text: string): string {
 	return text
-		.replace(/<v(?:\.[^\s>]*)?\s+([^>]*)>/g, " $1: ")
+		.replace(/<v(?:\.[^\s<>]*)?\s+([^<>]*)>/g, " $1: ") // `<` ends a try: one scan per character
 		.replace(/<[^<>]*>|\{\\[^{}]*\}/g, "")
 		.replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_, name: string) => ENTITIES[name] ?? "")
 		.replace(/\s+/g, " ")
@@ -58,11 +58,10 @@ function unseen(color: string, ground = "black"): boolean {
 	);
 }
 
-// Whether a STYLE block has a rule that can hide cue text.
+// Whether a STYLE block has a rule that can hide cue text; a block that is not whole rules is refused.
 function hides(block: string): boolean {
-	const raw = block.replace(/\/\*[\s\S]*?\*\//g, "");
 	try {
-		return [...raw.matchAll(/\{([^{}]*)\}/g)].some(([, body = ""]) => {
+		return cssRules(block).some(([, body]) => {
 			const {
 				background,
 				"background-color": ground = background,
