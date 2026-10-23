@@ -62,6 +62,8 @@ export function createServer(readers: Readers = {}): McpServer {
 }
 
 export async function startMcp(readers: Readers = {}): Promise<void> {
+	// Stdout carries JSON-RPC only: a library that logs must not break the client's stream.
+	console.log = console.info = console.debug = console.error;
 	const server = createServer(readers);
 	await server.connect(new StdioServerTransport());
 	process.stdin.once("end", () => {

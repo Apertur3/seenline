@@ -10,7 +10,7 @@ import type { ConvertOptions, ConvertResult } from "./types.ts";
 export { PlainviewError } from "./error.ts";
 export type { ConvertOptions, ConvertResult, HiddenText, OcrResult } from "./types.ts";
 
-/** Convert locally; optional OCR and verify callbacks receive the supplied path or a private temporary copy, and for a PDF the page numbers to read. */
+/** Convert locally; optional OCR and verify callbacks receive the supplied path or a private temporary copy, for a PDF the page numbers to read, and the input bytes. */
 export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<ConvertResult> {
 	if (input.length === 0)
 		throw new PlainviewError("invalid", "could not read this file: empty input");
@@ -32,7 +32,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		copy ??= opts.path === undefined ? local() : Promise.resolve(opts.path);
 		const path = await copy;
 		try {
-			const read = await reader(path, pages);
+			const read = await reader(path, pages, input);
 			if (
 				!strings(read.pages) ||
 				!strings(read.extras) ||

@@ -9,11 +9,12 @@ import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
 const HELP = `Usage: plainview <file> [more files] [options]
-       plainview mcp [--ocr] [--verify] [--ocr-lang <lang>]
+       plainview mcp [--ocr] [--verify] [--ocr-lang <lang>] [--help]
 
 Convert local documents to Markdown. Scans and images fail closed unless --ocr is set.
 
-  --json             Write one JSON object per file to stdout
+  --json             Write one JSON object per successful file to stdout, with its input path
+                     as "file"
   --out <dir>        Write <name>.md files instead of stdout
   --fail-on-hidden   Exit 3 if any successful file has hidden content
   --hidden <mode>    How the hidden block shows hidden text: describe (default; location, kind
@@ -92,7 +93,13 @@ async function run(args: string[]): Promise<number> {
 	if (args[0] === "mcp") {
 		let readers: Readers;
 		try {
-			readers = readersFrom(parseArgs({ args: args.slice(1), options: OCR_OPTIONS }).values);
+			const options = { ...OCR_OPTIONS, help: { type: "boolean" } } as const;
+			const { values } = parseArgs({ args: args.slice(1), options });
+			if (values.help) {
+				process.stdout.write(HELP);
+				return 0;
+			}
+			readers = readersFrom(values);
 		} catch (error) {
 			return usage(errorMessage(error));
 		}
@@ -115,6 +122,7 @@ async function run(args: string[]): Promise<number> {
 	let hidden = false;
 	let suspect = false;
 	for (const file of files) {
+		let result: string;
 		try {
 			const {
 				markdown,
@@ -125,22 +133,25 @@ async function run(args: string[]): Promise<number> {
 				...readers,
 				...(mode && { hidden: mode }),
 			});
-			if (values.out !== undefined) {
-				await mkdir(values.out, { recursive: true });
-				await writeFile(join(values.out, outputName(file)), markdown);
-			} else {
-				process.stdout.write(
-					values.json
-						? `${JSON.stringify({ markdown, pages, hidden: entries, flags })}\n`
-						: markdown,
-				);
-			}
 			hidden ||= entries.length > 0 || flags.length > 0;
 			suspect ||= entries.some((e) => e.suspect);
+			result = values.json
+				? `${JSON.stringify({ file, markdown, pages, hidden: entries, flags })}\n`
+				: markdown;
 		} catch (error) {
 			process.stderr.write(`${file}: ${formatError(error)}\n`);
 			failed = true;
+			continue;
 		}
+		if (values.out === undefined) process.stdout.write(result);
+		else
+			try {
+				await mkdir(values.out, { recursive: true });
+				await writeFile(join(values.out, outputName(file)), result);
+			} catch (error) {
+				process.stderr.write(`${file}: could not write the output: ${errorMessage(error)}\n`);
+				failed = true;
+			}
 	}
 	if (failed) return 1;
 	if (values["fail-on-suspect"] && suspect) return 4;

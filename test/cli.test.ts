@@ -32,16 +32,16 @@ test("built CLI --hidden text emits exactly the golden Markdown and no diagnosti
 	}
 });
 
-test("CLI JSON is one result per file and excludes optional reader metadata", async () => {
-	const names = ["report.pdf", "office-book.xlsx"];
+test("CLI JSON is one result per successful file, names its input and excludes optional reader metadata", async () => {
+	const names = ["report.pdf", "missing.pdf", "office-book.xlsx"];
 	const result = run("--json", ...names.map(fixture));
-	assert.equal(result.status, 0, result.stderr);
-	assert.equal(result.stderr, "");
+	assert.equal(result.status, 1, result.stderr);
+	assert.ok(result.stderr.startsWith(`${fixture("missing.pdf")}: invalid: `), result.stderr);
 	const lines = result.stdout.trimEnd().split("\n");
 	assert.equal(lines.length, 2);
-	for (const [index, name] of names.entries()) {
+	for (const [index, name] of ["report.pdf", "office-book.xlsx"].entries()) {
 		const expected = await convert(await readFile(fixture(name)), { name });
-		assert.deepEqual(JSON.parse(lines[index] as string), expected);
+		assert.deepEqual(JSON.parse(lines[index] as string), { file: fixture(name), ...expected });
 	}
 });
 
@@ -124,10 +124,14 @@ test("CLI empty, damaged, unsupported and unwritable files fail closed", async (
 		}
 		const blocked = join(scratch, "file");
 		await writeFile(blocked, "occupied");
+		// An output that cannot be written is not an input error.
 		const result = run("--out", blocked, fixture("report.pdf"));
 		assert.equal(result.status, 1);
 		assert.equal(result.stdout, "");
-		assert.ok(result.stderr.startsWith(`${fixture("report.pdf")}: invalid: `));
+		assert.ok(
+			result.stderr.startsWith(`${fixture("report.pdf")}: could not write the output: `),
+			result.stderr,
+		);
 	} finally {
 		await rm(scratch, { recursive: true, force: true });
 	}
@@ -182,6 +186,8 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	assert.equal(help.status, 0);
 	assert.match(help.stdout, /Usage: plainview/);
 	assert.equal(help.stderr, "");
+	const mcpHelp = run("mcp", "--help");
+	assert.deepEqual([mcpHelp.status, mcpHelp.stdout, mcpHelp.stderr], [0, help.stdout, ""]);
 	assert.equal(run("--version").stdout, `${pkg.version}\n`);
 	assert.equal(run("--version").status, 0);
 	assert.equal(run("--version").stderr, "");

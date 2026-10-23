@@ -129,3 +129,32 @@ test("built plainview mcp speaks stdio with no extra stdout or diagnostics", asy
 	}
 	assert.equal(stderr, "");
 });
+
+test("built plainview mcp keeps library logging off stdout", async () => {
+	// Logs on every console channel from the moment the server reads stdin, as a chatty library would.
+	const preload = `data:text/javascript,process.stdin.once("newListener",()=>setInterval(()=>{console.log("noise");console.info("noise");console.debug("noise")},5).unref())`;
+	const client = new Client({ name: "stdio-noise-test", version: "1.0.0" });
+	const errors: Error[] = [];
+	client.onerror = (error) => errors.push(error);
+	const transport = new StdioClientTransport({
+		command: process.execPath,
+		args: ["--import", preload, fileURLToPath(new URL("../dist/cli.js", import.meta.url)), "mcp"],
+		stderr: "pipe",
+	});
+	let stderr = "";
+	transport.stderr?.on("data", (chunk: Buffer) => {
+		stderr += chunk.toString();
+	});
+	try {
+		await client.connect(transport);
+		const result = await client.callTool({
+			name: "convert_file",
+			arguments: { path: fixture("report.pdf") },
+		});
+		assert.ok(!result.isError, JSON.stringify(result.content));
+	} finally {
+		await client.close();
+	}
+	assert.deepEqual(errors, []);
+	assert.match(stderr, /noise/);
+});

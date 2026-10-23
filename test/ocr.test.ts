@@ -9,6 +9,7 @@ import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { convert } from "../src/index.ts";
 import { tesseract } from "../src/ocr.ts";
 
 const cli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
@@ -23,8 +24,15 @@ text:*) /bin/cat >/dev/null; echo "\${FAKE#text:}"; exit 0 ;;
 esac
 n=$(/bin/cat | /usr/bin/wc -c)
 echo "Recognised $((n)) bytes: $*"`,
-	// Page N becomes N bytes of raster.
-	pdftoppm: `/usr/bin/head -c "$6" /dev/zero`,
+	// Page N becomes a PNG signature and N bytes; pipe returns the PDF it was given, raw no image, slow takes a while.
+	pdftoppm: `case "$FAKE" in
+pipe) printf '\\211PNG\\r\\n\\032\\n'; exec /bin/cat ;;
+raw) exec /usr/bin/head -c 9 /dev/zero ;;
+slow) /bin/sleep 0.3 ;;
+esac
+/bin/cat >/dev/null
+printf '\\211PNG\\r\\n\\032\\n'
+/usr/bin/head -c "$6" /dev/zero`,
 };
 let scratch = "";
 let both = "";
@@ -73,12 +81,12 @@ test("--ocr reads an image through tesseract on stdin, with the language flag", 
 test("--ocr reads only the weak PDF pages, each under its own anchor", () => {
 	const scan = run(both, ["--ocr", fixture("documents/scan.pdf")]);
 	assert.equal(scan.status, 0, scan.stderr);
-	assert.equal(scan.stdout, "[p. 1]\nRecognised 1 bytes: stdin stdout -l eng\n");
+	assert.equal(scan.stdout, "[p. 1]\nRecognised 9 bytes: stdin stdout -l eng\n");
 	const weak = run(both, ["--ocr", fixture("pdf-hiding/weak-page.pdf")]);
 	assert.equal(weak.status, 0, weak.stderr);
 	assert.match(
 		weak.stdout,
-		/^\[p\. 1\]\n[^\n]+\n\[p\. 2\]\nRecognised 2 bytes: [^\n]+\n\[p\. 3\]\n/,
+		/^\[p\. 1\]\n[^\n]+\n\[p\. 2\]\nRecognised 10 bytes: [^\n]+\n\[p\. 3\]\n/,
 	);
 });
 
@@ -125,6 +133,60 @@ test("--ocr fails closed on a recogniser error, output over the cap, and a file 
 	assert.equal(result.status, 1);
 	assert.equal(result.stdout, "");
 	assert.match(result.stderr, /unavailable: .*reads PNG, JPEG, GIF, BMP and WebP images only/);
+});
+
+async function withFake<T>(fake: string, body: () => Promise<T>): Promise<T> {
+	const saved = process.env;
+	process.env = { PATH: both, FAKE: fake };
+	try {
+		return await body();
+	} finally {
+		process.env = saved;
+	}
+}
+
+test("pdftoppm renders the bytes that were parsed, not the file now at the path", async () => {
+	const bytes = await readFile(fixture("documents/scan.pdf"));
+	const result = await withFake("pipe", () =>
+		convert(bytes, {
+			name: "scan.pdf",
+			path: fixture("pdf-hiding/weak-page.pdf"),
+			ocr: tesseract("eng"),
+		}),
+	);
+	assert.equal(
+		result.markdown,
+		`[p. 1]\nRecognised ${8 + bytes.length} bytes: stdin stdout -l eng\n`,
+	);
+});
+
+test("pdftoppm output that is no image, a weak BMP signature and a file over its deadline fail closed", async () => {
+	const pdf = await readFile(fixture("documents/scan.pdf"));
+	await withFake("raw", () =>
+		assert.rejects(tesseract("eng")("x.pdf", [1], pdf), {
+			message: "could not read this file: text recognition failed (pdftoppm returned no image)",
+		}),
+	);
+	const bmp = Buffer.alloc(58);
+	bmp.write("BM");
+	bmp.writeUInt32LE(58, 2);
+	bmp.writeUInt32LE(54, 10);
+	bmp.writeUInt32LE(40, 14);
+	const read = await withFake("", () => tesseract("eng")("x.bmp", undefined, bmp));
+	assert.deepEqual(read.pages, ["Recognised 58 bytes: stdin stdout -l eng\n"]);
+	for (const fake of [Buffer.from("BM\n/etc/hosts\n".padEnd(40)), bmp.subarray(0, 40)])
+		await withFake("", () =>
+			assert.rejects(tesseract("eng")("x.bmp", undefined, fake), { code: "unavailable" }),
+		);
+	// Each run is under its own timeout, but four 0.3 s pages overrun the file's 0.6 s.
+	const started = Date.now();
+	await withFake("slow", () =>
+		assert.rejects(tesseract("eng", 5_000, 200, 100)("x.pdf", [1, 2, 3, 4], pdf), {
+			code: "invalid",
+			message: "could not read this file: text recognition is over the time limit for this file",
+		}),
+	);
+	assert.ok(Date.now() - started < 3_000);
 });
 
 test("a hung recogniser is killed at the timeout", async () => {
@@ -231,7 +293,7 @@ test("plainview mcp --ocr reads a scan over stdio", async () => {
 		});
 		assert.ok(!result.isError, JSON.stringify(result.content));
 		assert.deepEqual(result.content, [
-			{ type: "text", text: "[p. 1]\nRecognised 1 bytes: stdin stdout -l nld\n" },
+			{ type: "text", text: "[p. 1]\nRecognised 9 bytes: stdin stdout -l nld\n" },
 		]);
 	} finally {
 		await client.close();
