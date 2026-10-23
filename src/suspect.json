@@ -33,20 +33,23 @@
 		"м": "m",
 		"н": "h",
 		"ω": "w",
-		"η": "n"
+		"η": "n",
+		"г": "r",
+		"γ": "y",
+		"μ": "u"
 	},
 	"parts": {
 		"ANS": "(?:answers?|responses?|repl(?:y|ies)|outputs?|summar(?:y|ies)|completions?)",
 		"YOUR": "(?:your <ANS>|(?:the|each|every|any|all) <ANS> you (?:write|produce|give|generate|return|send|provide|make|create))",
-		"MARK": "(?:[\\u0022“«]|(?<!\\w)['‘](?=\\w)|https?:|www\\.|\\b[\\w-]+\\.(?:com|org|net|io|co|biz|info|ly)\\b|\\b[\\w.-]+@[\\w-]+\\.\\w|\\b(?:the|this|these|that) (?:following|exact|words?|phrases?|sentences?|lines?|links?|urls?|address|token|string|code ?word|term|slogan|tagline|statement|claim|signature|disclaimer|hashtag|emoji|keywords?|markdown|image|hyperlink|footnote)\\b|\\ban? (?:link|url|hyperlink|markdown|image|footnote|hashtag|code ?word|token)\\b)",
+		"MARK": "(?:[\\u0022“«`]|(?<!\\w)['‘](?=\\w)|https?:|www\\.|\\b[\\w-]+\\.(?:com|org|net|io|co|biz|info|ly|ai|xyz|dev|app|site|cloud|me)\\b|\\b[\\w.-]+@[\\w-]+\\.\\w|\\b(?:the|this|these|that) (?:following|exact|words?|phrases?|sentences?|lines?|links?|urls?|address|token|string|code ?word|term|slogan|tagline|statement|claim|signature|disclaimer|hashtag|emoji|keywords?|markdown|image|hyperlink|footnote)\\b(?! (?:count|counts|limit|limits|document|file|processor|order|choice|list|lists|length|search)\\b)|\\ban? (?:link|url|hyperlink|markdown|image|footnote|hashtag|code ?word|token)\\b)",
 		"IMP": "(?:^\\W*|[.!?:;,] \\W*|\\b(?:please|kindly|and|then|also|always|now|just|simply) )",
 		"AI": "(?:ai|a\\.i\\.|llm|chatbot|language model|assistant|bot|screener|summari[sz]er|(?:ai|grading|screening|reviewing|evaluating|evaluation|review|scoring|ranking|summari[sz]ing|reading|language|automated) (?:model|system|tool|reviewer|grader|screener|agent|assistant)|model(?= (?:reading|processing|parsing|reviewing|summari[sz]ing|screening|evaluating|grading|reads|processes|parses|reviews|summari[sz]es|screens|evaluates|grades|that|which|who)\\b))s?\\b(?! (?:manager|director|editor|professor|principal|coach|secretary|registrar|curator|engineer|librarian|committee|working group|developers?|team)\\b)",
 		"TVERB": "(?:ignore|disregard|forget(?: about)?|skip|never mind|set aside|put aside|leave aside|pay no attention to|abandon|discard|ditch|scrap|stop|(?:do not|don't|never) (?:summari[sz]e|answer|analy[sz]e|review|process|read|translate|describe))",
-		"TNOUN": "(?:document|text|file|page|content|contents|paper|report|resume|cv|invoice|article|essay|email|passage|input|question|request|task|prompt|material|pdf|attachment|summary|analysis|above|everything|assignment|query|contract|agreement|form|letter|data|table|slides?|presentation|website|webpage|site|brief|proposal|statement|summari[sz]ing|answering|analy[sz]ing|translating|reviewing)",
+		"TNOUN": "(?:document|text|file|page|content|contents|paper|report|resume|cv|invoice|article|essay|email|passage|input|question|request|task|prompt|material|pdf|attachment|summary|analysis|above|everything|assignment|query|summari[sz]ing|answering|analy[sz]ing|translating|reviewing)",
 		"ACT": "(?:write|compose|produce|output|print|reply|respond|say|tell|describe|draft|list|explain|translate|generate|create|talk|give|answer|return|type|sing|recite|make|state)",
 		"FORM": "(?:capital letters|capitals|upper ?case|lower ?case|all caps|caps lock|emojis?|rhymes?|rhyming couplets|verse|haikus?|limericks?|riddles|pirate(?: speak)?|shakespearean(?: english)?|old english|pig latin|morse(?: code)?|binary|base64|hex|leetspeak|questions|french|german|spanish|italian|dutch|portuguese|russian|chinese|japanese|latin|klingon|reverse|backwards)",
 		"SYS": "(?:^\\W*|[.!?] \\W*|\\[|<|#+ ?)(?:(?:important|urgent|official|priority|critical|new|mandatory|high[- ]priority) )*(?:system|sys|admin|administrator|developer|dev|operator|root|sudo|platform|ai provider|openai|anthropic)(?: (?:message|note|notice|instructions?|override|prompt|update|directive|command|alert|mode|priority|order|policy))?(?: from [\\w ]{1,30})? ?[\\]>:]",
-		"DIRECT": "(?:the (?:assistant|ai|model|chatbot|llm)\\b|\\byou (?:are|have been|may|must|should|will|can|now)(?: now)? (?:authori[sz]ed|allowed|permitted|cleared|free|required|instructed|exempt|no longer|ignore|disregard|bypass|reveal|respond|answer)|\\byour (?:instructions|rules|guidelines|behaviou?r|restrictions|filters|safety|programming|responses?|answers?|repl(?:y|ies))\\b|\\b(?:permits?|allows?|authori[sz]es|instructs|wants|orders|tells) you to\\b|\\b(?:every|each|all) (?:repl(?:y|ies)|answers?|responses?|outputs?)\\b|\\b(?:ignore|disregard|forget|reveal|comply|obey|respond|reply)\\b|\\bthe user (?:has|is)\\b|\\bnew (?:instructions?|polic(?:y|ies)|rules|guidelines)\\b|\\b(?:safety|restrictions?|filters?|guardrails|content polic(?:y|ies)|unrestricted|trusted)\\b|\\b(?:turned off|disabled|suspended|lifted|deactivated)\\b)"
+		"DIRECT": "(?:\\bthe (?:assistant|ai|model|chatbot|llm) (?:must|should|shall|may|will|can|is|has been|needs to)(?: now)? (?:be )?(?:cleared|allowed|permitted|authori[sz]ed|required|instructed|free|exempt|follow|comply|obey|ignore|disregard|reveal|answer|respond|output|share|disclose)|\\byou (?:are|have been|may|must|should|will|can)(?: now)? (?:authori[sz]ed|allowed|permitted|cleared|free to|required to|instructed|exempt|no longer bound|ignore|disregard|bypass|reveal)|\\byour (?:instructions|rules|guidelines|behaviou?r|restrictions|filters|safety (?:rules|settings|guidelines)|programming)\\b|\\byour <ANS> (?:must|should|shall|will)\\b|\\bthe (?:user|operator|owner|admin|administrator|developer)s? (?:permits?|allows?|authori[sz]es|instructs|wants|orders|tells) you to\\b|\\b(?:every|each|all) <ANS> (?:must|should|shall|to) (?:mention|promote|praise|recommend|say|state)\\b|\\b(?:ignore|disregard|forget) (?:all |any |your )?(?:previous|prior|earlier|above|other|existing|safety|content)\\b|\\bcomply with (?:this|these|the following|the document|the instructions|everything)\\b|\\bobey\\b|\\breveal (?:your|the (?:hidden|internal|system|secret))\\b|\\bthe user has (?:authori[sz]ed|permitted|allowed|consented|granted|approved|asked you|requested that you)\\b|\\bnew (?:instructions?|rules|guidelines|polic(?:y|ies)) (?:follow|below|replace|override|supersede)|\\bnew instructions? ?:|\\b(?:safety|restrictions?|filters?|filtering|guardrails|content polic(?:y|ies)|moderation|safeguards|compliance checks|safety mode)(?: (?:are|is|have been|has been))?(?: now)? (?:disabled|off|turned off|lifted|suspended|removed|deactivated|waived|bypassed)\\b|\\bunrestricted\\b|\\bwithout (?:any )?(?:restrictions?|filters?|limits)\\b|\\b(?:trusted|privileged|authoritative) (?:instructions?|commands?|directives?)\\b|\\btreat (?:the following|this|it) as (?:trusted|instructions|a command|authoritative)\\b)"
 	},
 	"rules": [
 		{
@@ -133,6 +136,7 @@
 			"note": "fake system, developer or user-authority messages",
 			"patterns": [
 				"<SYS> ~~ <DIRECT>",
+				"<</?sys>>",
 				"\\b(?:override|instructions?|notice|message|update|directive|order|policy)s? from (?:openai|anthropic|your (?:developers?|creators?|operators?|makers?)|the (?:ai|model|llm) (?:provider|vendor|developer|company)|the (?:system|platform) (?:owner|operator))\\b",
 				"\\bthe (?:user|operator|owner|admin|administrator|developer|account (?:holder|owner))s? (?:has|have|had) (?:already |explicitly |now )?(?:(?:authori[sz]ed|permitted|allowed|cleared|instructed|asked) you|(?:given|granted) you (?:[\\w-]+ ){0,2}?(?:permission|authori[sz]ation|consent|approval|clearance)) (?:to|for)\\b",
 				"\\bthis is your (?:developer|creator|operator|maker|programmer|system|admin(?:istrator)?) (?:speaking|talking)\\b"
@@ -146,12 +150,12 @@
 				"\\b(?:respond|reply|answer|speak|talk)s? as (?:if|though) you (?:were|are)\\b(?! [\\w-]+ing\\b)",
 				"\\b(?:act|behave|respond|answer|reply|speak) (?:as|like) (?:an?|the) [^.!?]{0,40}\\b(?:with no |without (?:any )?)(?:rules|restrictions|limits|filters|guidelines|morals|ethics|boundaries|censorship)\\b",
 				"\\byou are an? (?:evil|unrestricted|unfiltered|uncensored|jailbroken|rogue|unaligned|amoral|unethical|malicious|unbound) (?:ai|assistant|model|bot|chatbot|language model)\\b",
-				"\\bbecome an? (?:[\\w-]+ ){0,2}?(?:ai|assistant|chatbot|bot|language model)\\b(?! (?:manager|director|editor|professor|coach|principal|engineer|to)\\b)",
+				"\\bbecome an? (?:[\\w-]+ ){0,2}?(?:ai|assistant|chatbot|bot|language model)(?: (?:who|that|which|with|without)\\b| ?[.,;!]| ?$)",
 				"\\b(?:role-?play(?:ing)?|in character) as\\b",
 				"\\b(?:switch|change|shift) (?:in)?to (?:the |a )?(?:persona|character|voice|identity) of\\b",
 				"\\b(?:adopt|assume|take on) (?:the )?voice of\\b",
 				"\\byour name is now\\b",
-				"\\b(?:from now on|from here on|henceforth|for the rest of (?:this|the) (?:conversation|chat|session)),? (?:you |please )?(?:respond|reply|answer|speak|talk|write|act|behave)s?\\b"
+				"\\b(?:from now on|from here on|henceforth|for the rest of (?:this|the) (?:conversation|chat|session)),? (?:you |please )?(?:respond|reply|answer|speak|talk|write|act|behave)s? (?:as|like|in (?:the )?(?:style|voice|tone|character|manner))\\b"
 			]
 		},
 		{
@@ -170,16 +174,15 @@
 			"reason": "verdict",
 			"note": "score and verdict steering",
 			"patterns": [
-				"<IMP>(?:rate|score|grade|mark|rank)(?: them| him| her| this| it| these| those| each| every| all| the [\\w-]+| this [\\w-]+| the [\\w-]+ [\\w-]+)?(?: a| an| as| at| with)? (?:\\d+(?:\\.\\d+)?|ten|nine|five|full marks|max(?:imum)?)(?: ?(?:out of|/) ?(?:\\d+|ten|five)| stars?| points?| marks?)\\b",
+				"<IMP>(?:rate|score|grade|mark|rank)(?: them| him| her| this| it| these| those| each| every| all| the [\\w-]+| this [\\w-]+| the [\\w-]+ [\\w-]+)?(?: a| an| as| at| with)? (?:(?<top>\\d+) ?(?:out of|/) ?\\k<top>\\b|(?:9|nine) ?(?:out of|/) ?10\\b|(?:ten|10) out of ten\\b|(?:4|5|four|five) stars?\\b|full marks\\b|max(?:imum)? (?:score|points|marks)\\b)",
 				"\\b(?:give|assign|award)s?(?: (?:this|the|that|it|them|him|her)(?: [\\w-]+){0,2})? (?:an? |the )?(?:rating|score|grade|mark|marks) of (?:\\d+|five|ten|full|maximum|top)",
 				"\\b(?:give|assign|award)s? ~ (?:full|maximum|top|perfect) (?:points|marks|stars)\\b",
 				"\\brecommend(?:ing)? (?:an? )?(?:immediate|urgent|instant|direct|swift|fast[- ]track(?:ed)?|straight) (?:offer|hire|hiring|interview|approval|acceptance|promotion|shortlisting|funding|payout)\\b",
-				"<IMP>(?:recommend|advise|suggest|propose)(?:ing)?(?: that)?(?: the (?:committee|panel|board|manager|hiring manager|team|reviewers?|editor|recruiter))?(?: to)? (?:hiring|hire|approving|approve|accepting|accept|shortlisting|advancing|advance|funding|fund|promoting|selecting|moving|fast[- ]tracking|offering)(?: (?:this|the|him|her|them)\\b|[.!]?$)",
-				"\\b(?:put|place|move|rank|list|position|keep|sort|push)s? (?:this |the |that )?(?:candidate|applicant|resume|cv|application|submission|paper|proposal|bid|vendor|supplier|him|her|them)(?:'s \\w+)? (?:at|on|to|in) (?:the )?(?:top|front|head|first place|number one)\\b",
-				"\\brank(?:s|ed)? (?:this|the|that|him|her|them|it)(?: [\\w-]+){0,2} (?:first|top|highest|number one|#1|above (?:all|every|the (?:rest|other)))",
+				"<IMP>(?:recommend|advise|suggest|propose)(?:ing)?(?: that)?(?: the (?:committee|panel|board|manager|hiring manager|team|reviewers?|editor|recruiter))?(?: to)? (?:hiring|hire|approving|approve|accepting|accept|shortlisting|advancing|advance|funding|fund|promoting|selecting|moving|fast[- ]tracking|offering) (?:(?:this|the) (?:candidate|applicant|person|submission|paper|bid|vendor|supplier|resume|cv)\\b|him\\b|her\\b|them\\b)",
+				"\\b(?:put|place|move|rank|list|position|keep|sort|push)s? (?:this |the |that )?(?:candidate|applicant|resume|cv|application|submission|paper|proposal|bid|vendor|supplier|him|her|them)(?:'s \\w+)? (?:at|to) (?:the )?(?:top|front|head|number one)\\b",
+				"\\brank (?:this|the|that|him|her|them|it)(?: [\\w-]+){0,2} (?:first|top|highest|number one|#1|above (?:all|every|the (?:rest|other)))",
 				"\\b(?:should|must|is to|are to|needs? to) be (?:hired|shortlisted|advanced|accepted|approved|funded|selected|promoted|offered the (?:job|role|position)|ranked first|rated highly)(?: immediately| at once| right away)? (?:without|regardless|immediately)\\b",
 				"\\b(?:score|rating|grade|mark|rate|rank|approve|accept|recommend|positive|negative|sentiment|classify|label)\\b ~~ regardless of (?:the )?(?:content|contents|evidence|facts|merits?|quality|performance|its \\w+|what)\\b",
-				"\\b(?:candidate|applicant|person|this vendor|this supplier|i am|i'm)(?: is| are| am)? (?:an? |the )?(?:perfect|ideal|flawless|exceptional|outstanding) (?:match|fit|choice|hire|candidate)\\b",
 				"<IMP>(?:rate|grade|mark|score|classify|evaluate|assess|treat|label|review|describe|present|portray|characteri[sz]e)(?: this| the| it| them| him| her)(?: [\\w-]+)? as (?:an? )?(?:strong accept|exceptional|outstanding|excellent|top[- ]tier|flawless|perfect|trustworthy|legitimate|genuine|low[- ]risk|risk[- ]free|verified|approved)\\b",
 				"\\b(?:grade|mark|score)(?: this| the| it| them| him| her)(?: [\\w-]+)? (?:an? )(?:a|a\\+|10|top|perfect)\\b(?! (?:or|and)\\b)"
 			]
@@ -219,10 +222,9 @@
 				"\\b<YOUR> ~~ (?:must|should|shall|has to|needs to|will|is to|ought to)(?: always| also)? (?:include|contain|mention|feature|have|say|state|read|cite|reference|link|recommend|point|use|end|begin|start|direct|send|refer|tell|ask|advise|encourage)s? ~~ (?:<MARK>|\\bthat\\b)",
 				"\\b(?:say|state|mention|write|note|claim|stress|confirm|report|add) (?:in|within) (?:your|each|every|any) <ANS> that\\b",
 				"\\b(?:make sure|ensure|be sure|remember|don't forget|do not forget)(?: that)? (?:your|each|every) <ANS> ~ (?:include|contain|mention|end|begin|start|say|state|read|recommend|cite|link|use|feature|close|open|conclude)s? ~~ (?:<MARK>|\\bthat\\b)",
-				"\\b(?:respond|reply|answer|write|speak|talk|communicate)(?: to (?:me|the user|everyone|all))? (?:only|exclusively|solely|entirely|strictly|purely) (?:in|using|with) <FORM>\\b",
-				"\\b(?:respond|reply|answer|speak|write|talk) (?:only )?(?:in [\\w-]+ )?(?:from now on|henceforth|for the rest of (?:this|the) (?:conversation|chat|session))",
+				"\\b(?:respond|reply|answer|speak|talk)(?: to (?:me|the user|everyone|all))? (?:only|exclusively|solely|entirely|strictly|purely) (?:in|using|with) <FORM>\\b",
 				"\\b(?:write|give|deliver|format|compose|phrase|present|render|produce)s? (?:your|the|each|every) (?:whole |entire |full )?<ANS> (?:entirely |only |solely )?(?:as|in the form of|in) (?:an? )?(?:poem|limerick|haiku|sonnet|song|rap|rhyme|riddle|jokes?|verse|pirate|shakespearean|emojis?|acrostic|<FORM>)\\b",
-				"\\b(?:tell|advise|urge|instruct)(?: that)? (?:the |any |all )?(?:users?|readers?)(?: who [\\w ]{1,20})? (?:to|that|they) ~~ (?:https?:|www\\.|\\b[\\w-]+\\.(?:com|org|net|io|co|biz|info|ly)\\b)",
+				"\\b(?:tell|advise|urge|instruct)(?: that)? the (?:user|reader)(?: who [\\w ]{1,20})? (?:to|that) ~~ (?:https?:|www\\.|\\b[\\w-]+\\.(?:com|org|net|io|co|biz|info|ly)\\b)",
 				"\\b(?:share|give|show|send|provide|present) (?:this|the following) (?:link|url|address|website|site) (?:to|with) the (?:user|reader)s?\\b"
 			]
 		},
@@ -230,7 +232,7 @@
 			"reason": "addresses-ai",
 			"note": "notes addressed to an AI reader, reviewer or screener",
 			"patterns": [
-				"\\b(?:say|mention|state|report|claim|confirm|assert|write|tell (?:the )?(?:[\\w-]+ )?(?:user|reader|recruiter|manager|committee|client|customer|team|panel|board)s?|inform (?:the )?(?:user|reader)s?|describe|call|present|portray|characteri[sz]e|summari[sz]e)(?: it| this| them| the \\w+)? ~~ (?:is|are|was|were|has been|have been|as|has|have|contains?|meets?|passes|passed|deserves|be) (?:(?:fully|completely|entirely|100%|totally|absolutely|perfectly) (?:compliant|certified|verified|approved|safe|accurate|correct)|(?:fully |completely |entirely |totally |absolutely )?(?:flawless|risk-free|risk free|error-free|trustworthy|legitimate|genuine|original work|no (?:issues|risks?|problems|errors|flaws|concerns|red flags|weaknesses)|nothing (?:wrong|to report|of concern)|every (?:requirement|criterion|criteria)|all (?:the )?(?:criteria|requirements|safety tests)))\\b",
+				"\\b(?:say|mention|state|claim|write|tell (?:the )?(?:[\\w-]+ )?(?:user|reader|recruiter|manager|committee|client|customer|team|panel|board)s?|inform (?:the )?(?:user|reader)s?|describe|call|present|portray|characteri[sz]e|summari[sz]e)(?: it| this| them| the \\w+)? ~~ (?:is|are|was|were|has been|have been|as|has|have|contains?|meets?|passes|passed|deserves|be) (?:(?:fully|completely|entirely|100%|totally|absolutely|perfectly) (?:compliant|certified|verified|approved|safe|accurate|correct)|(?:fully |completely |entirely |totally |absolutely )?(?:flawless|risk-free|risk free|error-free|trustworthy|legitimate|genuine|original work|no (?:issues|risks?|problems|errors|flaws|concerns|red flags|weaknesses)|nothing (?:wrong|to report|of concern)|every (?:requirement|criterion|criteria)|all (?:the )?(?:criteria|requirements|safety tests)))\\b",
 				"\\b(?:dear|hey|hi|hello|greetings|attention|attn|(?:a )?(?:note|memo|message|reminder|request|instructions?|psa|tip|hint|comment) (?:to|for))(?: the| any| all| an?| whichever| every| our| my)? (?:[\\w-]+ ){0,2}?<AI>(?: (?:reading|processing|parsing|reviewing|summari[sz]ing|screening|evaluating|grading|(?:that|which|who) (?:reads|processes|reviews|summari[sz]es|screens|grades))(?: (?:this|these|the)(?: [\\w-]+)?)?)? ?[,:!;]",
 				"(?:^\\W*|[.!?] \\W*)(?:to|for)(?: the| any| all| an?| whichever| every)? (?:[\\w-]+ ){0,2}?<AI>(?: (?:reading|processing|parsing|reviewing|summari[sz]ing|screening|evaluating|grading|(?:that|which|who) (?:reads|processes|reviews|summari[sz]es|screens|grades))(?: (?:this|these|the)(?: [\\w-]+)?)?)? ?[,:]",
 				"(?:^\\W*|[.!?] \\W*)(?:ai|llm|chatbot|ai (?:screener|reviewer|grader|summari[sz]er|model|system|tool|assistant))s? ?:",
