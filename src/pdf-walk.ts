@@ -458,7 +458,7 @@ class Walker {
 			if (this.layers.includes(true)) why.push("hidden layer");
 			// Spacing or kerning that steps each letter back onto the one before stacks them (a step back of
 			// more than a letter only reverses them).
-			const spread = natural > 0 ? Math.min(1, Math.abs(net) / natural) : 1;
+			const spread = natural ? Math.min(1, Math.abs(net / natural)) : 1;
 			const shape = squeeze(user, s.hscale * spread, size);
 			if (!(shape >= MIN_HSCALE && shape <= MAX_HSCALE)) why.push("squeezed");
 			if (unmapped) why.push("unreadable font");
