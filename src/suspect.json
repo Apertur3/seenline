@@ -60,9 +60,9 @@
 				"(?:ignore|disregard|forget|override|bypass|abandon|discard|erase)(?:all|any|every|the|your|of|these|those){0,3}(?:previous|prior|above|earlier|preceding|former|original|existing|other|safety){1,2}(?:instructions?|rules|directions|prompts?|guidelines|constraints|directives?|context|commands|guidance|restrictions|safeguards)",
 				"(?:ignore|disregard|forget)(?:everything|anything|all)(?:above|before|previous|prior|earlier|said)",
 				"(?:ignore|disregard|forget|override|bypass|abandon|discard|erase)(?:the|your|this|all|any)?(?:stated|requested|assigned|original|users?)(?:task|request|question)",
-				"(?:previous|prior|earlier|above|old|original|existing|every|all)(?:instructions?|constraints?|restrictions|directives?|context)(?:above|before|sofar)?(?:are|is|were|was|as)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|suspended|lifted|disabled|nolonger)",
+				"(?:previous|prior|earlier|above|old|original|existing|every|all)(?:instructions?|constraints?|restrictions|directives?|context)(?:above|before|sofar)?(?:are|is|were|was|as|have|has)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|suspended|lifted|disabled|nolonger)",
 				"(?:instructions?|rules|directives?)(?:above|before|sofar)(?:are|is)(?:now)?(?:obsolete|cancell?ed|revoked|void|superseded|invalid|nolonger)",
-				"(?:your|all)(?:previous|prior|earlier|above)rules?(?:are|is|were|was|as)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|nolonger)",
+				"(?:your|all)(?:previous|prior|earlier|above)rules?(?:are|is|were|was|as|have|has)(?:now|been)?(?:void|null|obsolete|cancell?ed|revoked|superseded|invalid|overridden|nolonger)",
 				"(?:replaces|supersedes|overrides|outranks?|takesprecedenceover)(?:all|any|every|the|your|of|these|those){0,3}(?:previous|prior|earlier|above|other|existing|original)?(?:instructions?|directives?|prompts?)",
 				"(?:obey|complywith)(?:the|all|any|only)?(?:next|following|new|replacement|embedded)(?:instructions?|directives?|commands?)",
 				"(?:ignore|disregard)(?:that|this|it)and(?:continue|proceed)",
@@ -113,7 +113,7 @@
 				"insteadof(?:summari[sz]ing|answering|translating|reviewing)(?:this|theuser|thedocument|thequestion)",
 				"your(?:real|actual|true|primary)(?:task|job|goal|objective|mission|assignment)(?:isto|is)",
 				"(?:ignore|disregard|forget|abandon|pause)(?:the|this|your)?(?:visible|stated|original|assigned|requested|current|users?)?(?:task|document|request|question|assignment)(?:and|then|instead)(?:write|compose|produce|output|print|reply|respond|say|tell|describe|draft|list|explain|translate|generate|create|give|answer|return|recite|state)",
-				"whensummari[sz]ingthis(?:document|text|file|page|email|resume|cv|paper|article|report)",
+				"whensummari[sz]ingthis(?:document|text|file|page|email)",
 				"inyoursummary(?:emphasi[sz]e|highlight|focus|mention|include|say|state|stress|foreground|prioriti[sz]e|omit|downplay)"
 			]
 		}
