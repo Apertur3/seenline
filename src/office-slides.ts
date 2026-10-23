@@ -98,20 +98,26 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 	const scale = fit.endsWith("%") ? Number.parseFloat(fit) / 100 : Number(fit) / 100000;
 	if (Number(attr(props, "sz") ?? attr(defaults, "sz") ?? 1200) * scale < 200)
 		why.push("tiny text");
-	const fill = (props && first(props, "solidFill")) ?? (defaults && first(defaults, "solidFill"));
-	const color = fill && first(fill, "srgbClr");
-	const scheme = fill && first(fill, "schemeClr");
-	// A colour under 10% opaque, or no fill and no outline: the letters are not drawn.
-	const alpha = attr(fill && first(fill, "alpha"), "val") ?? "100000";
-	const opaque = alpha.endsWith("%") ? Number.parseFloat(alpha) * 1000 : Number(alpha);
-	const bare = props && children(props, "noFill").length > 0 && !first(props, "ln");
-	if (opaque < 10000 || bare) why.push("transparent text");
-	if (
-		(attr(color, "val")?.toUpperCase() === "FFFFFF" ||
-			["lt1", "bg1"].includes(attr(scheme, "val") ?? "")) &&
-		light(ground)
-	)
-		why.push("white text");
+	// The letters' own fill, not their outline's (a:ln holds a fill of its own).
+	const own = (x?: Xml) => x && children(x, "solidFill")[0];
+	const fill = own(props) ?? own(defaults);
+	const opaque = (f?: Xml) => {
+		const alpha = attr(f && first(f, "alpha"), "val") ?? "100000";
+		return (alpha.endsWith("%") ? Number.parseFloat(alpha) * 1000 : Number(alpha)) >= 10000;
+	};
+	const white = (f?: Xml) =>
+		attr(f && first(f, "srgbClr"), "val")?.toUpperCase() === "FFFFFF" ||
+		["lt1", "bg1"].includes(attr(f && first(f, "schemeClr"), "val") ?? "");
+	// An outline draws the letters when it has a fill: a colour 10% opaque or more, a gradient or a pattern.
+	const ln = props && children(props, "ln")[0];
+	const line = ln && own(ln);
+	const outlined = line
+		? opaque(line)
+		: !!ln && ["gradFill", "pattFill"].some((k) => children(ln, k).length > 0);
+	// A colour under 10% opaque, or no fill, and no outline: the letters are not drawn.
+	const bare = props && children(props, "noFill").length > 0;
+	if ((!opaque(fill) || bare) && !outlined) why.push("transparent text");
+	if (white(fill) && light(ground) && (!outlined || white(line))) why.push("white text");
 	return why;
 }
 
