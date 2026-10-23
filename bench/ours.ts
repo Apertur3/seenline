@@ -1,6 +1,6 @@
 // Plainview through convert(), the same call the CLI and the MCP server make. No OCR callback is
-// supplied, so scans and images fail closed; that is recorded, not hidden. The verify variant passes the
-// CLI's own `--verify` reader (a local tesseract and pdftoppm) and runs each PDF once.
+// supplied, so scans and images fail closed; that is recorded, not hidden. The verify and ocr variants pass
+// the CLI's own `--verify` and `--ocr` reader (a local tesseract and pdftoppm) and run each file once.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { arch, cpus, platform, release, totalmem } from "node:os";
@@ -32,19 +32,19 @@ export async function ours(
 	entries: Entry[],
 	reps = REPS,
 	hidden: Mode = "describe",
-	verify?: ConvertOptions["verify"],
+	reader?: { name: "verify" | "ocr"; read: NonNullable<ConvertOptions["ocr"]> },
 ): Promise<void> {
-	const dir = verify ? join(cache, "plainview-verify") : dirOf(cache, hidden);
+	const dir = reader ? join(cache, `plainview-${reader.name}`) : dirOf(cache, hidden);
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(
 		join(dir, "environment.json"),
 		JSON.stringify({
-			candidate: verify ? "plainview-verify" : "plainview",
+			candidate: reader ? `plainview-${reader.name}` : "plainview",
 			version,
 			date: new Date().toISOString().slice(0, 10),
 			node: process.version,
 			...hardware(),
-			configuration: `convert() from src, no OCR callback, hidden ${hidden}${verify ? ", verify" : ""}`,
+			configuration: `convert() from src, ${reader ? "" : "no OCR callback, "}hidden ${hidden}${reader ? `, ${reader.name}` : ""}`,
 		}),
 	);
 	for (const entry of entries) {
@@ -64,7 +64,7 @@ export async function ours(
 					name: entry.file,
 					path: entry.path,
 					hidden,
-					...(verify && { verify }),
+					...(reader && { [reader.name]: reader.read }),
 				});
 				text = result.markdown;
 				held = result.hidden.map((h) => h.text);

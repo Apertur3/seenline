@@ -131,8 +131,37 @@ const table = (head: string[], body: (string | number)[][]) =>
 	[head, head.map(() => "---"), ...body].map((r) => `| ${r.join(" | ")} |`).join("\n");
 const tools = (rs: Row[]) => [...new Set(rs.map((r) => r.candidate))];
 const ext = (r: Row) => extname(r.entry.file).slice(1).toLowerCase();
-const OUTCOMES: Outcome[] = ["leaked", "flagged", "stripped", "failed-closed", "correct"];
-const cell = (r?: Row) => (r ? (r.outcome === "-" ? r.status : r.outcome) : "-");
+/** The table label of a row: the scorer's class, split where the tool's own doing differs from the scanner's reading. */
+const cell = (r?: Row) => {
+	if (!r) return "-";
+	if (r.outcome === "-") return r.status;
+	if (r.outcome === "stripped" && r.entry.facts.length === 0) return "absent, unchecked";
+	if (r.outcome === "flagged" && !r.signalled) return "scanner-detected";
+	if (r.outcome === "leaked" && r.signalled) return "leaked, signalled";
+	return r.outcome;
+};
+/** Total rows: row name, then the cell label it counts. */
+const TOTALS: [string, string][] = [
+	["leaked, no tool signal", "leaked"],
+	["leaked, and the tool signalled it", "leaked, signalled"],
+	["flagged by the tool itself", "flagged"],
+	["detected by Plainview's scanner, no tool signal", "scanner-detected"],
+	["stripped", "stripped"],
+	["absent, no visible text to check", "absent, unchecked"],
+	["failed-closed", "failed-closed"],
+	["correct", "correct"],
+];
+const DEFINITIONS = `- \`leaked\`: a payload is in the visible body of the output and the tool gave no signal.
+- \`flagged\`: every payload copy sits in the hidden block, or the tool signalled and the payload is absent. A tool signals with a flag or a hidden block of its own.
+- \`scanner-detected\`: a payload is in the output with no signal from the tool, but Plainview's scanner reads those lines as hidden (for example invisible Unicode passed through). The tool made no flag; this is not credited to it as one.
+- \`leaked, signalled\`: the payload is still in the visible body, which is a leak too, but the tool also listed it as hidden or flagged the file.
+- \`correct\`: payload absent, no signal, every visible fact intact.
+- \`stripped\`: payload absent, no signal, visible text not fully intact.
+- \`absent, unchecked\`: payload absent and no signal, but the file has no visible-text key to check, so nothing says whether the visible text survived; an empty output lands here too (most Set C injection fixtures; the class is \`stripped\` in \`bench/results.tsv\`).
+- \`failed-closed\`: the tool refused or raised an error.
+- \`unsupported\`: the file's format is outside the tool's declared formats.
+
+\`unsupported\` and \`not-run\` cells are not counted in the total rows.`;
 
 /** Outcome per file (rows) and tool (columns) for one set, then the totals per tool. */
 function outcomes(rs: Row[], set: string, label: (e: Entry) => string[], head: string[]): string {
@@ -146,18 +175,16 @@ function outcomes(rs: Row[], set: string, label: (e: Entry) => string[], head: s
 			...names.map((t) => cell(mine.find((r) => r.candidate === t && r.entry.file === file))),
 		];
 	});
-	const totals = OUTCOMES.map((o) => [
-		...head.map((_, i) => (i === 0 ? `**${o}**` : "")),
-		...names.map((t) => mine.filter((r) => r.candidate === t && r.outcome === o).length),
-	]);
-	// Flagged under the scanner's reading includes raw invisible characters passed through; this line is the tool's own doing.
-	const own = [
-		...head.map((_, i) => (i === 0 ? "**flagged by the tool itself**" : "")),
-		...names.map(
-			(t) => mine.filter((r) => r.candidate === t && r.outcome === "flagged" && r.signalled).length,
-		),
-	];
-	return table([...head, ...names], [...body, ...totals, own]);
+	const totals = [...TOTALS, ["tool signalled, any class (overlaps the rows above)", ""]].map(
+		([name, label]) => [
+			...head.map((_, i) => (i === 0 ? `**${name}**` : "")),
+			...names.map(
+				(t) =>
+					mine.filter((r) => r.candidate === t && (label ? cell(r) === label : r.signalled)).length,
+			),
+		],
+	);
+	return table([...head, ...names], [...body, ...totals]);
 }
 
 function byFormat(
@@ -230,23 +257,34 @@ function limits(): string {
 }
 
 export function markdown(rs: Row[], cache: string): string {
+	const pct = (a: number, b: number) => (b ? `${a}/${b} (${((100 * a) / b).toFixed(1)}%)` : "-");
 	const fid = tools(rs).map((t) => {
-		const all = rs.filter((r) => r.candidate === t);
-		const mine = all.filter((r) => r.status === "ok");
-		const sum = (i: number) => {
+		const offered = rs.filter((r) => r.candidate === t && r.status !== "unsupported");
+		const mine = offered.filter((r) => r.status === "ok");
+		const sum = (i: number): [number, number] => {
 			const parts = mine.map((r) => (r.score[i] ?? "-").split("/").map(Number));
-			return `${parts.reduce((a, p) => a + (p[0] || 0), 0)}/${parts.reduce((a, p) => a + (p[1] || 0), 0)}`;
+			return [
+				parts.reduce((a, p) => a + (p[0] || 0), 0),
+				parts.reduce((a, p) => a + (p[1] || 0), 0),
+			];
 		};
-		return [t, `${mine.length}/${all.length}`, sum(0), sum(1), sum(2), sum(3)];
+		const all = offered.reduce((a, r) => a + r.entry.facts.length, 0);
+		return [
+			t,
+			`${mine.length}/${offered.length}`,
+			...[0, 1, 2, 3].map((i) => pct(...sum(i))),
+			pct(sum(0)[0], all),
+		];
 	});
 	const run = tools(rs).map((t) => {
 		const mine = rs.filter((r) => r.candidate === t);
 		const first = mine[0];
+		const offered = mine.filter((r) => r.status !== "unsupported");
 		return [
 			t,
 			first?.version ?? "-",
 			first?.date ?? "-",
-			`${mine.filter((r) => r.status === "ok").length}/${mine.length}`,
+			`${offered.filter((r) => r.status === "ok").length}/${offered.length}`,
 			mine.some((r) => r.status === "not-run")
 				? (mine.find((r) => r.status === "not-run")?.error ?? "")
 				: "",
@@ -269,15 +307,26 @@ ${env.arch ?? ""}, ${env.cores ?? "?"} cores, ${env.memoryGiB ?? "?"} GiB RAM; w
 
 The tables here cover the tools shown as run below. A tool that was not run has no results and no claim is made about it. Do not quote a partial run as a comparison.
 
-${table(["tool", "version", "date", "files read", "not run because", "configuration"], run)}
+${table(["tool", "version", "date", "files read of offered", "not run because", "configuration"], run)}
 
-\`unsupported\` means the file's format is outside the tool's declared formats; such files are left out of its totals.
+\`unsupported\` means the file's format is outside the tool's declared formats; such files are left out of its totals ("offered" counts the files that are not).
+
+## How to read these tables
+
+This benchmark is synthetic and small, and the authors of Plainview wrote the corpus selection, the answer keys and the scorer and ran it themselves. It describes how these tools behave on these files; it is not an independent ranking, and a different corpus can give different results. Everything is reproducible with \`npm run bench\`.
+
+Outcome classes for Sets B and C (one per file and tool):
+
+${DEFINITIONS}
+
+Hidden-ness is judged by Plainview's scanner over every tool's output, so a competitor's raw invisible characters can read as hidden to that scanner; those rows say \`scanner-detected\`, not \`flagged\`. The Plainview columns are separate runs of one version: \`plainview\` (no OCR reader; scans and images fail closed), \`plainview-verify\` (\`--verify\`, PDFs) and \`plainview-ocr\` (\`--ocr\`, PDFs and images). A \`plainview-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
+
+What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 
 ## Set B: Split-View canaries
 
 Source: ${SPLITVIEW.source} (${SPLITVIEW.record}, ${SPLITVIEW.license}; credit the authors). The PDFs are downloaded into a
-cache outside the repository and never vendored. Outcomes: \`leaked\` (payload in the visible body), \`flagged\`
-(every payload copy sits in the hidden block, or the tool signalled and the payload is absent), \`correct\` (payload absent, no signal, every visible fact intact), \`stripped\` (payload absent, no signal, visible text not fully intact), \`failed-closed\` (error). Hidden-ness is judged by Plainview's scanner over each tool's output.
+cache outside the repository and never vendored. Outcome classes are defined under "How to read these tables".
 ${SPLITVIEW.note}
 The authors' own counts for their runs (Docling 18 of 25, Unstructured 17 of 25, LlamaParse 10 of 25) are theirs; the
 table below is a re-run. Gaps in the font-decoding and reading-order families depend on a render-versus-text
@@ -289,13 +338,15 @@ ${rs.some((r) => r.entry.set === "B") ? `Plainview leaks on: ${plainviewLeaks.le
 
 ## Set C: the repository's own injection and Unicode cases
 
-Synthetic fixtures in \`test/fixtures\`. Same outcome classes as set B.
+Synthetic fixtures in \`test/fixtures\`. Same outcome classes as set B. The injection fixtures have no visible-text key, so a tool that drops the payload shows \`absent, unchecked\`, not \`correct\`. The image fixtures are read by \`plainview-ocr\` with text recognition on.
 
 ${outcomes(rs, "C", (e) => [e.file], ["file"])}
 
 ## Fidelity (facts, rows, order, anchors found, visible text counted)
 
-${table(["tool", "files read", "facts", "rows", "order", "anchors"], fid)}
+${table(["tool", "files read of offered", "facts (files read)", "rows", "order", "anchors", "facts (all offered files)"], fid)}
+
+Denominators: facts, rows, order and anchors count the files a tool read, and no others. A file it failed on or refused is left out of those four columns, so a tool that refuses hard inputs does not lose recovery there. The last column counts every fact in every file the tool was offered (a refused file recovers none), and the second column says how many files were read. Read the three together. A tool is offered a file when the format is inside its declared formats.
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
@@ -320,9 +371,11 @@ Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shar
 
 ${byFormat(
 	rs,
-	(r) => r.seconds,
+	(r) => (r.status === "ok" ? r.seconds : null),
 	(xs) => median(xs).toFixed(3),
 )}
+
+Timing covers successful conversions. A \`-\` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. \`plainview\` has no OCR reader and refuses images; \`plainview-ocr\` reads them with a local tesseract, as docling, unstructured, marker and tika do.
 
 ${anchorSection(cache, rs)}
 ${speedSection(cache, env.version ?? "?", `${env.os ?? "?"} ${env.arch ?? ""}, ${env.cores ?? "?"} cores, ${env.memoryGiB ?? "?"} GiB RAM`)}`;
