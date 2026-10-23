@@ -4,7 +4,18 @@
 // operators are read here. Pure JavaScript, no rendering.
 
 import { light } from "./colour.ts";
-import { type Box, bounds, type Fill, paints, polygons } from "./pdf-paths.ts";
+import { PlainviewError } from "./error.ts";
+import {
+	type Box,
+	bounds,
+	type Fill,
+	hides,
+	lum,
+	onWhite,
+	paints,
+	polygons,
+	RGB,
+} from "./pdf-paths.ts";
 
 export type Matrix = [number, number, number, number, number, number];
 export interface Item {
@@ -24,17 +35,32 @@ interface Glyph {
 	width: number;
 	originalCharCode: number;
 	isInFont: boolean;
+	isSpace?: boolean;
 }
-interface Saved {
+// A soft mask's content: each solid fill with what it lets through (0 to 1), and what it lets through
+// elsewhere. "unknown" when it draws anything else (text, pictures, shadings, see-through fills).
+type Mask = { fills: [Fill, number][]; rest: number } | "unknown";
+// The graphics state: what q saves and Q restores, text state included.
+interface State {
 	ctm: Matrix;
 	fontSize: number;
+	// The font's glyph width unit in text space (its FontMatrix; 1/1000 for most, 1/2048 for some).
+	em: number;
+	// The font in force could not be read at all (pdfjs draws nothing for it).
+	broken: boolean;
 	color: string;
 	stroke: string;
-	alpha: number;
+	fillAlpha: number;
+	strokeAlpha: number;
+	blend: string;
+	soft: Mask | null;
 	mode: number;
 	hscale: number;
-	clip: Box | null;
-	broken: boolean;
+	rise: number;
+	charSpacing: number;
+	wordSpacing: number;
+	// The clipping paths in force. pdfjs reports `W` before the path it clips to.
+	clips: Fill[];
 }
 export interface Ops {
 	fnArray: number[];
@@ -46,12 +72,18 @@ export interface Ops {
 const TINY_PT = 2.25;
 // A page with more text runs than this is not a document, and covering is quadratic in it.
 const MAX_RUNS = 100_000;
+const MAX_CLIPS = 32;
 const OFF_PAGE_PT = 5;
-// Horizontal scaling (Tz) outside this range makes the letters a smear or a line, not text.
+// Letters wider or narrower than this against their height (horizontal scaling Tz, a text matrix,
+// character spacing that stacks them) are a smear or a line, not text.
 const MIN_HSCALE = 0.2;
 const MAX_HSCALE = 10;
 // A TJ adjustment this far back is a word space (typesetters write spaces as kerning).
 const SPACE_KERN = 200;
+// Text drawn at under this opacity is not there; a fill or picture at this or more hides what is under
+// it (a white fill at 0.94 over black text leaves it #f0f0f0, which counts as white).
+const SEEN_ALPHA = 0.05;
+const COVER_ALPHA = 0.94;
 
 export const mul = (a: Matrix, b: Matrix): Matrix => [
 	a[0] * b[0] + a[1] * b[2],
@@ -62,24 +94,49 @@ export const mul = (a: Matrix, b: Matrix): Matrix => [
 	a[4] * b[1] + a[5] * b[3] + b[5],
 ];
 const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
-const intersect = (a: Box, b: Box): Box => [
-	Math.max(a[0], b[0]),
-	Math.max(a[1], b[1]),
-	Math.min(a[2], b[2]),
-	Math.min(a[3], b[3]),
+const START: State = {
+	ctm: IDENTITY,
+	fontSize: 0,
+	em: 0.001,
+	broken: false,
+	color: "#000000",
+	stroke: "#000000",
+	fillAlpha: 1,
+	strokeAlpha: 1,
+	blend: "source-over",
+	soft: null,
+	mode: 0,
+	hscale: 1,
+	rise: 0,
+	charSpacing: 0,
+	wordSpacing: 0,
+	clips: [],
+};
+// A point just outside a clip still counts as in: edges are only as exact as the rounding in the file.
+const NUDGE = [
+	[0, 0],
+	[1, 0],
+	[-1, 0],
+	[0, 1],
+	[0, -1],
 ];
-// A point just outside the box still counts as in: edges are only as exact as the rounding in the file.
-const within = ([x0, y0, x1, y1]: Box, x: number, y: number) =>
-	x >= x0 - 1 && x <= x1 + 1 && y >= y0 - 1 && y <= y1 + 1;
+const inside = (clips: Fill[], x: number, y: number) =>
+	clips.every((c) => NUDGE.some(([dx = 0, dy = 0]) => paints(c, x + dx, y + dy)));
 
 // White is every channel at 0xf0 or more; an invisible mode is "neither fill nor stroke" (3) or clip only (7).
-function hiding(color: string, mode: number, size: number, x: number, y: number, v: Matrix) {
+// Off the page is the run's start or the middle of its letters.
+function hiding(color: string, mode: number, size: number, points: number[][], v: Matrix) {
 	const why: string[] = [];
 	if (/^#(f[0-9a-f]){3}$/i.test(color)) why.push("white");
 	if (size < TINY_PT) why.push("tiny");
 	if (mode === 3 || mode === 7) why.push("invisible");
 	const off = OFF_PAGE_PT;
-	if (x < v[0] - off || x > v[2] + off || y < v[1] - off || y > v[3] + off) why.push("off-page");
+	if (
+		points.some(
+			([x = 0, y = 0]) => x < v[0] - off || x > v[2] + off || y < v[1] - off || y > v[3] + off,
+		)
+	)
+		why.push("off-page");
 	return why;
 }
 
@@ -92,8 +149,9 @@ export function walk(
 	list: Ops,
 	view: Matrix,
 	visible: (layer: unknown) => boolean,
+	fonts: (id: string) => number[] | undefined = () => undefined,
 ): { items: Item[]; pictured: number } {
-	const w = new Walker(OPS, view, visible);
+	const w = new Walker(OPS, view, visible, fonts);
 	for (const [i, fn] of list.fnArray.entries()) w.step(fn, list.argsArray[i] as unknown[]);
 	const area = (view[2] - view[0]) * (view[3] - view[1]);
 	return { items: w.out, pictured: area > 0 ? w.pictured / area : 0 };
@@ -102,53 +160,71 @@ export function walk(
 class Walker {
 	out: Item[] = [];
 	pictured = 0;
-	private saved: Saved[] = [];
-	private ctm = IDENTITY;
-	private fontSize = 0;
-	private color = "#000000";
-	private stroke = "#000000";
-	private alpha = 1;
-	private mode = 0;
-	private hscale = 1;
-	// The font in force could not be read at all (pdfjs draws nothing for it).
-	private broken = false;
-	// The bounding box of the clipping paths in force. pdfjs reports `W` before the path it clips to.
-	private clip: Box | null = null;
-	private clipping = false;
+	private saved: State[] = [];
+	private s: State = { ...START };
+	private clipping: "" | "nonzero" | "evenodd" = "";
 	private groupBox: number[] | null = null;
+	// Inside a soft mask's own content (pdfjs inlines it before the gs that sets it): nothing there is
+	// painted on the page. `mask` collects it; `made` is the last one finished, for the gs that follows.
+	private masks: { mask: Mask; luminosity: boolean }[] = [];
+	private made: Mask | null = null;
 	// Every fill and picture so far, in paint order: what lies under text drawn next.
 	private painted: Fill[] = [];
 	private tm = IDENTITY;
 	private tlm = IDENTITY;
 	private leading = 0;
+	// The outlines of text drawn in a clipping mode (Tr 4 to 7) in this text object: the clip after ET.
+	private textClip: [number, number][][] | null = null;
 	// One entry per open marked-content section: true when it is a layer that is switched off.
 	private layers: boolean[] = [];
 	private OPS: Record<string, number>;
 	private view: Matrix;
 	private visible: (layer: unknown) => boolean;
+	private fonts: (id: string) => number[] | undefined;
 
-	constructor(OPS: Record<string, number>, view: Matrix, visible: (layer: unknown) => boolean) {
+	constructor(
+		OPS: Record<string, number>,
+		view: Matrix,
+		visible: (layer: unknown) => boolean,
+		fonts: (id: string) => number[] | undefined,
+	) {
 		this.OPS = OPS;
 		this.view = view;
 		this.visible = visible;
+		this.fonts = fonts;
 	}
 
 	step(fn: number, a: unknown[]): void {
 		const { OPS } = this;
-		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) {
-			const { ctm, fontSize, color, stroke, alpha, mode, hscale, clip, broken } = this;
-			this.saved.push({ ctm, fontSize, color, stroke, alpha, mode, hscale, clip, broken });
+		if (fn === OPS.save || fn === OPS.paintFormXObjectBegin || fn === OPS.beginAnnotation) {
+			this.saved.push({ ...this.s });
+			if (fn === OPS.beginAnnotation) {
+				// An annotation's appearance is drawn from a fresh state, mapped onto its rectangle.
+				const [, rect, transform, matrix] = a as [unknown, number[] | null, Matrix, Matrix];
+				this.s = { ...START, ctm: mul(matrix ?? IDENTITY, transform ?? IDENTITY) };
+				if (rect) this.s.clips = [this.region(this.corners(rect, IDENTITY), "nonzero")];
+				return;
+			}
 			if (fn !== OPS.paintFormXObjectBegin) return;
-			if (a?.[0]) this.ctm = mul(a[0] as Matrix, this.ctm);
+			if (a?.[0]) this.s.ctm = mul(a[0] as Matrix, this.s.ctm);
 			// A form draws nothing outside its bounding box (pdfjs hands a group's box to beginGroup).
 			const bbox = (a?.[1] as number[] | null) ?? this.groupBox;
 			this.groupBox = null;
-			if (bbox) this.clipTo(this.corners([...bbox]));
+			if (bbox) this.clipTo(this.corners([...bbox]), "nonzero");
 		} else if (fn === OPS.beginGroup) {
-			this.groupBox = (a?.[0] as { bbox?: number[] } | undefined)?.bbox ?? null;
-		} else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd) {
-			Object.assign(this, this.saved.pop());
-		} else if (fn === OPS.transform) this.ctm = mul(a as Matrix, this.ctm);
+			const g = a?.[0] as { bbox?: number[]; smask?: { subtype?: string; backdrop?: string } };
+			this.groupBox = g?.bbox ?? null;
+			if (g?.smask) {
+				const luminosity = g.smask.subtype !== "Alpha";
+				const rest =
+					luminosity && RGB.test(g.smask.backdrop ?? "") ? lum(g.smask.backdrop ?? "") : 0;
+				this.masks.push({ mask: { fills: [], rest }, luminosity });
+			}
+		} else if (fn === OPS.endGroup) {
+			if ((a?.[0] as { smask?: unknown })?.smask) this.made = this.masks.pop()?.mask ?? "unknown";
+		} else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd || fn === OPS.endAnnotation) {
+			this.s = this.saved.pop() ?? this.s;
+		} else if (fn === OPS.transform) this.s.ctm = mul(a as Matrix, this.s.ctm);
 		else this.paint(fn, a);
 	}
 
@@ -159,82 +235,127 @@ class Walker {
 			this.layers.push(a[0] === "OC" && !this.visible(a[1]));
 		} else if (fn === OPS.beginMarkedContent) this.layers.push(false);
 		else if (fn === OPS.endMarkedContent) this.layers.pop();
-		else if (fn === OPS.clip || fn === OPS.eoClip) this.clipping = true;
+		else if (fn === OPS.clip) this.clipping = "nonzero";
+		else if (fn === OPS.eoClip) this.clipping = "evenodd";
 		else if (fn === OPS.constructPath) {
 			const box = a[2] as ArrayLike<number> | undefined;
 			if (box) {
-				const b = this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0]);
-				if (this.clipping) this.clipTo(b);
 				const data = (a[1] as ArrayLike<number>[] | undefined)?.[0];
-				const polys = data ? polygons(data, (x, y) => this.at(x, y)) : [this.rect(Array.from(box))];
-				// A see-through or soft-masked fill is no known ground for white letters ("" counts as light).
-				const ground = this.alpha < 1 ? "" : this.color;
+				const polys = data
+					? polygons(data, (x, y) => this.at(x, y))
+					: [this.corners([box[0] ?? 0, box[1] ?? 0, box[2] ?? 0, box[3] ?? 0])];
+				if (this.clipping) this.clipTo(polys, this.clipping);
 				if (FILLS.some((n) => OPS[n] === a[0]))
 					this.cover(
 						polys,
-						ground,
+						this.s.color,
 						EO_FILLS.some((n) => OPS[n] === a[0]),
 					);
 			}
-			this.clipping = false;
+			this.clipping = "";
 		} else if (PICTURES.some((n) => OPS[n] === fn)) {
-			const [x0, y0, x1, y1] = intersect(this.corners([0, 0, 1, 1]), this.view.slice(0, 4) as Box);
-			this.pictured += Math.max(0, x1 - x0) * Math.max(0, y1 - y0);
+			const corners = this.corners([0, 0, 1, 1]);
+			const [x0, y0, x1, y1] = intersect(bounds([corners]), this.view.slice(0, 4) as Box);
+			if (!this.masks.length) this.pictured += Math.max(0, x1 - x0) * Math.max(0, y1 - y0);
 			// A picture's pixels are not read: under white letters it is unknown, so they stay flagged.
-			if (fn !== OPS.paintImageMaskXObject) this.cover([this.rect([0, 0, 1, 1])], "", false);
+			if (fn !== OPS.paintImageMaskXObject) this.cover([corners], "", false);
+		} else if (fn === OPS.shadingFill) {
+			// A shading paints everywhere the clip lets it; its colours are not read, like a picture's.
+			const [x0, y0, x1, y1] = this.view;
+			this.cover([this.corners([x0, y0, x1, y1], IDENTITY)], "", false);
 		} else this.text(fn, a);
 	}
 
-	private corners([x0, y0, x1, y1]: number[]): [number, number, number, number] {
-		const c = this.ctm;
-		const xs: number[] = [];
-		const ys: number[] = [];
-		for (const [x, y] of [
-			[x0, y0],
-			[x1, y0],
-			[x0, y1],
-			[x1, y1],
-		] as [number, number][]) {
-			xs.push(c[0] * x + c[2] * y + c[4]);
-			ys.push(c[1] * x + c[3] * y + c[5]);
-		}
-		return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+	// A rectangle's corners through the matrix in force, as a polygon.
+	private corners([x0 = 0, y0 = 0, x1 = 0, y1 = 0]: number[], c = this.s.ctm) {
+		const at = (x: number, y: number): [number, number] => [
+			c[0] * x + c[2] * y + c[4],
+			c[1] * x + c[3] * y + c[5],
+		];
+		return [at(x0, y0), at(x1, y0), at(x1, y1), at(x0, y1)];
 	}
 
-	private clipTo(b: Box): void {
-		this.clip = this.clip ? intersect(this.clip, b) : b;
+	private region(polys: [number, number][][] | [number, number][], rule: string): Fill {
+		const p = (Array.isArray(polys[0]?.[0]) ? polys : [polys]) as [number, number][][];
+		return { box: bounds(p), polys: p, evenOdd: rule === "evenodd", color: "" };
 	}
 
-	// A fill paints only inside the clipping paths in force.
+	private clipTo(polys: [number, number][][] | [number, number][], rule: string): void {
+		this.s.clips = [...this.s.clips, this.region(polys, rule)];
+		// Every run is tested against every clip in force; real pages nest a handful.
+		if (this.s.clips.length > MAX_CLIPS)
+			throw new PlainviewError(
+				"invalid",
+				"could not read this file: too many nested PDF clipping paths",
+			);
+	}
+
+	// A fill paints only inside the clipping paths in force, and hides what is under it only when it is
+	// near opaque, in a blend mode that does. Inside a soft mask it is the mask, not paint.
 	private cover(polys: [number, number][][], color: string, evenOdd: boolean): void {
 		if (!polys.length) return;
+		const m = this.masks.at(-1);
+		if (m) {
+			const solid = color && this.s.fillAlpha === 1 && !this.s.soft && m.mask !== "unknown";
+			if (!solid || m.mask === "unknown") m.mask = "unknown";
+			else {
+				const f = { ...this.region(polys, evenOdd ? "evenodd" : ""), clips: this.s.clips };
+				m.mask.fills.push([f, m.luminosity ? lum(color) : 1]);
+			}
+			return;
+		}
+		const { clips, blend, soft } = this.s;
 		const whole = bounds(polys);
-		const f: Fill = { box: this.clip ? intersect(this.clip, whole) : whole, polys, evenOdd, color };
+		const box = clips.reduce((b, c) => intersect(b, c.box), whole);
+		const alpha = color === "transparent" ? 0 : this.s.fillAlpha;
+		// A see-through, soft-masked or blended fill is no known ground for white letters ("" counts as light).
+		const ground = alpha < 1 || soft || blend !== "source-over" ? "" : color;
+		const f: Fill = { box, polys, evenOdd, color: ground, clips };
 		this.painted.push(f);
-		const [x0, y0, x1, y1] = f.box;
+		const [x0, y0, x1, y1] = box;
 		for (const it of this.out) {
 			// A rule or underline is thin; only a shape as tall as the text can hide it.
 			if (y1 - y0 < 0.5 * it.size || x1 - x0 < it.size || it.why.includes("covered")) continue;
-			if (paints(f, ...it.mid)) it.why.push("covered");
+			const [mx, my] = it.mid;
+			if (alpha * this.let(mx, my) >= COVER_ALPHA && hides(blend, color) && paints(f, mx, my))
+				it.why.push("covered");
 		}
+	}
+
+	// What the soft mask in force lets through at a point: 1 with none, and when it cannot be told.
+	private let(x: number, y: number): number {
+		const { soft } = this.s;
+		if (!soft || soft === "unknown") return 1;
+		return soft.fills.findLast(([f]) => paints(f, x, y))?.[1] ?? soft.rest;
 	}
 
 	private at(x: number, y: number): [number, number] {
-		const c = this.ctm;
+		const c = this.s.ctm;
 		return [c[0] * x + c[2] * y + c[4], c[1] * x + c[3] * y + c[5]];
 	}
 
-	private rect([x0 = 0, y0 = 0, x1 = 0, y1 = 0]: number[]): [number, number][] {
-		return [this.at(x0, y0), this.at(x1, y0), this.at(x1, y1), this.at(x0, y1)];
+	// Fill and stroke opacity, blend mode, soft mask and font; text drawn at 0 is not there for a reader.
+	private gstate(entries: [string, unknown][]): void {
+		const s = this.s;
+		for (const [key, value] of entries ?? []) {
+			if (key === "ca" && typeof value === "number") s.fillAlpha = value;
+			if (key === "CA" && typeof value === "number") s.strokeAlpha = value;
+			if (key === "BM" && typeof value === "string") s.blend = value;
+			if (key === "SMask") {
+				s.soft = value ? (this.made ?? "unknown") : null;
+				this.made = null;
+			}
+			if (key === "Font" && Array.isArray(value)) {
+				this.font(value[0], value[1] as number);
+			}
+		}
 	}
 
-	// Fill and stroke opacity: text drawn at 0 is not there for a reader.
-	private gstate(entries: [string, unknown][]): void {
-		for (const [key, value] of entries ?? []) {
-			if ((key === "CA" || key === "ca") && typeof value === "number") this.alpha = value;
-			// A soft mask may let anything through: a hair under 1, so no fill counts as ground.
-			if (key === "SMask" && value) this.alpha = Math.min(this.alpha, 0.99);
-		}
+	private font(id: unknown, size: number): void {
+		const em = this.fonts(String(id))?.[0];
+		this.s.broken = id === "g_font_error";
+		this.s.em = typeof em === "number" && em > 0 ? em : 0.001;
+		this.s.fontSize = size;
 	}
 
 	private move(tx: number, ty: number) {
@@ -243,18 +364,31 @@ class Walker {
 	}
 
 	private text(fn: number, a: unknown[]): void {
-		const { OPS } = this;
+		const { OPS, s } = this;
 		const parts = (i: number) => a[i] as (Glyph | number)[];
-		if (fn === OPS.beginText) this.tm = this.tlm = IDENTITY;
-		else if (fn === OPS.setFont) {
-			this.broken = a[0] === "g_font_error";
-			this.fontSize = a[1] as number;
-		} else if (fn === OPS.setFillRGBColor) this.color = String(a[0]);
-		else if (fn === OPS.setStrokeRGBColor) this.stroke = String(a[0]);
+		const num = a?.[0] as number;
+		if (fn === OPS.beginText) {
+			this.tm = this.tlm = IDENTITY;
+			this.textClip = null;
+		} else if (fn === OPS.endText) {
+			if (this.textClip) this.clipTo(this.textClip, "nonzero");
+			this.textClip = null;
+		} else if (fn === OPS.setFont) {
+			this.font(a[0], a[1] as number);
+		} else if (fn === OPS.setFillRGBColor) s.color = String(a[0]);
+		else if (fn === OPS.setStrokeRGBColor) s.stroke = String(a[0]);
+		// A pattern's colours are not read; an unusable colour paints nothing (pdfjs: transparent).
+		else if (fn === OPS.setFillColorN) s.color = "";
+		else if (fn === OPS.setStrokeColorN) s.stroke = "";
+		else if (fn === OPS.setFillTransparent) s.color = "transparent";
+		else if (fn === OPS.setStrokeTransparent) s.stroke = "transparent";
 		else if (fn === OPS.setGState) this.gstate(a[0] as [string, unknown][]);
-		else if (fn === OPS.setTextRenderingMode) this.mode = a[0] as number;
-		else if (fn === OPS.setHScale) this.hscale = (a[0] as number) / 100;
-		else if (fn === OPS.setLeading) this.leading = a[0] as number;
+		else if (fn === OPS.setTextRenderingMode) s.mode = num;
+		else if (fn === OPS.setHScale) s.hscale = num / 100;
+		else if (fn === OPS.setTextRise) s.rise = num;
+		else if (fn === OPS.setCharSpacing) s.charSpacing = num;
+		else if (fn === OPS.setWordSpacing) s.wordSpacing = num;
+		else if (fn === OPS.setLeading) this.leading = num;
 		else if (fn === OPS.setTextMatrix) {
 			this.tm = this.tlm = Array.from(
 				{ length: 6 },
@@ -267,6 +401,10 @@ class Walker {
 		} else if (fn === OPS.nextLine) this.move(0, -this.leading);
 		else if (fn === OPS.showText || fn === OPS.showSpacedText) this.show(parts(0));
 		else if (fn === OPS.nextLineShowText || fn === OPS.nextLineSetSpacingShowText) {
+			if (fn === OPS.nextLineSetSpacingShowText) {
+				s.wordSpacing = a[0] as number;
+				s.charSpacing = a[1] as number;
+			}
 			this.move(0, -this.leading);
 			this.show(parts(fn === OPS.nextLineShowText ? 0 : 2));
 		}
@@ -274,18 +412,23 @@ class Walker {
 
 	// showText hands over glyphs, showSpacedText glyphs mixed with kerning numbers.
 	private show(parts: (Glyph | number)[]): void {
-		const user = mul(this.tm, this.ctm);
-		const size = this.fontSize * Math.hypot(user[2], user[3]);
-		let text = this.broken ? UNREAD : "";
-		let unmapped = this.broken;
+		const { s } = this;
+		// Text rise (Ts) moves the letters off their baseline, up or down.
+		const user = mul(mul([1, 0, 0, 1, 0, s.rise], this.tm), s.ctm);
+		const size = s.fontSize * Math.hypot(user[2], user[3]);
+		let text = s.broken ? UNREAD : "";
+		let unmapped = s.broken;
 		let advance = 0; // in text space, before horizontal scaling
+		let natural = 0; // the glyphs' own widths
+		let spacing = 0; // character and word spacing (Tc, Tw)
 		for (const part of parts) {
 			if (typeof part === "number") {
 				if (-part >= SPACE_KERN && !text.endsWith(" ")) text += " ";
-				advance -= (part / 1000) * this.fontSize;
+				advance -= (part / 1000) * s.fontSize;
 			} else {
 				text += part.unicode;
-				advance += (part.width / 1000) * this.fontSize;
+				natural += part.width * s.em * s.fontSize;
+				spacing += s.charSpacing + (part.isSpace ? s.wordSpacing : 0);
 				// A multi-byte code with no Unicode mapping and no glyph in the font: pdfjs passes the
 				// code itself on as text, which says nothing about the letter drawn. A space draws nothing.
 				const code = part.originalCharCode;
@@ -296,35 +439,76 @@ class Walker {
 					!!part.unicode.trim();
 			}
 		}
-		advance *= this.hscale;
+		advance = (advance + natural + spacing) * s.hscale;
+		const point = (x: number, y: number): [number, number] => [
+			user[4] + x * user[0] + y * user[2],
+			user[5] + x * user[1] + y * user[3],
+		];
 		if (text.trim()) {
-			// An outline-only mode is painted in the stroke colour.
-			const ink = this.mode === 1 || this.mode === 5 ? this.stroke : this.color;
-			const why = hiding(ink, this.mode, size, user[4], user[5], this.view);
-			if (this.alpha < 0.05) why.push("transparent");
+			const shown = inks(s);
+			const ink = shown.find((c) => !/^#(f[0-9a-f]){3}$/i.test(c)) ?? shown[0] ?? s.color;
+			// Half the run along its baseline, then 0.3 em up: the middle of the letters, not the baseline.
+			const mid = point(advance / 2, 0.3 * s.fontSize);
+			const [mx, my] = mid;
+			const why = hiding(ink, s.mode, size, [[user[4], user[5]], mid], this.view);
+			// Text in a soft mask's content is never painted; it only shapes the mask.
+			const m = this.masks.at(-1);
+			if (m) m.mask = "unknown";
+			if (m && !why.includes("invisible")) why.push("invisible");
+			else if ((s.mode % 4 !== 3 && !shown.length) || this.let(mx, my) < SEEN_ALPHA)
+				why.push("transparent");
 			if (this.out.length >= MAX_RUNS) throw new Error("too much text");
 			if (this.layers.includes(true)) why.push("hidden layer");
-			if (this.hscale < MIN_HSCALE || this.hscale > MAX_HSCALE) why.push("squeezed");
+			// Character spacing that steps each letter back onto the one before stacks them (a step back of
+			// more than a letter only reverses them).
+			const spread = natural > 0 ? Math.min(1, Math.abs(natural + spacing) / natural) : 1;
+			const shape = squeeze(user, s.hscale * spread, size);
+			if (!(shape >= MIN_HSCALE && shape <= MAX_HSCALE)) why.push("squeezed");
 			if (unmapped) why.push("unreadable font");
 			const end = user[4] + advance * Math.hypot(user[0], user[1]);
-			// Half the run along its baseline, then 0.3 em up: the middle of the letters, not the baseline.
-			const mid: [number, number] = [
-				user[4] + (advance * user[0]) / 2 + 0.3 * this.fontSize * user[2],
-				user[5] + (advance * user[1]) / 2 + 0.3 * this.fontSize * user[3],
-			];
-			const [mx, my] = mid;
-			if (this.clip && !within(this.clip, mx, my)) why.push("clipped");
+			if (!inside(s.clips, mx, my)) why.push("clipped");
 			// White letters on a dark fill or a picture drawn before them are what a reader sees.
 			const white = why.indexOf("white");
 			const ground = white < 0 ? undefined : this.painted.findLast((p) => paints(p, mx, my));
-			if (ground && !light(ground.color)) why.splice(white, 1);
+			if (ground && !light(ground.color) && s.blend === "source-over") why.splice(white, 1);
 			const upright = user[0] > 0 && user[3] > 0 && Math.abs(user[1]) < 1e-3 * user[0];
 			this.out.push({ text, x: user[4], y: user[5], size, end, mid, upright, why });
+			if (s.mode >= 4) {
+				const [lo, hi] = [-0.25 * s.fontSize, 0.9 * s.fontSize];
+				const outline = [point(0, lo), point(advance, lo), point(advance, hi), point(0, hi)];
+				this.textClip = [...(this.textClip ?? []), outline];
+			}
 		}
 		this.tm = mul([1, 0, 0, 1, advance, 0], this.tm);
 	}
 }
 
+// Fill modes (0, 2, 4, 6) paint in the fill colour and opacity, stroke modes (1, 2, 5, 6) in the
+// stroke's: the inks a run shows in, those that are not see-through, as they look on a white page.
+function inks(s: State): string[] {
+	const on = [s.mode % 4 === 0 || s.mode % 4 === 2, s.mode % 4 === 1 || s.mode % 4 === 2];
+	return (
+		[
+			[s.color, s.fillAlpha],
+			[s.stroke, s.strokeAlpha],
+		] as const
+	)
+		.filter(([c, alpha], i) => on[i] && c !== "transparent" && alpha >= SEEN_ALPHA)
+		.map(([c]) => onWhite(s.blend, c));
+}
+
+// The letters' width against their height (1 for ordinary text, rotated or slanted), times `scale`.
+function squeeze(user: Matrix, scale: number, size: number): number {
+	const det = Math.abs(user[0] * user[3] - user[1] * user[2]);
+	return size > 0 ? (scale * (user[0] ** 2 + user[1] ** 2)) / det : scale;
+}
+
+const intersect = (a: Box, b: Box): Box => [
+	Math.max(a[0], b[0]),
+	Math.max(a[1], b[1]),
+	Math.min(a[2], b[2]),
+	Math.min(a[3], b[3]),
+];
 const FILLS = [
 	"fill",
 	"eoFill",

@@ -91,7 +91,78 @@ const remapped = (ranges: string): Spec => ({
 		),
 	],
 });
+// A graphics state /GS1 (object 6) with these entries; more objects follow it as 7, 8, ...
+const gs = (entries: string, content: string, extra: Spec["extra"] = []): Spec => ({
+	content: `${base}${content}`,
+	resources: "/ExtGState << /GS1 6 0 R >>",
+	extra: [`<< /Type /ExtGState ${entries} >>`, ...extra],
+});
+// A luminosity soft mask (object 7) whose group draws `mask`.
+const masked = (mask: string, content: string) =>
+	gs("/SMask << /S /Luminosity /G 7 0 R >>", content, [
+		stream(
+			"/Type /XObject /Subtype /Form /BBox [0 0 612 792] /Group << /S /Transparency /CS /DeviceGray >> /Resources << /Font << /F1 5 0 R >> >>",
+			mask,
+		),
+	]);
 const FILES: Record<string, string | Spec> = {
+	// Fill opacity 0 with stroke opacity 1: ordinary filled text paints nothing.
+	"fill-transparent.pdf": gs("/ca 0 /CA 1", `/GS1 gs ${line(canary("PDF-FILL-ALPHA"))}`),
+	// The visible twin: stroke opacity 0 does not touch filled text.
+	"stroke-transparent.pdf": gs("/ca 1 /CA 0", `/GS1 gs ${line(visible)}`),
+	// A white fill at opacity 0 over the text: nothing covers it.
+	"cover-transparent.pdf": gs("/ca 0", `${line(visible)}q /GS1 gs 1 g 60 650 400 30 re f Q\n`),
+	// A yellow highlight in Multiply over the text: the text shows through.
+	"highlight-multiply.pdf": gs("/BM /Multiply", `${line(visible)}q /GS1 gs 1 1 0 rg 60 650 400 30 re f Q\n`),
+	// A black box in Multiply over the text: black over anything is black.
+	"cover-multiply.pdf": gs("/BM /Multiply", `${line(canary("PDF-MULTIPLY"))}q /GS1 gs 0 g 60 650 400 30 re f Q\n`),
+	// Black text in Screen on the white page: it comes out white.
+	"text-screen.pdf": gs("/BM /Screen", `q /GS1 gs ${line(canary("PDF-SCREEN"))}Q\n`),
+	// A clip of the page with a hole (even-odd) where the text is: nothing of it is drawn.
+	"clip-hole.pdf": `${base}q 0 0 612 792 re 60 650 400 30 re W* n\n${line(canary("PDF-CLIP-HOLE"))}Q\n`,
+	// The visible twin: the hole is elsewhere on the page.
+	"clip-hole-beside.pdf": `${base}q 0 0 612 792 re 60 100 400 30 re W* n\n${line(visible)}Q\n`,
+	// Text rise (Ts) of 1000 pt: drawn above the page.
+	"rise-off-page.pdf": `${base}${line(canary("PDF-RISE"), "1000 Ts")}`,
+	// The visible twin: a superscript's rise.
+	"rise-superscript.pdf": `${base}${line(visible, "4 Ts")}`,
+	// Character spacing (Tc) of 1000: the first letter on the page, the rest far off it.
+	"spaced-off-page.pdf": `${base}${line(canary("PDF-SPACED"), "1000 Tc")}`,
+	// The visible twin: letter-spaced text.
+	"letter-spaced.pdf": `${base}${line(visible, "1 Tc")}`,
+	// A text matrix with no width: the letters are a line.
+	"matrix-collapsed.pdf": `${base}BT /F1 12 Tf 0 0 0 1 72 660 Tm (${canary("PDF-COLLAPSED")}) Tj ET\n`,
+	// A character drawn in a clipping mode (4 Tr) clips what follows to its outline.
+	"text-clip.pdf": `${base}q BT 4 Tr /F1 12 Tf 72 100 Td (x) Tj ET\n${line(canary("PDF-TEXT-CLIP"), "0 Tr")}Q\n`,
+	// A soft mask that lets nothing through (black luminosity) over the text.
+	"mask-hides.pdf": masked("0 g 0 0 612 792 re f", `q /GS1 gs ${line(canary("PDF-MASK"))}Q\n`),
+	// The visible twin: a soft mask that lets everything through.
+	"mask-shows.pdf": masked("1 g 0 0 612 792 re f", `q /GS1 gs ${line(visible)}Q\n`),
+	// Text inside a soft mask's own content: it shapes the mask and is never painted.
+	"mask-content.pdf": masked(
+		`BT /F1 12 Tf 72 400 Td (${canary("PDF-MASK-CONTENT")}) Tj ET`,
+		`q /GS1 gs ${line(visible)}Q\n`,
+	),
+	// A white shading painted over the text through a clip.
+	"shading-covers.pdf": {
+		content: `${base}${line(canary("PDF-SHADING"))}q 0 600 612 100 re W n /Sh1 sh Q\n`,
+		resources: "/Shading << /Sh1 6 0 R >>",
+		extra: [
+			"<< /ShadingType 2 /ColorSpace /DeviceGray /Coords [0 0 612 0] /Function << /FunctionType 2 /Domain [0 1] /C0 [1] /C1 [1] /N 1 >> >>",
+		],
+	},
+	// An annotation whose appearance is drawn at its rectangle, which lies off the page.
+	"annotation-off-page.pdf": {
+		content: base,
+		page: "/Annots [6 0 R]",
+		extra: [
+			"<< /Type /Annot /Subtype /FreeText /Rect [-500 -500 -300 -460] /DA (/F1 12 Tf 0 g) /AP << /N 7 0 R >> >>",
+			stream(
+				"/Type /XObject /Subtype /Form /BBox [0 0 200 40] /Resources << /Font << /F1 5 0 R >> >>",
+				`BT /F1 12 Tf 5 15 Td (${canary("PDF-ANNOTATION")}) Tj ET`,
+			),
+		],
+	},
 	// Text drawn inside a 1 pt clip at the page corner: never on the page.
 	"clipped.pdf": `${base}q 0 0 1 1 re W n\n${line(canary("PDF-CLIPPED"))}Q\n`,
 	// Text inside a clip that holds it: an ordinary visible line.
