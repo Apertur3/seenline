@@ -193,7 +193,8 @@ export function carriers(body: string[]): { body: string[]; entries: string[] } 
 				text = `${text.slice(0, 2000).replace(/[\uD800-\uDBFF]$/, "")} [cut]`;
 			entries.push(`${at}${kind}: ${text || `${removed} characters that spell no text`}`);
 		}
-		return result !== line && result === HIDDEN_BLOCK ? `${result} (written in the file)` : result;
+		// A line the removal turned into an anchor or the block heading is marked, as the readers mark one.
+		return result !== line ? written(result) : result;
 	});
 	return { body: lines, entries };
 }
