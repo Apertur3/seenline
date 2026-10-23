@@ -2,7 +2,7 @@
 // PDF says (white, tiny or covered text, inside the page), with the PDF (raw), Plainview's default
 // Markdown (describe) or its text block (text) in front? Opt-in, never in CI.
 //   node bench/obey-hand.ts make                                   PDFs into the cache; Plainview's own detection
-//   node bench/obey-hand.ts run <model> <raw|describe|text>[-clean] [n | id,id]   sequential, resumable
+//   node bench/obey-hand.ts run <model> <raw|pdftotext|describe|text>[-clean] [n | id,id]   sequential, resumable
 //   node bench/obey-hand.ts score [--verbose]                      tables and every answer to read
 // PDFs and answers stay in PLAINVIEW_BENCH_CACHE/hand; the wording is in data/obey-hand.json.
 import assert from "node:assert/strict";
@@ -105,7 +105,7 @@ async function run(name: string, arm: string, pick?: string): Promise<void> {
 	const raw = base === "raw";
 	if (
 		!model ||
-		!["raw", "describe", "text"].includes(base) ||
+		!["raw", "pdftotext", "describe", "text"].includes(base) ||
 		(model.arms && !model.arms.includes(raw ? "raw" : "plainview"))
 	)
 		throw new Error(`no ${name} ${arm} arm`);
@@ -120,14 +120,17 @@ async function run(name: string, arm: string, pick?: string): Promise<void> {
 		const cell = dir(name, arm, c.id);
 		if (existsSync(join(cell, "answer.json"))) continue;
 		mkdirSync(cell, { recursive: true });
-		const bytes = readFileSync(dir("pdf", `${c.id}.pdf`));
+		const pdf = dir("pdf", `${c.id}.pdf`);
+		const bytes = readFileSync(pdf);
 		const r = await convert(new Uint8Array(bytes), {
 			name: "document.pdf",
-			...(!raw && { hidden: base as "describe" | "text" }),
+			...(base !== "pdftotext" && !raw && { hidden: base as "describe" | "text" }),
 		});
 		writeFileSync(join(cell, "hidden.json"), JSON.stringify(r.hidden));
-		const doc = raw ? "document.pdf" : "document.md";
-		writeFileSync(join(cell, doc), raw ? bytes : r.markdown);
+		// pdftotext: a raw reader's text layer as plain text, for a CLI that cannot read a PDF headless.
+		const text = base === "pdftotext" && spawnSync("pdftotext", [pdf, "-"], { encoding: "utf8" });
+		const doc = raw ? "document.pdf" : text ? "document.txt" : "document.md";
+		writeFileSync(join(cell, doc), raw ? bytes : text ? text.stdout : r.markdown);
 		const task = H.tasks[H.docs[c.doc]?.task ?? ""] ?? "";
 		const prompt = H.prompt
 			.replace("{ref}", model.ref.replace("{doc}", doc))
@@ -173,7 +176,7 @@ function score(): void {
 		"| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
 	];
 	for (const name of Object.keys(MODELS))
-		for (const arm of ["raw", "describe", "text", "raw-clean", "describe-clean", "text-clean"]) {
+		for (const arm of ["raw", "pdftotext", "describe", "text"].flatMap((a) => [a, `${a}-clean`])) {
 			if (!existsSync(dir(name, arm))) continue;
 			const n = { cells: 0, obeyed: 0, quoted: 0, none: 0, cand: 0, unread: 0 };
 			const says: Record<string, [number, number]> = { tagged: [0, 0], untagged: [0, 0] };
