@@ -141,7 +141,8 @@ function none(v: string | undefined): boolean {
 	if (v.indexOf("(", v.indexOf("(") + 1) > 0) throw new Error("unsupported CSS");
 	const f = /^(min|max|clamp)\(([^()]*)\)$/.exec(v);
 	if (f) {
-		const all = (f[2] as string).split(",").map((x) => none(x.trim()));
+		// Inside a function a negative size is allowed, and comes out as zero.
+		const all = (f[2] as string).split(",").map((x) => x.trim().startsWith("-") || none(x.trim()));
 		const [a, b, c] = all; // clamp(min, value, max) is max(min, min(value, max))
 		if (f[1] === "clamp") return !!a && (!!b || !!c);
 		return f[1] === "min" ? all.some(Boolean) : all.every(Boolean);
@@ -155,24 +156,27 @@ const some = (v: string | undefined) =>
 // Elements whose box a height or width sizes and overflow clips. An ordinary inline element (a span)
 // is not one, nor a table or its cells, which grow to fit their content.
 const BOX =
-	/^(?:p|div|section|article|header|footer|main|aside|nav|ul|ol|li|blockquote|pre|dl|dt|dd|address|h[1-6]|form|fieldset|figure|figcaption|details|summary|center|body|html|input|textarea|select|button|iframe)$/;
+	/^(?:p|div|section|article|header|footer|main|aside|nav|ul|ol|li|blockquote|pre|dl|dt|dd|address|h[1-6]|hgroup|search|menu|dialog|legend|form|fieldset|figure|figcaption|details|summary|center|body|html|input|textarea|select|button|iframe)$/;
 const boxed = (css: Css, tag: string) =>
 	/^(?:absolute|fixed)$/.test(css.position ?? "") ||
 	/^(?:left|right)$/.test(css.float ?? "") ||
 	(css.display && !neutral("", css.display)
-		? !/^(?:inline|contents)$/.test(css.display)
+		? !/^(?:inline|contents|(?:inline-)?table(?:-[a-z-]+)?)$/.test(css.display)
 		: BOX.test(tag));
-// A box of (almost) no height or width that clips what overflows it, a minimum size counted.
+// A box of (almost) no height or width that clips what overflows it on that axis, a minimum size
+// counted. One axis hidden makes the other, if visible, scroll: it clips too.
 const collapsed = (css: Css, tag: string) => {
-	if (
-		!["overflow", "overflow-x", "overflow-y"].some((k) => /^(?:hidden|clip)\b/.test(css[k] ?? ""))
-	)
-		return false;
 	if (!boxed(css, tag)) return false;
+	const [ox = "", oy = ox] = (css.overflow ?? "").split(/\s+/);
+	const [x, y] = [css["overflow-x"] ?? ox, css["overflow-y"] ?? oy];
+	const clips = (a: string, b: string) =>
+		/^(?:hidden|clip)$/.test(a) || (/^(?:visible)?$/.test(a) && /^(?:hidden|auto|scroll)$/.test(b));
 	const lh = css["line-height"];
-	const lines = none(lh && /^[\d.]+$/.test(lh) ? `${lh}em` : lh) && !some(css.height);
-	const flat = (none(css.height) || none(css["max-height"]) || lines) && !some(css["min-height"]);
-	return flat || ((none(css.width) || none(css["max-width"])) && !some(css["min-width"]));
+	const lines = () => none(lh && /^[\d.]+$/.test(lh) ? `${lh}em` : lh) && !some(css.height);
+	const flat = () =>
+		(none(css.height) || none(css["max-height"]) || lines()) && !some(css["min-height"]);
+	const thin = () => (none(css.width) || none(css["max-width"])) && !some(css["min-width"]);
+	return (clips(y, x) && flat()) || (clips(x, y) && thin());
 };
 const faint = (opacity = "1") =>
 	opacity.includes("(") ||

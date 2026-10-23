@@ -98,9 +98,11 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 	const scale = fit.endsWith("%") ? Number.parseFloat(fit) / 100 : Number(fit) / 100000;
 	if (Number(attr(props, "sz") ?? attr(defaults, "sz") ?? 1200) * scale < 200)
 		why.push("tiny text");
-	// The letters' own fill, not their outline's (a:ln holds a fill of its own).
-	const own = (x?: Xml) => x && children(x, "solidFill")[0];
-	const fill = own(props) ?? own(defaults);
+	// The letters' fill and outline (a:ln, which holds a fill of its own), each the run's or else the shape's.
+	const own = (x: Xml | undefined, k: string) => x && children(x, k)[0];
+	const sets = (x?: Xml) => ["solidFill", "noFill", "gradFill", "pattFill"].some((k) => own(x, k));
+	const from = sets(props) ? props : defaults;
+	const fill = own(from, "solidFill");
 	const opaque = (f?: Xml) => {
 		const alpha = attr(f && first(f, "alpha"), "val") ?? "100000";
 		return (alpha.endsWith("%") ? Number.parseFloat(alpha) * 1000 : Number(alpha)) >= 10000;
@@ -108,16 +110,15 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 	const white = (f?: Xml) =>
 		attr(f && first(f, "srgbClr"), "val")?.toUpperCase() === "FFFFFF" ||
 		["lt1", "bg1"].includes(attr(f && first(f, "schemeClr"), "val") ?? "");
-	// An outline draws the letters when it has a fill: a colour 10% opaque or more, a gradient or a pattern.
-	const ln = props && children(props, "ln")[0];
-	const line = ln && own(ln);
-	const outlined = line
-		? opaque(line)
-		: !!ln && ["gradFill", "pattFill"].some((k) => children(ln, k).length > 0);
-	// A colour under 10% opaque, or no fill, and no outline: the letters are not drawn.
-	const bare = props && children(props, "noFill").length > 0;
-	if ((!opaque(fill) || bare) && !outlined) why.push("transparent text");
-	if (white(fill) && light(ground) && (!outlined || white(line))) why.push("white text");
+	// Fill and outline each draw the letters when 10% opaque or more (a gradient or pattern counts).
+	const filled = !own(from, "noFill") && opaque(fill);
+	const ln = own(props, "ln") ?? own(defaults, "ln");
+	const line = own(ln, "solidFill");
+	const outlined = line ? opaque(line) : !!own(ln, "gradFill") || !!own(ln, "pattFill");
+	if (!filled && !outlined) why.push("transparent text");
+	// White when everything that draws the letters is white.
+	const marks = [...(filled ? [fill] : []), ...(outlined ? [line] : [])];
+	if (marks.length && marks.every(white) && light(ground)) why.push("white text");
 	return why;
 }
 

@@ -305,6 +305,9 @@ class Walker {
 		const { clips, blend, soft } = this.s;
 		// Under a clip to glyph outlines (text modes 4 to 7) where the fill paints is not known exactly.
 		const approx = clips.some((c) => c.approx);
+		const alpha = color === "transparent" ? 0 : this.s.fillAlpha;
+		// A fill a reader cannot see changes nothing, on the page or in a mask: not the ground, not what it is over.
+		if (alpha < SEEN_ALPHA) return;
 		if (m) {
 			const solid = color && this.s.fillAlpha === 1 && !soft && m.mask !== "unknown" && !approx;
 			if (!solid || m.mask === "unknown") m.mask = "unknown";
@@ -314,9 +317,6 @@ class Walker {
 			}
 			return;
 		}
-		const alpha = color === "transparent" ? 0 : this.s.fillAlpha;
-		// A fill a reader cannot see changes nothing on the page: not the ground, not what it is over.
-		if (alpha < SEEN_ALPHA) return;
 		const whole = bounds(polys);
 		const box = clips.reduce((b, c) => intersect(b, c.box), whole);
 		// A see-through, soft-masked or blended fill is no known ground for white letters ("" counts as light).

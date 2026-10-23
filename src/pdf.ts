@@ -94,8 +94,10 @@ export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 		});
 		worker.once("error", (error: Error & { code?: string }) => {
 			if (error.code === "ERR_WORKER_OUT_OF_MEMORY") stop(OVER_MEMORY);
-			else if (!started) reject(broken(error.message));
-			else stop("damaged PDF");
+			else if (!started) {
+				reject(broken(error.message));
+				void worker.terminate();
+			} else stop("damaged PDF");
 		});
 		worker.once("exit", () => {
 			clearInterval(watch);
