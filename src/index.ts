@@ -12,12 +12,7 @@ export type { ConvertOptions, ConvertResult, HiddenText, OcrResult } from "./typ
 
 /** Convert locally; optional OCR and verify callbacks receive the supplied path or a private temporary copy, for a PDF the page numbers to read, and the input bytes. */
 export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<ConvertResult> {
-	if (input.length === 0)
-		throw new PlainviewError("invalid", "could not read this file: empty input");
-	if (opts.maxRows !== undefined && (!Number.isSafeInteger(opts.maxRows) || opts.maxRows < 1))
-		throw new PlainviewError("invalid", "maxRows must be a positive safe integer");
-	if (opts.hidden !== undefined && !HIDDEN_MODES.includes(opts.hidden))
-		throw new PlainviewError("invalid", "hidden must be text, framed or describe");
+	check(input, opts);
 	let scratch: string | undefined;
 	let copy: Promise<string> | undefined;
 	const local = async () => {
@@ -83,6 +78,15 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 	} finally {
 		if (scratch) await rm(scratch, { recursive: true, force: true });
 	}
+}
+
+function check(input: Uint8Array, opts: ConvertOptions): void {
+	if (input.length === 0)
+		throw new PlainviewError("invalid", "could not read this file: empty input");
+	if (opts.maxRows !== undefined && (!Number.isSafeInteger(opts.maxRows) || opts.maxRows < 1))
+		throw new PlainviewError("invalid", "maxRows must be a positive safe integer");
+	if (opts.hidden !== undefined && !HIDDEN_MODES.includes(opts.hidden))
+		throw new PlainviewError("invalid", "hidden must be text, framed or describe");
 }
 
 function strings(value: unknown): value is string[] {
