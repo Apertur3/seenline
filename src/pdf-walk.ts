@@ -282,8 +282,12 @@ class Walker {
 		return { box: bounds(p), polys: p, evenOdd: rule === "evenodd", color: "" };
 	}
 
-	private clipTo(polys: [number, number][][] | [number, number][], rule: string): void {
-		this.s.clips = [...this.s.clips, this.region(polys, rule)];
+	private clipTo(
+		polys: [number, number][][] | [number, number][],
+		rule: string,
+		approx = false,
+	): void {
+		this.s.clips = [...this.s.clips, { ...this.region(polys, rule), approx }];
 		// Every run is tested against every clip in force; real pages nest a handful.
 		if (this.s.clips.length > MAX_CLIPS)
 			throw new PlainviewError(
@@ -298,23 +302,28 @@ class Walker {
 		// A fill in a layer that is switched off paints nothing.
 		if (!polys.length || this.layers.includes(true)) return;
 		const m = this.masks.at(-1);
+		const { clips, blend, soft } = this.s;
+		// Under a clip to glyph outlines (text modes 4 to 7) where the fill paints is not known exactly.
+		const approx = clips.some((c) => c.approx);
 		if (m) {
-			const solid = color && this.s.fillAlpha === 1 && !this.s.soft && m.mask !== "unknown";
+			const solid = color && this.s.fillAlpha === 1 && !soft && m.mask !== "unknown" && !approx;
 			if (!solid || m.mask === "unknown") m.mask = "unknown";
 			else {
-				const f = { ...this.region(polys, evenOdd ? "evenodd" : ""), clips: this.s.clips };
+				const f = { ...this.region(polys, evenOdd ? "evenodd" : ""), clips };
 				m.mask.fills.push([f, m.luminosity ? lum(color) : 1]);
 			}
 			return;
 		}
-		const { clips, blend, soft } = this.s;
+		const alpha = color === "transparent" ? 0 : this.s.fillAlpha;
+		// A fill a reader cannot see changes nothing on the page: not the ground, not what it is over.
+		if (alpha < SEEN_ALPHA) return;
 		const whole = bounds(polys);
 		const box = clips.reduce((b, c) => intersect(b, c.box), whole);
-		const alpha = color === "transparent" ? 0 : this.s.fillAlpha;
 		// A see-through, soft-masked or blended fill is no known ground for white letters ("" counts as light).
-		const ground = alpha < 1 || soft || blend !== "source-over" ? "" : color;
+		const ground = alpha < 1 || soft || blend !== "source-over" || approx ? "" : color;
 		const f: Fill = { box, polys, evenOdd, color: ground, clips };
 		this.painted.push(f);
+		if (approx) return;
 		const [x0, y0, x1, y1] = box;
 		for (const it of this.out) {
 			// A rule or underline is thin; only a shape as tall as the text can hide it.
@@ -373,7 +382,7 @@ class Walker {
 			this.tm = this.tlm = IDENTITY;
 			this.textClip = null;
 		} else if (fn === OPS.endText) {
-			if (this.textClip) this.clipTo(this.textClip, "nonzero");
+			if (this.textClip) this.clipTo(this.textClip, "nonzero", true);
 			this.textClip = null;
 		} else if (fn === OPS.setFont) {
 			this.font(a[0], a[1] as number);

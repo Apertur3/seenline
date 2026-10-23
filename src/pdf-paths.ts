@@ -13,19 +13,48 @@ export interface Fill {
 	color: string;
 	/** The clipping paths in force when it was painted: it paints only inside all of them. */
 	clips?: Fill[];
+	/** A clip to glyph outlines, held as the runs' boxes: proof neither that a fill paints nor that it does not. */
+	approx?: boolean;
 }
 
-/** pdfjs path data (moveTo 0, lineTo 1, curveTo 2, quadraticCurveTo 3, closePath 4) as polygons; a curve by its control points. */
+/** pdfjs path data (moveTo 0, lineTo 1, curveTo 2, quadraticCurveTo 3, closePath 4) as polygons, a curve by points along it. */
 export function polygons(data: ArrayLike<number>, at: (x: number, y: number) => Point): Point[][] {
 	const out: Point[][] = [];
 	for (let i = 0; i < data.length; ) {
 		const op = data[i++] ?? 4;
 		const n = [2, 2, 6, 4][op] ?? 0;
 		if (op === 0 || !out.length) out.push([]);
-		for (let k = i; k < i + n; k += 2) out.at(-1)?.push(at(data[k] ?? 0, data[k + 1] ?? 0));
+		const poly = out.at(-1) as Point[];
+		const ends: Point[] = [];
+		for (let k = i; k < i + n; k += 2) ends.push(at(data[k] ?? 0, data[k + 1] ?? 0));
 		i += n;
+		const from = poly.at(-1);
+		poly.push(...(op >= 2 && op <= 3 && from ? curve([from, ...ends]) : ends));
 	}
 	return out.filter((p) => p.length > 0);
+}
+
+// A Bézier curve (its start, control points and end) as points along it, by de Casteljau: no chord
+// more than about a quarter point off the curve (Wang's bound), 16 at most, so a path grows 16 times at most.
+function curve(p: Point[]): Point[] {
+	const off = (a: Point, b: Point, c: Point) =>
+		Math.hypot(a[0] - 2 * b[0] + c[0], a[1] - 2 * b[1] + c[1]);
+	const [a, b, c, d] = p as [Point, Point, Point, Point?];
+	const bend = d ? 0.75 * Math.max(off(a, b, c), off(b, c, d)) : 0.25 * off(a, b, c);
+	const n = Math.min(16, Math.ceil(Math.sqrt(bend / 0.25))) || 1; // a straight or unmeasurable one: its end
+	const along = (q: Point[], t: number): Point =>
+		q.length === 1
+			? (q[0] as Point)
+			: along(
+					q
+						.slice(1)
+						.map((r, i) => [
+							(1 - t) * (q[i] as Point)[0] + t * r[0],
+							(1 - t) * (q[i] as Point)[1] + t * r[1],
+						]),
+					t,
+				);
+	return Array.from({ length: n }, (_, k) => along(p, (k + 1) / n));
 }
 
 export function bounds(polys: Point[][]): Box {

@@ -48,6 +48,8 @@ for (const [name, canary, reason] of [
 	["mask-content.pdf", "CANARY-PDF-MASK-CONTENT", "invisible"],
 	["shading-covers.pdf", "CANARY-PDF-SHADING", "covered"],
 	["annotation-off-page.pdf", "CANARY-PDF-ANNOTATION", "off-page"],
+	["clip-curve.pdf", "CANARY-PDF-CLIP-CURVE", "clipped"],
+	["curve-covers.pdf", "CANARY-PDF-CURVE-COVER", "covered"],
 ]) {
 	test(`${name}: flagged as hidden, kept out of the body`, async () => {
 		const { markdown, hidden } = await run(name as string);
@@ -81,6 +83,10 @@ for (const [name, text] of [
 	["letter-spaced.pdf", "Shown to every reader."],
 	["mask-shows.pdf", "Shown to every reader."],
 	["cover-hidden-layer.pdf", "Shown to every reader."],
+	["clip-curve-holds.pdf", "Shown to every reader."],
+	["curve-beside.pdf", "Shown to every reader."],
+	["glyph-clip-fill.pdf", "Shown to every reader."],
+	["ground-transparent.pdf", "Shown to every reader."],
 	["short-page.pdf", "[p. 1]\nApproved.\n"],
 	["resume.pdf", "Experience\nEducation\nEngineer at a shipping firm\nDegree in applied physics"],
 	[
