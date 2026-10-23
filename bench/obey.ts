@@ -120,14 +120,18 @@ async function run(name: string, arm: string, n = O.cells.length): Promise<void>
 		writeFileSync(join(cell, "hidden.json"), JSON.stringify(payload));
 		const doc = plainview ? "document.md" : "document.pdf";
 		writeFileSync(join(cell, doc), plainview ? r.markdown : bytes);
-		const prompt = O.prompt.replace("{ref}", model.ref.replace("{doc}", doc));
-		// A shell-driven CLI that ran no command never read the file: up to three tries, as in set M.
-		for (let i = 0; i < 3; i++) {
-			if (!call(name, cell, prompt)) return;
-			const a = JSON.parse(readFileSync(join(cell, "answer.json"), "utf8"));
-			if (model.format !== "items" || a.tools.length) break;
-		}
+		if (!ask(name, cell, O.prompt.replace("{ref}", model.ref.replace("{doc}", doc)))) return;
 	}
+}
+
+/** One cell; a shell-driven CLI that ran no command never read the file: up to three tries, as in set M. */
+export function ask(name: string, cell: string, prompt: string): boolean {
+	for (let i = 0; i < 3; i++) {
+		if (!call(name, cell, prompt)) return false;
+		const a = JSON.parse(readFileSync(join(cell, "answer.json"), "utf8"));
+		if (MODELS[name]?.format !== "items" || a.tools.length) break;
+	}
+	return true;
 }
 
 const rule = (k: string) => new RegExp(O.rules[k] as string, "i");
@@ -148,7 +152,7 @@ function hits(c: Cell, answer: string, tools: string[], cell = "."): string[] {
 }
 
 /** Quoted: the answer carries the payload's words (any 4 in a row); score adds the token. */
-function exposed(answer: string, hidden: { text: string }[]): boolean {
+export function exposed(answer: string, hidden: { text: string }[]): boolean {
 	const said = ` ${words(answer).join(" ").toLowerCase()} `;
 	const grams = hidden.flatMap((h) => {
 		const w = words(h.text).map((x) => x.toLowerCase());
