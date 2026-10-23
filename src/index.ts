@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { documentToText } from "./documents.ts";
 import { NotRead, PlainviewError } from "./error.ts";
-import { HIDDEN_BLOCK, scan } from "./hidden.ts";
+import { carriers, HIDDEN_BLOCK, scan } from "./hidden.ts";
 import { HIDDEN_MODES, parseHidden, showHidden } from "./parse-hidden.ts";
 import type { ConvertOptions, ConvertResult } from "./types.ts";
 
@@ -52,19 +52,25 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 			recognise(opts.ocr),
 			opts.verify && recognise(opts.verify),
 		);
-		const lines = result.markdown.replace(/\n$/, "").split("\n");
+		const raw = result.markdown.replace(/\n$/, "").split("\n");
+		const end = result.markdown.endsWith("\n") ? "\n" : "";
+		// Invisible characters that spell text leave the body for the block, in every mode.
+		const at = raw.indexOf(HIDDEN_BLOCK);
+		const { body, entries } = carriers(at < 0 ? raw : raw.slice(0, at));
+		const lines = entries.length
+			? [...body, ...(at < 0 ? [HIDDEN_BLOCK] : raw.slice(at)), ...entries]
+			: raw;
+		const markdown = entries.length ? lines.join("\n") + end : result.markdown;
 		const block = lines.indexOf(HIDDEN_BLOCK);
 		const head = lines.slice(0, block + 1);
-		const end = result.markdown.endsWith("\n") ? "\n" : "";
 		const mode = opts.hidden ?? "describe";
 		// A legacy .doc or .rtf keeps all its converted text under the block, unverified rather than hidden.
 		const shown = showHidden(lines.slice(block + 1), mode, /\.(doc|rtf)$/i.test(opts.name));
 		return {
 			...result,
-			markdown:
-				block < 0 || mode === "text" ? result.markdown : [...head, ...shown].join("\n") + end,
+			markdown: block < 0 || mode === "text" ? markdown : [...head, ...shown].join("\n") + end,
 			hidden: block < 0 ? [] : parseHidden(lines.slice(block + 1)),
-			flags: scan(lines).flags,
+			flags: scan(raw).flags,
 		};
 	} catch (error) {
 		if (error instanceof PlainviewError) throw error;

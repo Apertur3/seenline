@@ -73,3 +73,100 @@ export function visible(line: string): string {
 		.replace(TAG_RUN, (run) => `[hidden: ${[...run].length} tag characters]`)
 		.replace(UNSEEN, (c) => `[U+${code(c)}]`);
 }
+
+// Invisible characters that can spell text, as runs: tag characters, variation selectors, zero-width.
+const CARRIER = /(?:[\u{E0000}-\u{E007F}]|\p{Variation_Selector}|[​-‍⁠﻿­⁡-⁤᠎])+/gu;
+const SCRIPT_LATIN = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}]/u;
+const LETTER = /[\p{L}\p{M}]/u;
+const cp = (c: string) => c.codePointAt(0) ?? 0;
+
+// A run that is part of ordinary text: an emoji's selector or joiner, a subdivision flag's tag letters,
+// a soft hyphen, one selector on a symbol or an ideograph, one joiner or space between the letters of a
+// script that shapes or breaks with it, or one break hint at a hyphen, dash or slash.
+function ordinary(run: string, before: string, after: string): boolean {
+	if (/^️?‍?$/u.test(run) && /\p{Emoji}/u.test(before))
+		return !run.endsWith("‍") || /\p{Extended_Pictographic}/u.test(after);
+	if (
+		before === "\u{1F3F4}" &&
+		/^[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]{1,6}\u{E007F}$/u.test(run)
+	)
+		return true;
+	if ([...run].length !== 1) return false;
+	if (run === "­") return true;
+	if (/\p{Variation_Selector}/u.test(run)) return !SCRIPT_LATIN.test(before);
+	if (/[​-‍]/.test(run) && LETTER.test(before) && LETTER.test(after))
+		return !SCRIPT_LATIN.test(before) || !SCRIPT_LATIN.test(after);
+	return /[​⁠]/.test(run) && /[-‐-―/]/.test(before);
+}
+
+// Variation selectors as bytes: U+FE00-FE0F are 0-15, U+E0100-E01EF 16-255 (or 0-239), or U+FE00-FE0F
+// as nibble pairs (after a leading emoji selector or not); the reading with most letters, digits and
+// spaces is the text.
+function selectors(run: string): string {
+	const v = [...run].map((c) => (cp(c) >= 0xe0100 ? cp(c) - 0xe0100 + 16 : cp(c) - 0xfe00));
+	const nibbles = (n: number[]) =>
+		n.some((x) => x > 15)
+			? []
+			: n.slice(0, n.length & ~1).flatMap((x, i) => (i % 2 ? [] : [x * 16 + (n[i + 1] ?? 0)]));
+	const readings = [v, v.map((x) => (x > 15 ? x - 16 : x)), nibbles(v), nibbles(v.slice(1))];
+	const texts = readings.map((bytes) => {
+		try {
+			return new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bytes));
+		} catch {
+			return "";
+		}
+	});
+	const score = (t: string) => t.replace(/[^A-Za-z\d ]/g, "").length;
+	return texts.reduce((a, b) => (score(b) > score(a) ? b : a));
+}
+
+/**
+ * The body without the invisible characters that can carry text, and one hidden entry per line and
+ * kind: tag characters and variation selectors as the text they spell, zero-width characters as the
+ * words they sit in with each named. Ordinary uses (see `ordinary`) stay. Each entry takes the location
+ * of the last page, slide or sheet anchor above it.
+ */
+export function carriers(body: string[]): { body: string[]; entries: string[] } {
+	const entries: string[] = [];
+	let at = "";
+	const lines = body.map((line, i) => {
+		const anchor = /^\[(p\. \d+|slide \d+)\]$|^\[Sheet: [^\]]*\]$/.exec(line);
+		if (anchor) at = `${anchor[1] ?? anchor[0]}, `;
+		// A byte order mark that starts the text is an encoding mark.
+		const bom = i === 0 && line.startsWith("﻿") ? "﻿" : "";
+		const found = new Map<string, string[]>();
+		const add = (kind: string, text: string) => found.set(kind, [...(found.get(kind) ?? []), text]);
+		const words = line.slice(bom.length).split(/(\s+)/);
+		const cleaned = words.map((word) => {
+			let hit = false;
+			const out = word.replace(CARRIER, (run, offset: number) => {
+				const lead = word.slice(Math.max(0, offset - 2), offset);
+				const before = /^[\uD800-\uDBFF][\uDC00-\uDFFF]$/.test(lead) ? lead : lead.slice(-1);
+				const after = String.fromCodePoint(word.codePointAt(offset + run.length) ?? 0);
+				if (ordinary(run, before, after)) return run;
+				if (/[\u{E0000}-\u{E007F}]/u.test(run))
+					add(
+						"tag characters",
+						[...run]
+							.map((c) => (cp(c) > 0xe001f ? String.fromCodePoint(cp(c) - 0xe0000) : ""))
+							.join(""),
+					);
+				else if (/\p{Variation_Selector}/u.test(run)) add("variation selectors", selectors(run));
+				else hit = true;
+				return "";
+			});
+			if (hit) add("zero-width characters", visible(word));
+			return out;
+		});
+		for (const [kind, texts] of found) {
+			const text = texts
+				.join(" ")
+				.replace(/[\p{Cc}\s]+/gu, " ")
+				.trim();
+			entries.push(`${at}${kind}: ${text || visible(line).trim()}`);
+		}
+		const result = bom + cleaned.join("");
+		return result !== line && result === HIDDEN_BLOCK ? `${result} (written in the file)` : result;
+	});
+	return { body: lines, entries };
+}

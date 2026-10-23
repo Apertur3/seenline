@@ -4,6 +4,8 @@ import { type HtmlNode, htmlTree } from "./html-tree.ts";
 export interface MailText {
 	body: string[];
 	hidden: string[];
+	/** Entries listed even where the body shows their text. */
+	kept?: string[];
 }
 const flat = (s: string) => s.replace(/\s+/g, " ").trim();
 const BLOCK =
@@ -31,15 +33,20 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 				);
 			return "";
 		}
+		if (n.tag === "input" && /^hidden$/i.test(n.attrs.type ?? "") && n.attrs.value?.trim())
+			out.hidden.push(`HTML input value: ${flat(n.attrs.value)}`);
 		const state = visibility(n, path, inherited, rules);
 		const unseen =
 			hidden ||
 			state.hidden ||
 			["!comment", "template", "noscript", "head", "title"].includes(n.tag);
+		// A closed <details> shows its summary only.
+		const shut = n.tag === "details" && !Object.hasOwn(n.attrs, "open");
 		let text = n.children
 			.map((c) => {
-				if (typeof c !== "string") return visit(c, [...path, c], state.css, unseen);
-				if (unseen) {
+				if (typeof c !== "string")
+					return visit(c, [...path, c], state.css, unseen || (shut && c.tag !== "summary"));
+				if (unseen || shut) {
 					if (flat(c)) out.hidden.push(`HTML ${n.tag || "hidden"} text: ${flat(c)}`);
 					return "";
 				}

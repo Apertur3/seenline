@@ -1,6 +1,6 @@
 // The one scorer. assess() scores fidelity and the hidden-text pass/flag/drop split; outcome() maps a
 // run to a set B/C class. Both read the same split() of a tool's output, so they cannot disagree.
-import { scan } from "../src/hidden.ts";
+import { HIDDEN_BLOCK } from "../src/hidden.ts";
 
 export interface Key {
 	facts: readonly string[];
@@ -57,7 +57,11 @@ function anchored(lines: string[], label: string, fact: string): boolean {
 	return norm((end < 0 ? tail : tail.slice(0, end)).join("\n")).includes(norm(fact));
 }
 
-/** Lines of the output, which of them the scanner calls hidden, and the visible rest. */
+/**
+ * Lines of the output, which of them sit in a `[Hidden in the original]` block, and the visible rest.
+ * A scanner mark on a body line (an invisible character, markup that hides) is not isolation: a model
+ * reading the output still reads that line, so it counts as visible.
+ */
 function split(text: string) {
 	// Preserve location metadata already supplied by reference readers, regardless of syntax.
 	if (text.includes("\f") && !/^\[p\. \d+\]$/m.test(text)) {
@@ -68,7 +72,8 @@ function split(text: string) {
 	}
 	text = text.replace(/^<!-- Slide number: (\d+) -->$/gm, "[slide $1]");
 	const lines = text.split("\n");
-	const hiddenLines = scan(lines).hidden;
+	const block = lines.indexOf(HIDDEN_BLOCK);
+	const hiddenLines = new Set(block < 0 ? [] : lines.map((_, i) => i + 1).slice(block));
 	const visible = lines.filter((_, i) => !hiddenLines.has(i + 1)).map(norm);
 	return { lines, hiddenLines, visible, body: norm(visible.join("\n")) };
 }

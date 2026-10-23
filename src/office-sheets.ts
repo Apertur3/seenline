@@ -61,6 +61,19 @@ function filler(parts: Map<string, Xml>, styles: Xml | undefined) {
 	};
 }
 
+// A custom number format that shows nothing of a cell: for text, a text (fourth) section without @;
+// for a number, only a format with every section empty (`;;;`), as a blank for zero is ordinary.
+function formatHides(code: string | undefined, c: Xml, value: string): boolean {
+	if (!code || !value) return false;
+	const sections = code
+		.replace(/"[^"]*"|\\.|[_*]./g, "x")
+		.replace(/\[[^\]]*\]/g, "")
+		.split(";");
+	if (["s", "inlineStr", "str"].includes(c.attrs.t ?? ""))
+		return sections.length > 3 && !sections[3]?.includes("@");
+	return (!c.attrs.t || c.attrs.t === "n") && sections.every((s) => !s.trim());
+}
+
 function cellValue(c: Xml, shared: Xml[]): string {
 	const value = first(c, "v");
 	if (c.attrs.t === "s") {
@@ -78,7 +91,7 @@ function sheetRows(
 	label: string,
 	why: string[],
 	shared: Xml[],
-	[fonts, formats, fill]: [Xml[], Xml[], ReturnType<typeof filler>],
+	[fonts, formats, fill, codes]: [Xml[], Xml[], ReturnType<typeof filler>, Map<string, string>],
 	out: OfficeText,
 	maxRows: number,
 ): void {
@@ -104,6 +117,8 @@ function sheetRows(
 			if (columns.some((v) => column >= Number(v.attrs.min) && column <= Number(v.attrs.max)))
 				reasons.push("hidden column");
 			const value = flat(cellValue(c, shared));
+			if (formatHides(codes.get(format?.attrs.numFmtId ?? ""), c, value))
+				reasons.push("hidden by number format");
 			while (values.length < column) values.push("");
 			if (value && reasons.length)
 				out.hidden.push(
@@ -125,6 +140,12 @@ export function sheets(parts: Map<string, Xml>, maxRows = MAX_ROWS): OfficeText 
 	const shared = ss ? children(ss, "si") : [];
 	const fonts = styles ? children(first(styles, "fonts") ?? styles, "font") : [];
 	const formats = styles ? children(first(styles, "cellXfs") ?? styles, "xf") : [];
+	const codes = new Map(
+		(styles ? all(styles, "numFmt") : []).map((f) => [
+			f.attrs.numFmtId ?? "",
+			f.attrs.formatCode ?? "",
+		]),
+	);
 	const list = all(book, "sheet");
 	if (!list.length || list.length > 300) throw new Error("sheet count");
 	out.pages = list.length;
@@ -134,10 +155,11 @@ export function sheets(parts: Map<string, Xml>, maxRows = MAX_ROWS): OfficeText 
 		const label = `[Sheet: ${flat(s.attrs.name ?? "")}]`;
 		const why = s.attrs.state && s.attrs.state !== "visible" ? ["hidden sheet"] : [];
 		out.body.push(label);
-		const style: [Xml[], Xml[], ReturnType<typeof filler>] = [
+		const style: [Xml[], Xml[], ReturnType<typeof filler>, Map<string, string>] = [
 			fonts,
 			formats,
 			filler(parts, styles),
+			codes,
 		];
 		sheetRows(part(parts, path), label, why, shared, style, out, maxRows);
 	}

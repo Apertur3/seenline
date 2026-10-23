@@ -131,12 +131,11 @@ const table = (head: string[], body: (string | number)[][]) =>
 	[head, head.map(() => "---"), ...body].map((r) => `| ${r.join(" | ")} |`).join("\n");
 const tools = (rs: Row[]) => [...new Set(rs.map((r) => r.candidate))];
 const ext = (r: Row) => extname(r.entry.file).slice(1).toLowerCase();
-/** The table label of a row: the scorer's class, split where the tool's own doing differs from the scanner's reading. */
+/** The table label of a row: the scorer's class, split where the tool's own signal changes its meaning. */
 const cell = (r?: Row) => {
 	if (!r) return "-";
 	if (r.outcome === "-") return r.status;
 	if (r.outcome === "stripped" && r.entry.facts.length === 0) return "absent, unchecked";
-	if (r.outcome === "flagged" && !r.signalled) return "scanner-detected";
 	if (r.outcome === "leaked" && r.signalled) return "leaked, signalled";
 	return r.outcome;
 };
@@ -145,7 +144,6 @@ const TOTALS: [string, string][] = [
 	["leaked, no tool signal", "leaked"],
 	["leaked, and the tool signalled it", "leaked, signalled"],
 	["flagged by the tool itself", "flagged"],
-	["detected by Plainview's scanner, no tool signal", "scanner-detected"],
 	["stripped", "stripped"],
 	["absent, no visible text to check", "absent, unchecked"],
 	["failed-closed", "failed-closed"],
@@ -153,7 +151,6 @@ const TOTALS: [string, string][] = [
 ];
 const DEFINITIONS = `- \`leaked\`: a payload is in the visible body of the output and the tool gave no signal.
 - \`flagged\`: every payload copy sits in the hidden block, or the tool signalled and the payload is absent. A tool signals with a flag or a hidden block of its own.
-- \`scanner-detected\`: a payload is in the output with no signal from the tool, but Plainview's scanner reads those lines as hidden (for example invisible Unicode passed through). The tool made no flag; this is not credited to it as one.
 - \`leaked, signalled\`: the payload is still in the visible body, which is a leak too, but the tool also listed it as hidden or flagged the file.
 - \`correct\`: payload absent, no signal, every visible fact intact.
 - \`stripped\`: payload absent, no signal, visible text not fully intact.
@@ -319,7 +316,7 @@ Outcome classes for Sets B and C (one per file and tool):
 
 ${DEFINITIONS}
 
-Hidden-ness is judged by Plainview's scanner over every tool's output, so a competitor's raw invisible characters can read as hidden to that scanner; those rows say \`scanner-detected\`, not \`flagged\`. The Plainview columns are separate runs of one version: \`plainview\` (no OCR reader; scans and images fail closed), \`plainview-verify\` (\`--verify\`, PDFs) and \`plainview-ocr\` (\`--ocr\`, PDFs and images). A \`plainview-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
+Text counts as hidden when it sits in a \`[Hidden in the original]\` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Plainview columns are separate runs of one version: \`plainview\` (no OCR reader; scans and images fail closed), \`plainview-verify\` (\`--verify\`, PDFs) and \`plainview-ocr\` (\`--ocr\`, PDFs and images). A \`plainview-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
 
 What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 

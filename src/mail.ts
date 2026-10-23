@@ -4,6 +4,7 @@ import { HIDDEN_BLOCK } from "./hidden.ts";
 import { type MailText, readHtml } from "./html.ts";
 import { decodeCharset, headerText, type MimePart, mimeParams, readMime } from "./mime.ts";
 import { unseen } from "./parse-hidden.ts";
+import { suspect } from "./suspect.ts";
 
 const flat = (s: string) => s.replace(/\s+/g, " ").trim();
 const safe = (s: string) => (s === HIDDEN_BLOCK ? `${s} (written in the file)` : s);
@@ -80,6 +81,16 @@ function email(bytes: Uint8Array): MailText {
 		)
 			out.hidden.push(`Mail alternate HTML: ${flat(parsed.body.join(" "))}`);
 	}
+	// The text/plain alternative is the body, but an HTML client shows the HTML one: plain text that no
+	// HTML alternative shows is listed too when it reads like an instruction, so the tag sees it.
+	const shown = html.map((h) => flat(h.body.join(" "))).join(" ");
+	const only = plain
+		.flatMap((p) => p.split(/\r?\n/))
+		.map(flat)
+		.filter((l) => l && !shown.includes(l))
+		.join(" ");
+	if (html.length && suspect(only))
+		out.kept = [`Mail plain text the HTML alternative does not show: ${only}`];
 	out.body.push(...attachments.body);
 	if (!plain.length && !html.length && !attachments.body.length) throw new Error("no mail text");
 	return out;
@@ -94,7 +105,7 @@ export function convertMail(bytes: Uint8Array, name: string): string {
 		if (bytes.length > 50 * 1024 * 1024) throw new Error("file size");
 		const out = /\.eml$/i.test(name) ? email(bytes) : readHtml(decodeCharset(bytes));
 		const body = out.body.map(safe);
-		const listed = unseen(body, out.hidden);
+		const listed = [...unseen(body, out.hidden), ...(out.kept ?? [])];
 		const result = [...body, ...(listed.length ? [HIDDEN_BLOCK, ...listed] : [])].join("\n").trim();
 		if (!result || Buffer.byteLength(result) > 5 * 1024 * 1024)
 			throw new Error(result ? "text size" : "no text");

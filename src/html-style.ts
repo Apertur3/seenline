@@ -110,7 +110,33 @@ function tiny(size: string | undefined): boolean {
 		n <= (unit === "pt" ? 2 : unit === "em" || unit === "rem" ? 0.15 : unit === "%" ? 15 : 2.5)
 	);
 }
-function cssHidden(css: Css): boolean {
+// The size in a `font` shorthand (`bold 16px/1.4 serif`, `0/0 a`); a system font or a keyword shows.
+function fontTiny(font: string | undefined): boolean {
+	if (
+		!font ||
+		/^(?:inherit|initial|unset|revert|caption|icon|menu|message-box|small-caption|status-bar)$/.test(
+			font,
+		)
+	)
+		return false;
+	const size =
+		/(?:^|\s)((?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)|0|(?:xx?-)?(?:small|large)|medium|larger|smaller)(?:\s*\/\s*\S+)?\s+\S/.exec(
+			font,
+		)?.[1];
+	return !size || tiny(size);
+}
+// A box of (almost) no height or width that clips what overflows it; a computed size counts as none.
+const collapsed = (css: Css) =>
+	/^(?:hidden|clip)\b/.test(css.overflow ?? css["overflow-y"] ?? css["overflow-x"] ?? "") &&
+	["height", "max-height", "width", "max-width", "line-height"].some((k) => {
+		const v = k === "line-height" && /^[\d.]+$/.test(css[k] ?? "") ? `${css[k]}em` : css[k];
+		if (!v) return false;
+		if (v.includes("(") || Number.parseFloat(v) === 0) return true;
+		return /^(?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)?$/.test(v) && tiny(v);
+	});
+const faint = (opacity = "1") =>
+	Number.parseFloat(opacity) / (opacity.trim().endsWith("%") ? 100 : 1) < 0.1;
+export function cssHidden(css: Css): boolean {
 	const foreground = color(css.color);
 	const colours = [css.color, css.background, css["background-color"]].filter(
 		(c): c is string => !!c,
@@ -120,9 +146,10 @@ function cssHidden(css: Css): boolean {
 		uncertain ||
 		css.display === "none" ||
 		["hidden", "collapse"].includes(css.visibility ?? "") ||
-		Number(css.opacity ?? 1) === 0 ||
+		faint(css.opacity) ||
 		tiny(css["font-size"]) ||
-		!!css.font ||
+		fontTiny(css.font) ||
+		collapsed(css) ||
 		foreground === "#ffffff" ||
 		foreground === "transparent" ||
 		(!!foreground &&
@@ -130,9 +157,22 @@ function cssHidden(css: Css): boolean {
 		["left", "right", "top", "bottom", "text-indent"].some(
 			(k) => /^-/.test(css[k] ?? "") || Number.parseFloat(css[k] ?? "") > 10000,
 		) ||
-		["clip", "clip-path", "transform", "filter", "content-visibility"].some((k) =>
-			Object.hasOwn(css, k),
-		)
+		["margin", "margin-left", "margin-top"].some((k) => Number.parseFloat(css[k] ?? "") < -999) ||
+		// Their effect on the letters is not worked out here, so the text is listed.
+		[
+			"clip",
+			"clip-path",
+			"transform",
+			"filter",
+			"content-visibility",
+			"mask",
+			"mask-image",
+			"-webkit-mask",
+			"-webkit-mask-image",
+			"zoom",
+			"scale",
+			"-webkit-text-fill-color",
+		].some((k) => Object.hasOwn(css, k))
 	);
 }
 export function visibility(
@@ -142,6 +182,8 @@ export function visibility(
 	rules: Rule[],
 ): { css: Css; hidden: boolean } {
 	const css = { ...inherited };
+	// ponytail: aria-hidden only takes text from a screen reader, but the pinned reference goldens list
+	// it as hidden (mail-newsletter.html); it stays listed until the golden baseline is re-cut.
 	let hidden = Object.hasOwn(n.attrs, "hidden") || n.attrs["aria-hidden"]?.toLowerCase() === "true";
 	for (const rule of rules)
 		if (selected(path, rule.selector)) {

@@ -98,8 +98,8 @@
 	{
 		"file": "unicode-zero-width.html",
 		"html": "<p>Thanks for the review.</p><p>C​A​N​A​R​Y​-UNI-ZW</p>",
-		"facts": ["Thanks for the review."],
-		"hidden": ["CANARY-UNI-ZW"]
+		"facts": ["Thanks for the review.", "CANARY-UNI-ZW"],
+		"hidden": ["C​A​N​A​R​Y​-UNI-ZW"]
 	},
 	{
 		"file": "unicode-bidi.html",

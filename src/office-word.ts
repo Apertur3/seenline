@@ -8,6 +8,7 @@ import {
 	local,
 	nodes,
 	part,
+	related,
 	text,
 	type Xml,
 } from "./office-xml.ts";
@@ -143,6 +144,35 @@ export function word(parts: Map<string, Xml>): OfficeText {
 		}
 	};
 	blocks(document, out.body);
+	// Headers and footers, each part once. A section without its own reference of a type keeps the
+	// previous section's; a first-page one shows only with titlePg, an even-page one only with
+	// evenAndOddHeaders. A part no section shows is listed.
+	const rels = related(parts, "word/document.xml");
+	const settings = parts.get("word/settings.xml");
+	const evenOdd = on(settings && first(settings, "evenAndOddHeaders"));
+	for (const kind of ["header", "footer"]) {
+		const current = new Map<string, string>();
+		const [referred, used] = [new Set<string>(), new Set<string>()];
+		for (const section of all(document, "sectPr")) {
+			for (const ref of children(section, `${kind}Reference`)) {
+				const path = rels.get(ref.attrs["r:id"] ?? "");
+				if (!path) continue;
+				current.set(attr(ref, "type") ?? "default", path);
+				referred.add(path);
+			}
+			for (const [type, path] of current)
+				if (type === "first" ? on(children(section, "titlePg")[0]) : type !== "even" || evenOdd)
+					used.add(path);
+		}
+		const shown: string[] = [];
+		for (const path of referred) {
+			const lines: string[] = [];
+			blocks(part(parts, path), lines);
+			if (used.has(path)) shown.push(...lines);
+			else for (const line of lines.filter(Boolean)) out.hidden.push(`unused ${kind}: ${line}`);
+		}
+		if (shown.some(Boolean)) out.body.push(kind === "header" ? "Header" : "Footer", ...shown);
+	}
 	for (const kind of ["footnotes", "endnotes"]) {
 		const notes = parts.get(`word/${kind}.xml`);
 		if (!notes) continue;

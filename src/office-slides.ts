@@ -92,10 +92,18 @@ function runReason(run: Xml, shape: Xml, ground: string | undefined): string[] {
 	const props = first(run, "rPr");
 	const defaults = first(shape, "defRPr");
 	const why: string[] = [];
-	if (Number(attr(props, "sz") ?? attr(defaults, "sz") ?? 1200) < 200) why.push("tiny text");
+	// Shrink on overflow scales every run of the shape (fontScale in thousandths of a percent).
+	const scale = Number(attr(first(shape, "normAutofit"), "fontScale") ?? 100000) / 100000;
+	if (Number(attr(props, "sz") ?? attr(defaults, "sz") ?? 1200) * scale < 200)
+		why.push("tiny text");
 	const fill = (props && first(props, "solidFill")) ?? (defaults && first(defaults, "solidFill"));
 	const color = fill && first(fill, "srgbClr");
 	const scheme = fill && first(fill, "schemeClr");
+	// A colour under 10% opaque, or no fill and no outline: the letters are not drawn.
+	const alpha = attr(fill && first(fill, "alpha"), "val") ?? "100000";
+	const opaque = alpha.endsWith("%") ? Number.parseFloat(alpha) * 1000 : Number(alpha);
+	const bare = props && children(props, "noFill").length > 0 && !first(props, "ln");
+	if (opaque < 10000 || bare) why.push("transparent text");
 	if (
 		(attr(color, "val")?.toUpperCase() === "FFFFFF" ||
 			["lt1", "bg1"].includes(attr(scheme, "val") ?? "")) &&
