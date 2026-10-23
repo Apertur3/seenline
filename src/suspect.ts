@@ -16,7 +16,7 @@ const RULES = data.rules.flatMap(({ reason, patterns }) =>
 	patterns.map((s) => [reason, new RegExp(expand(s), "u")] as const),
 );
 const SQUASHED = data.squashed.map(
-	({ reason, patterns }) => [reason, new RegExp(patterns.join("|"), "g")] as const,
+	({ reason, patterns }) => [reason, new RegExp(patterns.join("|"), "gu")] as const,
 );
 // Words run together (glyphs joined without a gap, letters spaced one per space): each run
 // without spaces that is mostly letters, read as its letters only.
@@ -58,10 +58,11 @@ export function normal(text: string): string {
 			.replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z\d]+\b/g, (w) =>
 				w.replace(/[01345789]/g, (d) => LEET[d] ?? d),
 			)
-			// Single letters with one separator, the same one throughout, so a space or a doubled
-			// separator between spaced words keeps them apart.
-			.replace(/(?<![\p{L}\d])\p{L}([\t .*_·,:/|+~-])\p{L}(?:\1\p{L})*(?![\p{L}\d])/gu, (run) =>
-				run.replace(/[^\p{L}]/gu, ""),
+			// Single letters with one separator, the same one throughout; the separator doubled before
+			// the next spaced word stands for a space.
+			.replace(
+				/(?<![\p{L}\d])\p{L}([\t .*_·,:/|+~-])\p{L}(?:\1\p{L})*(?![\p{L}\d])(\1+(?=\p{L}\1\p{L}))?/gu,
+				(run, _sep, gap) => run.replace(/[^\p{L}]/gu, "") + (gap ? " " : ""),
 			)
 			.replace(/[\s_*]+/g, " ")
 	);
@@ -69,18 +70,17 @@ export function normal(text: string): string {
 
 /** The reason class when hidden text reads like an instruction to an AI, else null. */
 export function suspect(text: string): string | null {
+	// camelCase humps part words (a code name reads as words, not as a run below).
+	const t = text.replace(/(?<=\p{Ll}{2})(?=\p{Lu}\p{Ll}{2})/gu, " ");
 	// A format character inside a word hides it; between words it stands for a space: read both ways.
-	const forms = [
-		normal(text),
-		...(/\p{Cf}/u.test(text) ? [normal(text.replace(/\p{Cf}/gu, " "))] : []),
-	];
-	const rule = RULES.find(([, pattern]) => forms.some((t) => pattern.test(t)))?.[0];
+	const forms = [normal(t), ...(/\p{Cf}/u.test(t) ? [normal(t.replace(/\p{Cf}/gu, " "))] : [])];
+	const rule = RULES.find(([, pattern]) => forms.some((f) => pattern.test(f)))?.[0];
 	if (rule) return rule;
 	// Without word boundaries short phrases match by chance: a signature phrase of 16 letters or more.
 	const squashed = forms.flatMap(runs);
 	return (
 		SQUASHED.find(([, re]) =>
-			squashed.some((s) => [...s.matchAll(re)].some((m) => m[0].length >= 16)),
+			squashed.some((s) => s.matchAll(re).some((m) => m[0].length >= 16)),
 		)?.[0] ?? null
 	);
 }

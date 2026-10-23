@@ -23,6 +23,8 @@ test("hostile runs of letters and separators stay fast (no regex backtracking st
 		"a ".repeat(n / 2),
 		"a.".repeat(n / 2),
 		"a.b-".repeat(n / 4),
+		"a..b.c".repeat(n / 6),
+		"abCde".repeat(n / 5),
 		". ".repeat(n / 2),
 		"#".repeat(n),
 		"-".repeat(n),
