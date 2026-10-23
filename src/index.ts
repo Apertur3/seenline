@@ -21,6 +21,11 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 	let scratch: string | undefined;
 	let copy: Promise<string> | undefined;
 	const local = async () => {
+		if (opts.noTempFiles)
+			throw new NotRead(
+				"unavailable",
+				"could not read this file: text recognition without a path requires temporary file writes",
+			);
 		scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-"));
 		const path = join(scratch, `input${extname(opts.name)}`);
 		await writeFile(path, input, { flag: "wx", mode: 0o600 });
@@ -68,7 +73,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		const shown = showHidden(lines.slice(block + 1), mode, /\.(doc|rtf)$/i.test(opts.name));
 		return {
 			...result,
-			markdown: block < 0 || mode === "text" ? markdown : [...head, ...shown].join("\n") + end,
+			markdown: block < 0 ? markdown : [...head, ...shown].join("\n") + end,
 			hidden: block < 0 ? [] : parseHidden(lines.slice(block + 1)),
 			flags: scan(raw).flags,
 		};

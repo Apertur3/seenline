@@ -3,8 +3,12 @@
 // fabricated facts (data injection) are never tagged.
 import data from "./suspect.json" with { type: "json" };
 
-// A gap of up to n words within one sentence; a dot or ? inside a word (a link, an address) joins it.
-const gap = (n: number) => `[^\\w.!?;]+(?:[\\w'’-]+(?:[.?][\\w'’-]+)*[^\\w.!?;]+){0,${n}}`;
+// A gap of up to n words within one sentence; a dot, ? or apostrophe between letters (a link, an
+// address, "user's") joins a word. Words and separators share no character, so a gap reads one way
+// only, and a separator is at most 20 characters, so the match stays linear on hostile text (a long
+// run of hyphens or quotes).
+const SEP = "(?:[^\\w.!?;'’]|['’](?!\\w)|(?<!\\w)['’](?=\\w)){1,20}";
+const gap = (n: number) => `${SEP}(?:\\w+(?:[.?'’]\\w+)*${SEP}){0,${n}}`;
 const PARTS: Record<string, string> = data.parts;
 // A <NAME> stands for a part, which may hold parts itself; an unknown name fails at load.
 const expand = (s: string): string =>
@@ -65,6 +69,9 @@ export function normal(text: string): string {
 				(run, _sep, gap) => run.replace(/[^\p{L}]/gu, "") + (gap ? " " : ""),
 			)
 			.replace(/[\s_*]+/g, " ")
+			// A run of three or more of one mark (a dash rule) reads as two ("//", "<<" stay), so padding
+			// never widens a gap past its bound; an ellipsis stays.
+			.replace(/([^\w\s.])\1{2,}/gu, "$1$1")
 	);
 }
 
@@ -75,7 +82,11 @@ export function suspect(text: string): string | null {
 		normal(t),
 		...(/\p{Cf}/u.test(t) ? [normal(t.replace(/\p{Cf}/gu, " "))] : []),
 	];
-	const forms = read(text);
+	// A hyphen between letters is a separator ("ignore-previous-instructions"); read with the
+	// compounds joined too, so "state-of-the-art" does not use up a gap's words.
+	const forms = read(text).flatMap((f) =>
+		/\w-\w/.test(f) ? [f, f.replace(/(?<=\w)-(?=\w)/g, "")] : [f],
+	);
 	const rule = RULES.find(([, pattern]) => forms.some((f) => pattern.test(f)))?.[0];
 	if (rule) return rule;
 	// Without word boundaries short phrases match by chance: a signature phrase of 16 letters or more.

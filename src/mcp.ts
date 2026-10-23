@@ -8,7 +8,8 @@ import { convertFile, formatError, type Readers } from "./file.ts";
 import { HIDDEN_MODES } from "./parse-hidden.ts";
 import { version } from "./version.ts";
 
-export function createServer(readers: Readers = {}): McpServer {
+/** The server; with `roots` (real paths of folders) it reads only files whose real path lies inside one. */
+export function createServer(readers: Readers = {}, roots?: string[]): McpServer {
 	const server = new McpServer({ name: "plainview", version });
 	server.registerTool(
 		"convert_file",
@@ -41,15 +42,11 @@ export function createServer(readers: Readers = {}): McpServer {
 		async ({ path, hidden: mode }) => {
 			try {
 				if (!isAbsolute(path)) throw new PlainviewError("invalid", "path must be absolute");
-				if (/\.(doc|rtf)$/i.test(path))
-					throw new PlainviewError(
-						"unavailable",
-						"could not read this file: legacy Office conversion requires temporary file writes",
-					);
-				const { markdown, pages, flags, hidden } = await convertFile(path, {
-					...readers,
-					...(mode && { hidden: mode }),
-				});
+				const { markdown, pages, flags, hidden } = await convertFile(
+					path,
+					{ ...readers, ...(mode && { hidden: mode }), noTempFiles: true },
+					roots,
+				);
 				return {
 					content: [{ type: "text", text: markdown }],
 					structuredContent: { pages, flags, hidden },
@@ -62,10 +59,10 @@ export function createServer(readers: Readers = {}): McpServer {
 	return server;
 }
 
-export async function startMcp(readers: Readers = {}): Promise<void> {
+export async function startMcp(readers: Readers = {}, roots?: string[]): Promise<void> {
 	// Stdout carries JSON-RPC only: a library that logs must not break the client's stream.
 	Object.assign(console, new Console(process.stderr));
-	const server = createServer(readers);
+	const server = createServer(readers, roots);
 	await server.connect(new StdioServerTransport());
 	process.stdin.once("end", () => {
 		void server.close();

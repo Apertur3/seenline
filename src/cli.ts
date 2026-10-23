@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, realpath, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { convertFile, errorMessage, formatError, type Readers } from "./file.ts";
@@ -9,7 +9,7 @@ import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
 const HELP = `Usage: plainview <file> [more files] [options]
-       plainview mcp [--ocr] [--verify] [--ocr-lang <lang>] [--help]
+       plainview mcp [--root <dir>]... [--ocr] [--verify] [--ocr-lang <lang>] [--help]
 
 Convert local documents to Markdown. Scans and images fail closed unless --ocr is set.
 
@@ -30,6 +30,9 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
                      (default eng)
   --help             Show this help
   --version          Show the package version
+
+The MCP server reads any absolute path it is asked for; --root <dir> (repeatable) limits it to
+files whose real path lies inside those folders.
 
 Multiple files require --json or --out. These options are mutually exclusive.
 Use -- before filenames beginning with a dash (or ./mcp for a file named mcp).
@@ -85,6 +88,13 @@ function readersFrom(values: { ocr?: boolean; verify?: boolean; "ocr-lang"?: str
 	return { ...(values.ocr && { ocr: read }), ...(values.verify && { verify: read }) };
 }
 
+async function folder(dir: string): Promise<string> {
+	const real = await realpath(dir).catch(() => "");
+	if (!real || !(await stat(real)).isDirectory())
+		throw new Error("--root takes an existing folder");
+	return real;
+}
+
 function outputName(file: string): string {
 	return `${basename(file, extname(file))}.md`;
 }
@@ -92,19 +102,25 @@ function outputName(file: string): string {
 async function run(args: string[]): Promise<number> {
 	if (args[0] === "mcp") {
 		let readers: Readers;
+		let roots: string[] | undefined;
 		try {
-			const options = { ...OCR_OPTIONS, help: { type: "boolean" } } as const;
+			const options = {
+				...OCR_OPTIONS,
+				root: { type: "string", multiple: true },
+				help: { type: "boolean" },
+			} as const;
 			const { values } = parseArgs({ args: args.slice(1), options });
 			if (values.help) {
 				process.stdout.write(HELP);
 				return 0;
 			}
 			readers = readersFrom(values);
+			roots = values.root && (await Promise.all(values.root.map(folder)));
 		} catch (error) {
 			return usage(errorMessage(error));
 		}
 		const { startMcp } = await import("./mcp.ts");
-		await startMcp(readers);
+		await startMcp(readers, roots);
 		return 0;
 	}
 	let options: ReturnType<typeof parse>;

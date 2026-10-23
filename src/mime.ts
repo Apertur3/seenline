@@ -116,10 +116,9 @@ export function readMime(bytes: Uint8Array): MimePart {
 			throw new Error("MIME boundary");
 		let current: string[] | null = null;
 		for (const line of body.split(/\r?\n/)) {
-			if (
-				line.replace(/[ \t]+$/, "") === `--${boundary}` ||
-				line.replace(/[ \t]+$/, "") === `--${boundary}--`
-			) {
+			// Trailing blanks trimmed from the start of their run only, so a long blank run costs one scan.
+			const bare = line.replace(/(?<![ \t])[ \t]+$/, "");
+			if (bare === `--${boundary}` || bare === `--${boundary}--`) {
 				if (current) part.children.push(parse(current.join("\r\n"), depth + 1));
 				current = null;
 				if (line.trimEnd() === `--${boundary}--`) break;

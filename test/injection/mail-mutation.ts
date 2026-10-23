@@ -7,8 +7,8 @@ registerHooks({
 		if (!url.endsWith("/src/mail.ts")) return result;
 		const source = String(result.source);
 		const mutated = source.replace(
-			/import\s*\{\s*HIDDEN_BLOCK\s*\}\s*from\s*["'][^"']+["'];?/,
-			'const HIDDEN_BLOCK = "[Mutation: hidden text presented as ordinary text]";',
+			/import\s*\{\s*HIDDEN_BLOCK\s*,?([^}]*)\}\s*from\s*(["'][^"']+["']);?/,
+			'import {$1} from $2; const HIDDEN_BLOCK = "[Mutation: hidden text presented as ordinary text]";',
 		);
 		if (mutated === source) throw new Error("Mail hidden-header mutation did not apply");
 		return { ...result, source: mutated };

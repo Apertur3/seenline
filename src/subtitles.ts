@@ -20,7 +20,7 @@ const ENTITIES: Record<string, string> = {
 function plain(text: string): string {
 	return text
 		.replace(/<v(?:\.[^\s>]*)?\s+([^>]*)>/g, " $1: ")
-		.replace(/<[^>]*>|\{\\[^}]*\}/g, "")
+		.replace(/<[^<>]*>|\{\\[^{}]*\}/g, "")
 		.replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_, name: string) => ENTITIES[name] ?? "")
 		.replace(/\s+/g, " ")
 		.trim();

@@ -1,4 +1,5 @@
 import { light, mix } from "./colour.ts";
+import { written } from "./hidden.ts";
 import type { OfficeText } from "./office-word.ts";
 import {
 	all,
@@ -132,7 +133,7 @@ function sheetRows(
 				);
 			else values[column - 1] = value;
 		}
-		if (!rowWhy.length) out.body.push(`[row ${number}]`, values.join(" | "));
+		if (!rowWhy.length) out.body.push(`[row ${number}]`, written(values.join(" | ")));
 	}
 	if (rows.length > maxRows) out.body.push(`[truncated: first ${maxRows} rows only]`);
 }

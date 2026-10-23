@@ -1,6 +1,6 @@
 // Pure readers share one output contract; OCR is supplied by the caller.
 import { NotRead, PlainviewError } from "./error.ts";
-import { HIDDEN_BLOCK } from "./hidden.ts";
+import { HIDDEN_BLOCK, written } from "./hidden.ts";
 import { imageMeta } from "./image-meta.ts";
 import { legacyOfficeToText } from "./legacy-office.ts";
 import { convertMail } from "./mail.ts";
@@ -12,9 +12,14 @@ import type { ConvertOptions, DocumentText, OcrResult } from "./types.ts";
 import { compare } from "./verify.ts";
 
 const MIN_TEXT = 10;
+/** The largest input read, in bytes: the largest file of the test corpora is under a fifth of it. */
+export const MAX_INPUT = 100 << 20;
+export const TOO_LARGE = `could not read this file: larger than the ${MAX_INPUT >> 20} MB input limit`;
+const TEMP_FILES =
+	"could not read this file: legacy Office conversion requires temporary file writes";
 /** Said under the anchor of a page with (almost) no text layer when no text recognition read it. */
 export const NO_TEXT_LAYER = "(no readable text layer on this page; it may be a scan or an image)";
-const safe = (l: string) => (l === HIDDEN_BLOCK ? `${l} (written in the page)` : l);
+const safe = (l: string) => written(l, "page");
 const page = (n: number, lines: string[]) => [`[p. ${n}]`, ...lines.map(safe)];
 const nonEmpty = (text: string) => text.split("\n").filter((l) => l.trim());
 
@@ -27,9 +32,12 @@ export async function documentToText(
 	verify?: Reader,
 ): Promise<DocumentText> {
 	const { name } = opts;
+	if (bytes.length > MAX_INPUT) throw new PlainviewError("invalid", TOO_LARGE);
 	if (/\.(html?|eml|msg)$/i.test(name)) return { markdown: convertMail(bytes, name), pages: 1 };
-	if (/\.(doc|rtf)$/i.test(name))
+	if (/\.(doc|rtf)$/i.test(name)) {
+		if (opts.noTempFiles) throw new PlainviewError("unavailable", TEMP_FILES);
 		return { markdown: await legacyOfficeToText(bytes, name), pages: 1 };
+	}
 	if (OFFICE_FILE.test(name)) return convertOffice(bytes, name, opts.maxRows);
 	if (/\.(vtt|srt)$/i.test(name)) {
 		const raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
@@ -51,8 +59,12 @@ export async function documentToText(
 
 async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	const read = await ocr();
+	const body = read.pages.flatMap(nonEmpty).map(safe);
+	// Metadata alone is not the picture's text: an image recognition found nothing in fails.
+	if (!body.length)
+		throw new PlainviewError("invalid", "could not read this file: no text found in it");
 	return {
-		body: read.pages.flatMap(nonEmpty).map(safe),
+		body,
 		hidden: [...read.extras, ...imageMeta(bytes)],
 		pages: read.pages.length,
 		readers: read.reader ? read.pages.map(() => read.reader as string) : undefined,
@@ -73,12 +85,14 @@ async function fromPdf(bytes: Uint8Array, ocr: Reader, verify?: Reader) {
 				return null;
 			})
 		: { pages: [], extras: [] };
-	const body = pages.flatMap((p, i) =>
-		page(
+	// A page recognition returned no text for keeps the marker: it was not read, not found empty.
+	const body = pages.flatMap((p, i) => {
+		const recognised = read ? nonEmpty(read.pages[i] ?? "") : [];
+		return page(
 			p.number,
-			!weak[i] ? p.lines : read ? nonEmpty(read.pages[i] ?? "") : [NO_TEXT_LAYER, ...p.lines],
-		),
-	);
+			!weak[i] ? p.lines : recognised.length ? recognised : [NO_TEXT_LAYER, ...p.lines],
+		);
+	});
 	const hidden = pages.flatMap((p) =>
 		p.hidden.map(
 			(h) => `p. ${p.number}, ${h.why.join(" and ")} text: ${h.text.replace(/\s+/g, " ")}`,

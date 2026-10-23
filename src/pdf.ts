@@ -2,6 +2,7 @@
 // text layer: the text layer silently drops text outside the page box, and we need to see all of it
 // to flag it. Pure JavaScript, no network, no rendering.
 import { fileURLToPath } from "node:url";
+import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { PlainviewError } from "./error.ts";
 import { extras } from "./pdf-extras.ts";
 import { lines, readingOrder } from "./pdf-order.ts";
@@ -41,8 +42,53 @@ async function openPdf(bytes: Uint8Array) {
 	return { pdfjs, task, doc: await task.promise };
 }
 
+// A small file can decompress to gigabytes of streams and drawing operators, and pdfjs reads a page
+// in one go, so a PDF is read in a worker thread under a memory limit (its heap, and the process's
+// growth, which counts decoded stream buffers too) and a deadline: past either it fails closed with
+// that cause, and the process (an MCP server) stays up and responsive. Real files of the test corpora
+// stay far below both.
+const MEMORY_MB = 2048;
+const DEADLINE_S = 120;
+const fail = (why: string) => new PlainviewError("invalid", `could not read this file: ${why}`);
+const OVER_MEMORY = `the PDF needs more memory to read than the limit (${MEMORY_MB / 2} MB heap, ${MEMORY_MB} MB in all)`;
+
 /** Reads every page and what the file carries outside its pages; throws `invalid` for a file that is not a readable PDF. */
-export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
+export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
+	return new Promise((done, reject) => {
+		const worker = new Worker(new URL(import.meta.url), {
+			workerData: { plainviewPdf: bytes },
+			resourceLimits: { maxOldGenerationSizeMb: MEMORY_MB / 2 },
+			stdout: true,
+			stderr: true,
+		});
+		worker.stdout.resume();
+		worker.stderr.resume();
+		const [start, base] = [Date.now(), process.memoryUsage.rss()];
+		const stop = (why: string) => {
+			reject(fail(why));
+			void worker.terminate();
+		};
+		const watch = setInterval(() => {
+			if (process.memoryUsage.rss() - base > MEMORY_MB * 2 ** 20) stop(OVER_MEMORY);
+			if (Date.now() - start > DEADLINE_S * 1000)
+				stop(`the PDF took longer than ${DEADLINE_S} seconds to read`);
+		}, 50);
+		worker.once("message", (m: { doc?: PdfDoc; error?: string }) => {
+			clearInterval(watch);
+			void worker.terminate();
+			m.doc ? done(m.doc) : reject(new PlainviewError("invalid", m.error as string));
+		});
+		worker.once("error", (error: { code?: string }) =>
+			stop(error.code === "ERR_WORKER_OUT_OF_MEMORY" ? OVER_MEMORY : "damaged PDF"),
+		);
+		worker.once("exit", () => {
+			clearInterval(watch);
+			reject(fail("damaged PDF"));
+		});
+	});
+}
+
+async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 	let opened: Awaited<ReturnType<typeof openPdf>>;
 	try {
 		opened = await openPdf(bytes);
@@ -73,7 +119,9 @@ export async function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 		return { pages, extras: await extras(doc) };
 	} catch (error) {
 		if (error instanceof PlainviewError) throw error;
-		throw new PlainviewError("invalid", "could not read this file: damaged PDF");
+		// The walker's text budget (pdf-walk.ts) is a limit, not damage: name it.
+		const runs = (error as Error | null)?.message === "too much text";
+		throw fail(runs ? "a page has more than 100,000 text runs" : "damaged PDF");
 	} finally {
 		await task.destroy();
 	}
@@ -128,4 +176,17 @@ function text(runs: Item[], cell: string): string[] {
 		.map((l) => l.replace(/[ﬀ-ﬆ]/g, (c) => c.normalize("NFKC")))
 		.map((l) => l.replace(/\s+/g, " ").trim())
 		.filter(Boolean);
+}
+
+// In the worker: read the file, post the result or the cause.
+if (!isMainThread && parentPort && workerData?.plainviewPdf) {
+	const port = parentPort;
+	await parse(workerData.plainviewPdf).then(
+		(doc) => port.postMessage({ doc }),
+		(error: Error) =>
+			port.postMessage({
+				error:
+					error instanceof PlainviewError ? error.message : "could not read this file: damaged PDF",
+			}),
+	);
 }

@@ -2,14 +2,10 @@
 // XMP. A reader of the picture never sees it, so it goes to the flagged block,
 // one line each. Anything that is not a well-formed PNG or JPEG yields nothing.
 import { inflateSync } from "node:zlib";
+import { flatValue as flat } from "./parse-hidden.ts";
 
-const MAX_LINE = 2000;
-const flat = (s: string) => {
-	const t = s.replace(/[\s\0]+/g, " ").trim();
-	return t.length > MAX_LINE ? `${t.slice(0, MAX_LINE)} [cut at ${MAX_LINE} characters]` : t;
-};
 const XMP_TEXT =
-	/<(dc:(?:title|description|subject|creator)|exif:UserComment)\b[^>]*>([\s\S]*?)<\/\1>/g;
+	/<(dc:(?:title|description|subject|creator)|exif:UserComment)\b[^<>]*>((?:(?!<\/?\1\b)[\s\S])*)<\/\1>/g;
 // Tags that are free text a person wrote (0x010e, 0x9286, 0x9c9c, 0x9c9f, 0x9c9b); camera make, model and software are not.
 const EXIF_TEXT: Record<number, string> = {
 	270: "ImageDescription",
@@ -82,7 +78,7 @@ function jpeg(b: Buffer): string[] {
 function xmp(raw: string): string[] {
 	const out: string[] = [];
 	for (const [, tag, inner] of raw.matchAll(XMP_TEXT)) {
-		const text = flat((inner ?? "").replace(/<[^>]*>/g, " "));
+		const text = flat((inner ?? "").replace(/<[^<>]*>/g, " "));
 		if (text) out.push(`image metadata ${tag}: ${text}`);
 	}
 	return out;

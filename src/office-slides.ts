@@ -1,4 +1,5 @@
 import { light } from "./colour.ts";
+import { written } from "./hidden.ts";
 import type { OfficeText } from "./office-word.ts";
 import {
 	all,
@@ -150,7 +151,7 @@ function shapeText(
 			if (s && reasons.length) hidden.push(`${label}, ${reasons.join(" and ")}: ${flat(s)}`);
 			else value += s;
 		}
-		return flat(value);
+		return written(flat(value));
 	};
 	const table = first(shape, "tbl");
 	if (table)

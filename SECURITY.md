@@ -10,8 +10,16 @@ Use GitHub private vulnerability reporting on this repository (Security tab, "Re
 
 ## What counts
 
-- A vulnerability: anything that lets a crafted file make Plainview read or write files it should not, run code, reach the network, or escape the limits of the MCP server (which reads only the path it is given and writes nothing).
+- A vulnerability: anything that lets a crafted file make Plainview read or write files it should not, run code, reach the network, exhaust memory or stall the process past the resource limits below, or escape the limits of the MCP server (which writes nothing, and with `--root` reads only files whose real path lies inside the given folders).
 - A bug, not a vulnerability: hidden text that one of the documented detections should flag but does not. Open a normal issue with a file that shows it.
+
+## The MCP server reads any path unless limited
+
+Without `--root`, `plainview mcp` reads any absolute path the client asks for, with the rights of the user who runs it; a prompt injection in the client can ask for any file. Start it with `--root <dir>` (repeatable) to limit it to files whose real path, after symbolic links, lies inside those folders. Error messages name the cause in fixed words and never repeat the path or the system's own message.
+
+## Resource limits
+
+An input over 100 MB, a pipe, a device or a folder is refused before it is read; a file is opened without waiting on a pipe and read once. A PDF is read in a worker thread with a 1 GB heap, a 2 GB limit on the process's memory growth (decoded streams included) and a 120 second deadline: past any of them the file fails with that cause and the process keeps running. A PDF has at most 300 pages and 100,000 text runs a page. Office files and CSV are read up to 50 MB (a package up to 5,000 parts, 32 MB a part and 64 MB unpacked, each part decompressed into a buffer of its declared size), email up to 50 MB, an HTML file or part up to 5 MB, and an Office, HTML or email file's Markdown up to 5 MB. The regular expressions run on document text are written to take time linear in its length; `test/limits.test.ts` holds hostile inputs of 100,000 characters to a deadline.
 
 ## What Plainview does not claim
 

@@ -30,7 +30,7 @@ export function xml(raw: string): Xml {
 	let at = 0;
 	let count = 0;
 	for (const token of raw.matchAll(
-		/<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[[\s\S]*?\]\]>|<[^>]*>|[^<]+/g,
+		/<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[[\s\S]*?\]\]>|<[^>]*>|[^<]+/gy,
 	)) {
 		if (token.index !== at || ++count > 500_000) throw new Error("XML size");
 		const s = token[0];

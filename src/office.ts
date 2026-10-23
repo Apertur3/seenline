@@ -1,6 +1,6 @@
 // Office conversion is deterministic and local. The linked AI understands this text later.
 import { failure } from "./error.ts";
-import { HIDDEN_BLOCK } from "./hidden.ts";
+import { HIDDEN_BLOCK, written } from "./hidden.ts";
 import { MAX_ROWS, sheets } from "./office-sheets.ts";
 import { slides } from "./office-slides.ts";
 import { word } from "./office-word.ts";
@@ -9,7 +9,7 @@ import { listedValue, unseen } from "./parse-hidden.ts";
 
 export const OFFICE_FILE = /\.(docx?|pptx?|xlsx?|csv|tsv)$/i;
 export const OFFICE_FAILURE = "could not read this file: save it as .docx, .pptx or .xlsx";
-const safe = (s: string) => (s === HIDDEN_BLOCK ? `${s} (written in the file)` : s);
+const safe = (s: string) => written(s);
 
 export function convertOffice(
 	bytes: Uint8Array,
@@ -39,7 +39,8 @@ export function convertOffice(
 					: "";
 			if (flat(value)) out.hidden.push(`${name}: ${flat(value)}`);
 		}
-		const lines = out.body.filter(Boolean).map(safe);
+		// Slide and sheet readers mark their own text lines; a Word body has no anchors of its own.
+		const lines = out.body.filter(Boolean).map(ext === "docx" ? safe : String);
 		const listed = unseen(lines, out.hidden.map(safe));
 		if (listed.length) lines.push(HIDDEN_BLOCK, ...listed);
 		if (!lines.length) throw new Error("no text");

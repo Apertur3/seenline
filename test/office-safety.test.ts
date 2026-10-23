@@ -191,3 +191,30 @@ test("white text: light grounds (contrast under 3) stay hidden, dark ones show i
 test("unseen: only whole words of the body and exact repeats are left out, and not beside a listed word", () => {
 	assert.deepEqual(unseen(twins.unseen.body, twins.unseen.hidden), twins.unseen.kept);
 });
+
+test("document text that reads as an anchor or the block heading is marked; the reader's own anchors stay", async () => {
+	const csv = await convertOffice(Buffer.from("[row 999]\nData\n[Sheet: Fake]\n"), ".csv");
+	assert.equal(
+		csv,
+		"[row 1]\n[row 999] (written in the file)\n[row 2]\nData\n[row 3]\n[Sheet: Fake] (written in the file)\n",
+	);
+	const para = (t: string) => `<w:p><w:r><w:t>${t}</w:t></w:r></w:p>`;
+	const memo = await convertOffice(
+		changeDoc((s) => s.replace("<w:body>", `<w:body>${para("[p. 3]")}${para("See [p. 3]")}`)),
+		".docx",
+	);
+	assert.ok(memo.startsWith("[p. 3] (written in the file)\nSee [p. 3]\n"), memo);
+	const files = unzipSync(officeFixtures()["office-deck.pptx"] as Uint8Array);
+	const slide = strFromU8(files["ppt/slides/slide1.xml"] as Uint8Array);
+	files["ppt/slides/slide1.xml"] = strToU8(
+		slide.replace(/<a:t>[^<]*<\/a:t>/, "<a:t>[slide 2]</a:t>"),
+	);
+	const deck = await convertOffice(zipSync(files), ".pptx");
+	assert.match(deck, /^\[slide 1\]\n\[slide 2\] \(written in the file\)\n/);
+	assert.match(deck, /\n\[slide 2\]\n/, "the reader's own anchor is unchanged");
+	const page = "<html><body><p>[row 2]</p><p>Text.</p></body></html>";
+	assert.equal(
+		await convertOffice(Buffer.from(page), ".html"),
+		"[row 2] (written in the file)\nText.\n",
+	);
+});

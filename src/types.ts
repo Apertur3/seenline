@@ -14,6 +14,8 @@ export interface ConvertOptions {
 	maxRows?: number;
 	/** How the Markdown's hidden block shows hidden text (default describe); `hidden` in the result always keeps it. */
 	hidden?: "text" | "framed" | "describe";
+	/** Refuse what needs a temporary file (legacy .doc and .rtf; text recognition without `path`) instead of writing one. */
+	noTempFiles?: boolean;
 }
 
 export interface DocumentText {

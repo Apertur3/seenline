@@ -3,10 +3,20 @@ import { suspect } from "./suspect.ts";
 import type { ConvertOptions, HiddenText } from "./types.ts";
 
 const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+// A value from outside the page (a property, script, attachment, form field, image metadata) is kept
+// whole in hidden[] up to MAX_VALUE characters, and checked whole; the Markdown shows CUT of it.
+const MAX_VALUE = 1_000_000;
+const CUT = 2000;
+const VALUE = /^(?:metadata|javascript|attachment|image metadata|annotation|form field)\b/;
+const cut = (t: string, at: number) =>
+	t.length > at ? `${t.slice(0, at)} [cut at ${at} characters]` : t;
+/** A value on one line, its spaces and NULs collapsed, bounded at MAX_VALUE characters. */
+export const flatValue = (s: string) => cut(s.replace(/[\s\0]+/g, " ").trim(), MAX_VALUE);
 // Values a program writes, not a person: numbers, dates, ids, booleans, placeholders, base64.
 const MACHINE =
 	/^(?:[\d\s.,:;/#|+-]*|true|false|nil|null|untitled|anonymous|unknown|unspecified|\{?[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}\}?|0x[\da-f]+|\d{4}-\d\d-\d\dT[\d:.]+(?:Z|[+-][\d:]+)?)$/i;
-const BASE64 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?:[A-Za-z\d+/=]{20,}\s*)+$/;
+// Space-separated chunks of 20 or more: chunk and space share no character, so it reads one way only.
+const BASE64 = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[A-Za-z\d+/=]{20,}(?: [A-Za-z\d+/=]{20,})*$/;
 const NAME_FIELD = /^(?:Author|dc:creator|creator|lastModifiedBy|Company|Manager)$/;
 // A name: capitalised words and initials ("U.S."), name particles, separators; no digits.
 const NAME_TOKEN =
@@ -166,21 +176,27 @@ function kind(reasons: string[]): string {
  * converted file's own block) as text: it is the document, flagged only because its hiding could not
  * be checked; the converted file's own hidden entries are still described. Framed and described
  * entries that read like an instruction to an AI end with a tag naming the reason; text mode is unchanged.
+ * A value from outside the page longer than CUT is cut in text and framed mode; describe counts it whole.
  */
 export function showHidden(
 	lines: string[],
 	mode: ConvertOptions["hidden"] = "describe",
 	legacy = false,
 ): string[] {
-	if (mode !== "framed" && mode !== "describe") return lines;
 	const nested = lines.indexOf(HIDDEN_BLOCK);
 	const kept = !legacy ? 0 : nested < 0 ? lines.length : nested;
+	const shortened = (line: string, e: HiddenText) =>
+		e.text.length > CUT && VALUE.test(e.reasons.join(" and "))
+			? line.slice(0, line.length - e.text.length) + cut(e.text, CUT)
+			: line;
+	if (mode !== "framed" && mode !== "describe")
+		return lines.map((line, i) => (i < kept ? line : shortened(line, parseLine(line))));
 	const entries = withSuspect(lines.map(parseLine));
 	const shown = lines.map((line, i) => {
 		const entry = entries[i] as HiddenText;
 		if (!line || line === HIDDEN_BLOCK || i < kept) return line;
 		const tag = entry.suspect ? ` [reads like an instruction to an AI: ${entry.suspect}]` : "";
-		if (mode === "framed" || NOTICE.test(line)) return line + tag;
+		if (mode === "framed" || NOTICE.test(line)) return shortened(line, entry) + tag;
 		const at = entry.anchor ? `${entry.anchor}, ` : "";
 		const label = kind(entry.reasons);
 		const pdf = entry.anchor.startsWith("p. ") && entry.reasons.every((r) => PDF_TEXT.has(r));

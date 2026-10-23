@@ -38,9 +38,10 @@ export function styleRules(root: HtmlNode): Rule[] {
 	const rules: Rule[] = [];
 	const walk = (n: HtmlNode) => {
 		if (n.tag === "style") {
-			const raw = n.children.join("").replace(/\/\*[\s\S]*?\*\//g, "");
+			// An unclosed comment runs to the end, as in a browser; each pattern scans a character once.
+			const raw = n.children.join("").replace(/\/\*[\s\S]*?(?:\*\/|$)/g, "");
 			let at = 0;
-			for (const m of raw.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+			for (const m of raw.matchAll(/([^{}]+)\{([^{}]*)\}/gy)) {
 				if (raw.slice(at, m.index).trim()) throw new Error("CSS rules");
 				for (const selector of (m[1] as string).split(",")) {
 					if (/^[\w.*#\s-]+$/.test(selector))

@@ -21,9 +21,15 @@ const CLASSES: [flag: string, pattern: RegExp][] = [
 	["homoglyph", new RegExp(HOMOGLYPH, "u")],
 ];
 const STYLE_HIDING =
-	/display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*(0(px|em|rem|%)?|1px)(?![\d.])|opacity\s*:\s*0(\.0+)?(?![\d.])|(?<![\w-])color\s*:\s*(white|#fff(fff)?\b|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))|<[^>]*\shidden[\s>=]/i;
+	/display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*(0(px|em|rem|%)?|1px)(?![\d.])|opacity\s*:\s*0(\.0+)?(?![\d.])|(?<![\w-])color\s*:\s*(white|#fff(fff)?\b|rgb\(\s*255\s*,\s*255\s*,\s*255\s*\))|<[^<>]*\shidden[\s>=]/i;
 /** The line that opens the block a converted document keeps its hidden text in. */
 export const HIDDEN_BLOCK = "[Hidden in the original]";
+// The lines the output writes itself: a page, slide, sheet or row anchor, a truncation notice, the
+// block heading. A line of the document that reads as one is marked, so it never passes for one.
+const RESERVED =
+	/^\[(?:p\. \d+|slide \d+|row \d+|Sheet: .*|truncated: .*|Hidden in the original)\]$/;
+export const written = (line: string, where = "file") =>
+	RESERVED.test(line) ? `${line} (written in the ${where})` : line;
 const ORDER = [...CLASSES.map(([flag]) => flag), "markup-hidden"];
 
 export interface Scan {

@@ -1,13 +1,12 @@
 // Local mail/web conversion shares the document hidden-content boundary.
 import { failure, PlainviewError } from "./error.ts";
-import { HIDDEN_BLOCK } from "./hidden.ts";
+import { HIDDEN_BLOCK, written } from "./hidden.ts";
 import { type MailText, readHtml } from "./html.ts";
 import { decodeCharset, headerText, type MimePart, mimeParams, readMime } from "./mime.ts";
 import { unseen } from "./parse-hidden.ts";
 import { suspect } from "./suspect.ts";
 
 const flat = (s: string) => s.replace(/\s+/g, " ").trim();
-const safe = (s: string) => (s === HIDDEN_BLOCK ? `${s} (written in the file)` : s);
 function quoted(raw: string): string[] {
 	let older = false;
 	return raw
@@ -15,7 +14,7 @@ function quoted(raw: string): string[] {
 		.split("\n")
 		.map((line) => {
 			if (
-				/^(?:On .+wrote:|Op .+schreef .+:|-{2,}\s*(?:Original Message|Oorspronkelijk bericht|Forwarded message))/i.test(
+				/^(?:On .+wrote:|Op (?:(?!schreef ).)+schreef .+:|-{2,}\s*(?:Original Message|Oorspronkelijk bericht|Forwarded message))/i.test(
 					line,
 				)
 			)
@@ -104,7 +103,7 @@ export function convertMail(bytes: Uint8Array, name: string): string {
 	try {
 		if (bytes.length > 50 * 1024 * 1024) throw new Error("file size");
 		const out = /\.eml$/i.test(name) ? email(bytes) : readHtml(decodeCharset(bytes));
-		const body = out.body.map(safe);
+		const body = out.body.map((l) => written(l));
 		const listed = [...unseen(body, out.hidden), ...(out.kept ?? [])];
 		const result = [...body, ...(listed.length ? [HIDDEN_BLOCK, ...listed] : [])].join("\n").trim();
 		if (!result || Buffer.byteLength(result) > 5 * 1024 * 1024)

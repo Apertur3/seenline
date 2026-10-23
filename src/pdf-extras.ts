@@ -2,16 +2,11 @@
 // attachments and scripts. None of it is in the page a reader sees, so it goes to the flagged block
 // one line each, never dropped.
 import type { PDFDocumentProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
-import { listedValue } from "./parse-hidden.ts";
+import { flatValue as flat, listedValue } from "./parse-hidden.ts";
 
-const MAX_LINE = 2000;
-const flat = (s: string) => {
-	const t = s.replace(/[\s\0]+/g, " ").trim();
-	return t.length > MAX_LINE ? `${t.slice(0, MAX_LINE)} [cut at ${MAX_LINE} characters]` : t;
-};
 const UTF8 = new TextDecoder("utf-8", { fatal: true });
 const XMP_TEXT =
-	/<(dc:(?:title|description|subject|creator)|pdf:Keywords)\b[^>]*>([\s\S]*?)<\/\1>/g;
+	/<(dc:(?:title|description|subject|creator)|pdf:Keywords)\b[^<>]*>((?:(?!<\/?\1\b)[\s\S])*)<\/\1>/g;
 const PROPERTIES = ["Title", "Subject", "Keywords", "Author"];
 
 export async function extras(doc: PDFDocumentProxy): Promise<string[]> {
@@ -31,7 +26,7 @@ export async function extras(doc: PDFDocumentProxy): Promise<string[]> {
 	}
 	const xmp = (meta?.metadata as { getRaw?: () => string } | null)?.getRaw?.() ?? "";
 	for (const [, tag = "", inner] of xmp.matchAll(XMP_TEXT)) {
-		const text = flat((inner ?? "").replace(/<[^>]*>/g, " "));
+		const text = flat((inner ?? "").replace(/<[^<>]*>/g, " "));
 		if (listedValue(tag, text)) out.push(`metadata ${tag}: ${text}`);
 	}
 	for (const [name, list] of (await tried("javascript", () => doc.getJSActions(), null)) ?? []) {
