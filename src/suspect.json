@@ -36,7 +36,7 @@
 		"η": "n",
 		"г": "r",
 		"γ": "y",
-		"μ": "m"
+		"μ": "u"
 	},
 	"parts": {
 		"ANS": "(?:answers?|responses?|repl(?:y|ies)|outputs?|summar(?:y|ies)|completions?)",
@@ -51,7 +51,7 @@
 		"SYS": "(?:^\\W*|[.!?] \\W*|\\[|<|#+ ?)(?:(?:important|urgent|official|priority|critical|new|mandatory|high[- ]priority) )*(?:system|sys|admin|administrator|developer|dev|operator|root|sudo|platform|ai provider|openai|anthropic)(?: (?:message|note|notice|instructions?|override|prompt|update|directive|command|alert|mode|priority|order|policy))?(?: from [\\w ]{1,30})? ?[\\]>:]",
 		"DIRECT": "(?:<TOLD>|<LIFTED>)",
 		"TOLD": "(?:\\bthe (?:assistant|ai|model|chatbot|llm) (?:must|should|shall|may|will|can|is|has been|needs to)(?: now)? (?:be )?(?:cleared|allowed|permitted|authori[sz]ed|required|instructed|free|exempt|follow|comply|obey|ignore|disregard|reveal|answer|respond|output|share|disclose)|\\byou (?:are|have been|may|must|should|will|can)(?: now)? (?:authori[sz]ed|allowed|permitted|cleared|free to|required to|instructed|exempt|no longer bound|ignore|disregard|bypass|reveal)|\\byour (?:instructions|rules|guidelines|behaviou?r|restrictions|filters|safety (?:rules|settings|guidelines)|programming)\\b|\\byour <ANS> (?:must|should|shall|will)\\b|\\bthe (?:user|operator|owner|admin|administrator|developer)s? (?:permits?|allows?|authori[sz]es|instructs|wants|orders|tells) you to\\b|\\b(?:every|each|all) <ANS> (?:must|should|shall|to) (?:mention|promote|praise|recommend|say|state)\\b|\\b(?:ignore|disregard|forget) (?:all |any |your )?(?:previous|prior|earlier|above|other|existing|safety|content)\\b)",
-		"LIFTED": "(?:\\bcomply with (?:this|these|the following|the document|the instructions|everything)\\b|\\bobey (?:this|these|the following|the document|me|my)\\b|\\breveal (?:your|the (?:hidden|internal|system|secret))\\b|\\bthe user has (?:authori[sz]ed|permitted|allowed|consented|granted|approved|asked you|requested that you)\\b|\\bnew (?:instructions?|rules|guidelines|polic(?:y|ies)) (?:follow|below|replace|override|supersede)|\\bnew instructions? ?:|\\b(?:safety|restrictions?|filters?|filtering|guardrails|content polic(?:y|ies)|moderation|safeguards|compliance checks|safety mode)(?: (?:are|is|have been|has been))?(?: now)? (?:disabled|off|turned off|lifted|suspended|removed|deactivated|waived|bypassed)\\b|\\bunrestricted (?:mode|assistant|ai|model|responses?|output|answers?)\\b|\\bwithout (?:any )?(?:restrictions?|filters?|limits)\\b|\\b(?:trusted|privileged|authoritative) (?:instructions?|commands?|directives?)\\b|\\btreat (?:the following|this|it) as (?:trusted|instructions|a command|authoritative)\\b)"
+		"LIFTED": "(?:\\bcomply with (?:this|these|the following|the document|the instructions|everything)\\b|\\bobey (?:this|these|the following|the document|me|my|all|any|every|the user|user|unconditionally)\\b|\\breveal (?:your|the (?:hidden|internal|system|secret))\\b|\\bthe user has (?:authori[sz]ed|permitted|allowed|consented|granted|approved|asked you|requested that you)\\b|\\bnew (?:instructions?|rules|guidelines|polic(?:y|ies)) (?:follow|below|replace|override|supersede)|\\bnew instructions? ?:|\\b(?:safety|restrictions?|filters?|filtering|guardrails|content polic(?:y|ies)|moderation|safeguards|compliance checks|safety mode)(?: (?:are|is|have been|has been))?(?: now)? (?:disabled|off|turned off|lifted|suspended|removed|deactivated|waived|bypassed)\\b|\\bunrestricted (?:mode|assistant|ai|model|responses?|repl(?:y|ies)|output|answers?|text)\\b|\\byou are (?:now )?unrestricted\\b|\\bwithout (?:any )?(?:restrictions?|filters?|limits)\\b|\\b(?:trusted|privileged|authoritative) (?:instructions?|commands?|directives?)\\b|\\btreat (?:the following|this|it) as (?:trusted|instructions|a command|authoritative)\\b)"
 	},
 	"rules": [
 		{
@@ -151,8 +151,7 @@
 				"\\b(?:respond|reply|answer|speak|talk)s? (?:only |exclusively )?(?:in|using|with) the (?:style|voice|tone|manner|accent|persona|words) of\\b",
 				"\\b(?:respond|reply|answer|speak|talk)s? as (?:if|though) you (?:were|are)\\b(?! [\\w-]+ing\\b)",
 				"\\b(?:act|behave|respond|answer|reply|speak) (?:as|like) (?:an?|the) [^.!?]{0,40}\\b(?:with no |without (?:any )?)(?:rules|restrictions|limits|filters|guidelines|morals|ethics|boundaries|censorship)\\b",
-				"\\byou are an? (?:evil|unrestricted|unfiltered|uncensored|jailbroken|rogue|unaligned|amoral|unethical|malicious|unbound) (?:ai|assistant|model|bot|chatbot|language model)\\b",
-				"\\bbecome an? (?:[\\w-]+ ){0,2}?(?:ai|assistant|chatbot|bot|language model) (?:who|that|which|with|without)\\b",
+				"\\b(?:you are|become) an? (?:evil|unrestricted|unfiltered|uncensored|jailbroken|rogue|unaligned|amoral|unethical|malicious|unbound) (?:ai|assistant|model|bot|chatbot|language model)\\b",
 				"\\b(?:role-?play(?:ing)?|in character) as\\b",
 				"\\b(?:switch|change|shift) (?:in)?to (?:the |a )?(?:persona|character|voice|identity) of\\b",
 				"\\b(?:adopt|assume|take on) (?:the )?voice of\\b",
@@ -176,7 +175,7 @@
 			"reason": "verdict",
 			"note": "score and verdict steering",
 			"patterns": [
-				"<IMP>(?:rate|score|grade|mark|rank)(?: them| him| her| this| it| these| those| each| every| all| the [\\w-]+| this [\\w-]+| the [\\w-]+ [\\w-]+)?(?: a| an| as| at| with)? (?:(?<top>[5-9]|\\d\\d+) ?(?:out of|/) ?\\k<top>\\b|(?:9|nine)(?:\\.\\d)? ?(?:out of|/) ?10\\b|(?:ten|10) out of (?:ten|10)\\b|five out of five\\b|(?:4|5|four|five) stars?\\b|full marks\\b|max(?:imum)? (?:score|points|marks)\\b)",
+				"<IMP>(?:rate|score|grade|mark|rank)(?: them| him| her| this| it| these| those| each| every| all| the [\\w-]+| this [\\w-]+| the [\\w-]+ [\\w-]+)?(?: a| an| as| at| with)? (?:(?<top>[5-9]|\\d\\d+) ?(?:out of|/) ?\\k<top>\\b|(?:9|nine)(?:\\.\\d+)? ?(?:out of|/) ?10\\b|(?:ten|10)(?:\\.0+)? out of (?:ten|10)\\b|five out of five\\b|(?:4|5|four|five) stars?\\b|full marks\\b|max(?:imum)? (?:score|points|marks)\\b)",
 				"\\b(?:give|assign|award)s?(?: (?:this|the|that|it|them|him|her)(?: [\\w-]+){0,2})? (?:an? |the )?(?:rating|score|grade|mark|marks) of (?:\\d+|five|ten|full|maximum|top)",
 				"\\b(?:give|assign|award)s? ~ (?:full|maximum|top|perfect) (?:points|marks|stars)\\b",
 				"\\brecommend(?:ing)? (?:an? )?(?:immediate|urgent|instant|direct|swift|fast[- ]track(?:ed)?|straight) (?:offer|hire|hiring|interview|approval|acceptance|promotion|shortlisting|funding|payout)\\b",
