@@ -111,10 +111,10 @@ function parseLine(line: string): HiddenText {
  * Marks entries whose text reads like an instruction to an AI. A sentence split over neighbouring
  * entries of the same location and kind (a line or a word each) is read joined: the shortest run of
  * untagged entries, up to 12 and 400 characters, that matches and does not cross a sentence end.
- * Joined runs start in the first JOINED entries only (real files have a few thousand at most), so
- * a block of 100,000 entries costs single checks, not twelve each.
+ * The longest such run from an entry is read first, and the shorter ones only when it matches, so
+ * each entry costs one joined check; a block of more than MAX_ENTRIES entries fails the file.
  */
-const [JOINED, MAX_ENTRIES] = [5000, 100_000];
+const MAX_ENTRIES = 100_000;
 function withSuspect(entries: HiddenText[]): HiddenText[] {
 	if (entries.length > MAX_ENTRIES)
 		throw new PlainviewError(
@@ -128,17 +128,17 @@ function withSuspect(entries: HiddenText[]): HiddenText[] {
 			.slice(from, to + 1)
 			.map((e) => e.text)
 			.join(" ");
-	for (let i = 0; i < Math.min(entries.length, JOINED); i++) {
-		for (
-			let j = i + 1;
-			j < i + 12 &&
-			!tags[i] &&
-			!tags[j] &&
-			group(entries[j]) === group(entries[i]) &&
-			!/[.!?;]["')\]’”]*\s*$/.test(entries[j - 1]?.text ?? "");
-			j++
-		) {
-			if (joined(i, j).length > 400) break;
+	const joins = (i: number, j: number) =>
+		j < i + 12 &&
+		!tags[j] &&
+		group(entries[j]) === group(entries[i]) &&
+		!/[.!?;]["')\]’”]*\s*$/.test(entries[j - 1]?.text ?? "") &&
+		joined(i, j).length <= 400;
+	for (let i = 0; i < entries.length; i++) {
+		let last = i;
+		while (!tags[i] && joins(i, last + 1)) last++;
+		if (last === i || !suspect(joined(i, last))) continue;
+		for (let j = i + 1; j <= last; j++) {
 			if (!suspect(joined(i, j))) continue;
 			// The run starts as late as it can, so an unrelated line before it is not marked.
 			let from = j - 1;
