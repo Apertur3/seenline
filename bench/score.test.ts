@@ -81,7 +81,7 @@ test("outcome: flagged only when every copy sits in the hidden block or the tool
 
 test("outcome: a scanner mark on a body line is not isolation, the block is", () => {
 	const marked = [
-		"Quarterly results CANARY_EG_004_EXTRACTED​",
+		"Quarterly results CANARY_EG_004_EXTRACTED\u200B",
 		"<!-- CANARY_EG_004_EXTRACTED -->",
 		'<span style="display:none">CANARY_EG_004_EXTRACTED</span>',
 	];

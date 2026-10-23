@@ -75,7 +75,8 @@ export function visible(line: string): string {
 }
 
 // Invisible characters that can spell text, as runs: tag characters, variation selectors, zero-width.
-const CARRIER = /(?:[\u{E0000}-\u{E007F}]|\p{Variation_Selector}|[​-‍⁠﻿­⁡-⁤᠎])+/gu;
+const CARRIER =
+	/(?:[\u{E0000}-\u{E007F}]|\p{Variation_Selector}|[\u200B-\u200D\u2060\uFEFF\u00AD\u2061-\u2064\u180E])+/gu;
 const SCRIPT_LATIN = /[\p{Script=Latin}\p{Script=Greek}\p{Script=Cyrillic}]/u;
 const LETTER = /[\p{L}\p{M}]/u;
 const cp = (c: string) => c.codePointAt(0) ?? 0;
@@ -84,19 +85,19 @@ const cp = (c: string) => c.codePointAt(0) ?? 0;
 // a soft hyphen, one selector on a symbol or an ideograph, one joiner or space between the letters of a
 // script that shapes or breaks with it, or one break hint at a hyphen, dash or slash.
 function ordinary(run: string, before: string, after: string): boolean {
-	if (/^️?‍?$/u.test(run) && /\p{Emoji}/u.test(before))
-		return !run.endsWith("‍") || /\p{Extended_Pictographic}/u.test(after);
+	if (/^\uFE0F?\u200D?$/u.test(run) && /\p{Emoji}/u.test(before))
+		return !run.endsWith("\u200D") || /\p{Extended_Pictographic}/u.test(after);
 	if (
 		before === "\u{1F3F4}" &&
 		/^[\u{E0030}-\u{E0039}\u{E0061}-\u{E007A}]{1,6}\u{E007F}$/u.test(run)
 	)
 		return true;
 	if ([...run].length !== 1) return false;
-	if (run === "­") return true;
+	if (run === "\u00AD") return true;
 	if (/\p{Variation_Selector}/u.test(run)) return !SCRIPT_LATIN.test(before);
-	if (/[​-‍]/.test(run) && LETTER.test(before) && LETTER.test(after))
+	if (/[\u200B-\u200D]/.test(run) && LETTER.test(before) && LETTER.test(after))
 		return !SCRIPT_LATIN.test(before) || !SCRIPT_LATIN.test(after);
-	return /[​⁠]/.test(run) && /[-‐-―/]/.test(before);
+	return /[\u200B\u2060]/.test(run) && /[-\u2010-\u2015/]/.test(before);
 }
 
 // Variation selectors as bytes: U+FE00-FE0F are 0-15, U+E0100-E01EF 16-255 (or 0-239), or U+FE00-FE0F
@@ -133,9 +134,13 @@ export function carriers(body: string[]): { body: string[]; entries: string[] } 
 		const anchor = /^\[(p\. \d+|slide \d+)\]$|^\[Sheet: [^\]]*\]$/.exec(line);
 		if (anchor) at = `${anchor[1] ?? anchor[0]}, `;
 		// A byte order mark that starts the text is an encoding mark.
-		const bom = i === 0 && line.startsWith("﻿") ? "﻿" : "";
+		const bom = i === 0 && line.startsWith("\uFEFF") ? "\uFEFF" : "";
 		const found = new Map<string, string[]>();
-		const add = (kind: string, text: string) => found.set(kind, [...(found.get(kind) ?? []), text]);
+		const add = (kind: string, text: string) => {
+			const texts = found.get(kind) ?? [];
+			texts.push(text);
+			found.set(kind, texts);
+		};
 		const words = line.slice(bom.length).split(/(\s+)/);
 		const cleaned = words.map((word) => {
 			let hit = false;
@@ -155,17 +160,22 @@ export function carriers(body: string[]): { body: string[]; entries: string[] } 
 				else hit = true;
 				return "";
 			});
+			// The word as a model sees it, each removed character named.
 			if (hit) add("zero-width characters", visible(word));
 			return out;
 		});
+		const result = bom + cleaned.join("");
+		const removed = [...line].length - [...result].length;
 		for (const [kind, texts] of found) {
-			const text = texts
+			let text = texts
 				.join(" ")
 				.replace(/[\p{Cc}\s]+/gu, " ")
 				.trim();
-			entries.push(`${at}${kind}: ${text || visible(line).trim()}`);
+			// Named zero-width characters spell nothing; their words are cut after 2,000 characters.
+			if (kind === "zero-width characters" && text.length > 2000)
+				text = `${text.slice(0, 2000).replace(/[\uD800-\uDBFF]$/, "")} [cut]`;
+			entries.push(`${at}${kind}: ${text || `${removed} characters that spell no text`}`);
 		}
-		const result = bom + cleaned.join("");
 		return result !== line && result === HIDDEN_BLOCK ? `${result} (written in the file)` : result;
 	});
 	return { body: lines, entries };
