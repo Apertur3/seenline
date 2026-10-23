@@ -69,14 +69,14 @@ function formatHides(code: string | undefined, c: Xml, value: string): boolean {
 	if (!code || !value) return false;
 	const sections = code
 		.replace(/"[^"]*"|\\.|[_*]./g, "x")
-		.replace(/\[[^\]]*\]/g, "")
+		.replace(/\[[^[\]]*\]/g, "")
 		.split(";");
 	if (["s", "inlineStr", "str"].includes(c.attrs.t ?? ""))
 		return sections.length > 3 && !sections[3]?.includes("@");
 	const blank = code
 		.replace(/"([^"]*)"|\\(.)/g, "$1$2")
 		.replace(/[_*]./g, " ")
-		.replace(/\[[^\]]*\]/g, "")
+		.replace(/\[[^[\]]*\]/g, "")
 		.split(";");
 	return (!c.attrs.t || c.attrs.t === "n") && blank.every((s) => !s.trim());
 }
