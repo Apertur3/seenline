@@ -87,6 +87,33 @@ test("a block of more than 100,000 hidden entries fails closed, naming the cause
 	assert.equal(parseHidden(lines(10)).length, 10);
 });
 
+test("the built PDF reader starts under every way of running Node, and a reader that cannot start never blames the file", () => {
+	const dist = new URL("../dist/index.js", import.meta.url).href;
+	const read = `(await convert(readFileSync(${JSON.stringify(fixture("report.pdf"))}), { name: "x.pdf" })).markdown.split("\\n")[0]`;
+	const esm = `import { convert } from "${dist}"; import { readFileSync } from "node:fs"; console.log(await (async () => ${read})().catch((e) => e.code + ": " + e.message));`;
+	const cjs = `const { readFileSync } = require("node:fs"); import(${JSON.stringify(dist)}).then(async ({ convert }) => console.log(${read}));`;
+	const refuse = `data:text/javascript,import { isMainThread } from "node:worker_threads"; if (!isMainThread) throw new Error("no")`;
+	const cases: [string[], string?, string?][] = [
+		[["--input-type=module", "-e", esm]],
+		[["--input-type", "module", "-e", esm]],
+		[["--import", "data:text/javascript,export {}", "--input-type=module", "-e", esm]],
+		[["--experimental-vm-modules", "--no-warnings", "--input-type=module", "-e", esm]],
+		[["--expose-gc", "--stack-size=2000", "--input-type=module", "-e", esm]],
+		[["--input-type=module"], esm],
+		[["-e", cjs]],
+		[["--input-type=commonjs", "-e", cjs]],
+		[
+			["--import", refuse, "--input-type=module", "-e", esm],
+			undefined,
+			"unavailable: the PDF reader could not start: no",
+		],
+	];
+	for (const [args, input, out = "[p. 1]"] of cases) {
+		const r = spawnSync(process.execPath, args, { input, encoding: "utf8", timeout: 30_000 });
+		assert.equal(r.stdout, `${out}\n`, `${args.slice(0, -2).join(" ")}: ${r.stderr}`);
+	}
+});
+
 function run(...args: string[]) {
 	const result = spawnSync(process.execPath, [cli, ...args], { encoding: "utf8", timeout: 20_000 });
 	assert.equal(result.signal, null, `finished before the deadline: ${args.join(" ")}`);

@@ -51,19 +51,31 @@ const MEMORY_MB = 2048;
 const DEADLINE_S = 120;
 const fail = (why: string) => new PlainviewError("invalid", `could not read this file: ${why}`);
 const OVER_MEMORY = `the PDF needs more memory to read than the limit (${MEMORY_MB / 2} MB heap, ${MEMORY_MB} MB in all)`;
+// A worker that cannot start is this process's problem, never the document's.
+const broken = (why: string) =>
+	new PlainviewError("unavailable", `the PDF reader could not start: ${why}`);
 
 /** Reads every page and what the file carries outside its pages; throws `invalid` for a file that is not a readable PDF. */
 export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 	return new Promise((done, reject) => {
-		const worker = new Worker(new URL(import.meta.url), {
-			workerData: { plainviewPdf: bytes },
-			resourceLimits: { maxOldGenerationSizeMb: MEMORY_MB / 2 },
-			stdout: true,
-			stderr: true,
-		});
+		let worker: Worker;
+		try {
+			// Started from a string that imports this file: the worker inherits the process's flags, and a
+			// worker started from a file refuses to run under `--input-type` (`node --input-type=module -e`).
+			worker = new Worker(`import(${JSON.stringify(import.meta.url)})`, {
+				eval: true,
+				workerData: { plainviewPdf: bytes },
+				resourceLimits: { maxOldGenerationSizeMb: MEMORY_MB / 2 },
+				stdout: true,
+				stderr: true,
+			});
+		} catch (error) {
+			return reject(broken((error as Error).message)); // as under --permission without --allow-worker
+		}
 		worker.stdout.resume();
 		worker.stderr.resume();
 		const [start, base] = [Date.now(), process.memoryUsage.rss()];
+		let started = false; // the worker has loaded its code and pdfjs: a failure from here on is the file's
 		const stop = (why: string) => {
 			reject(fail(why));
 			void worker.terminate();
@@ -73,17 +85,21 @@ export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 			if (Date.now() - start > DEADLINE_S * 1000)
 				stop(`the PDF took longer than ${DEADLINE_S} seconds to read`);
 		}, 50);
-		worker.once("message", (m: { doc?: PdfDoc; error?: string }) => {
+		worker.on("message", (m: { started?: true; doc?: PdfDoc; error?: string }) => {
+			started = true;
+			if (m.started) return;
 			clearInterval(watch);
 			void worker.terminate();
 			m.doc ? done(m.doc) : reject(new PlainviewError("invalid", m.error as string));
 		});
-		worker.once("error", (error: { code?: string }) =>
-			stop(error.code === "ERR_WORKER_OUT_OF_MEMORY" ? OVER_MEMORY : "damaged PDF"),
-		);
+		worker.once("error", (error: Error & { code?: string }) => {
+			if (error.code === "ERR_WORKER_OUT_OF_MEMORY") stop(OVER_MEMORY);
+			else if (!started) reject(broken(error.message));
+			else stop("damaged PDF");
+		});
 		worker.once("exit", () => {
 			clearInterval(watch);
-			reject(fail("damaged PDF"));
+			reject(started ? fail("damaged PDF") : broken("it exited"));
 		});
 	});
 }
@@ -181,6 +197,8 @@ function text(runs: Item[], cell: string): string[] {
 // In the worker: read the file, post the result or the cause.
 if (!isMainThread && parentPort && workerData?.plainviewPdf) {
 	const port = parentPort;
+	await import("pdfjs-dist/legacy/build/pdf.mjs");
+	port.postMessage({ started: true });
 	await parse(workerData.plainviewPdf).then(
 		(doc) => port.postMessage({ doc }),
 		(error: Error) =>
