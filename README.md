@@ -29,7 +29,7 @@ $ npx plainview clipped.pdf
 [p. 1]
 Approved budget: EUR 100,000 for 2027.
 [Hidden in the original]
-p. 1, clipped: 50 characters not shown
+p. 1, clipped text: 50 characters not shown
 ```
 
 `--json` returns the same Markdown plus a `hidden` list with the full text of every entry, and `--hidden text` prints the text in the block itself:

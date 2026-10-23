@@ -16,7 +16,7 @@ The anchor lines and the `[Hidden in the original]` block grammar are a public c
 
 ## Fixtures and goldens
 
-Files in `test/golden/` are byte-identical to a pinned reference. Change them only in a commit of their own, with the reason in the message. Fixtures are synthetic or redacted real files; never add a file with personal data.
+Files in `test/golden/` are the output baseline, generated from an earlier pinned version of the readers with a few deliberate, documented edits (see `test/golden/README.md`). Change them only in a commit of their own, with the reason in the message. Fixtures are synthetic or redacted real files; never add a file with personal data.
 
 ## Size
 
