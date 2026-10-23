@@ -1,3 +1,4 @@
+import { PlainviewError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { suspect } from "./suspect.ts";
 import type { ConvertOptions, HiddenText } from "./types.ts";
@@ -110,8 +111,16 @@ function parseLine(line: string): HiddenText {
  * Marks entries whose text reads like an instruction to an AI. A sentence split over neighbouring
  * entries of the same location and kind (a line or a word each) is read joined: the shortest run of
  * untagged entries, up to 12 and 400 characters, that matches and does not cross a sentence end.
+ * Joined runs start in the first JOINED entries only (real files have a few thousand at most), so
+ * a block of 100,000 entries costs single checks, not twelve each.
  */
+const [JOINED, MAX_ENTRIES] = [5000, 100_000];
 function withSuspect(entries: HiddenText[]): HiddenText[] {
+	if (entries.length > MAX_ENTRIES)
+		throw new PlainviewError(
+			"invalid",
+			"could not read this file: more than 100,000 hidden entries",
+		);
 	const tags = entries.map((e) => suspect(e.text));
 	const group = (e?: HiddenText) => e && `${e.anchor}|${e.reasons.join()}`;
 	const joined = (from: number, to: number) =>
@@ -119,7 +128,7 @@ function withSuspect(entries: HiddenText[]): HiddenText[] {
 			.slice(from, to + 1)
 			.map((e) => e.text)
 			.join(" ");
-	for (let i = 0; i < entries.length; i++) {
+	for (let i = 0; i < Math.min(entries.length, JOINED); i++) {
 		for (
 			let j = i + 1;
 			j < i + 12 &&

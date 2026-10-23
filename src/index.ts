@@ -65,7 +65,9 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 		const head = lines.slice(0, block + 1);
 		const mode = opts.hidden ?? "describe";
 		// A legacy .doc or .rtf keeps all its converted text under the block, unverified rather than hidden.
-		const shown = showHidden(lines.slice(block + 1), mode, /\.(doc|rtf)$/i.test(opts.name));
+		// No block, nothing to show: the body is never read as hidden entries.
+		const shown =
+			block < 0 ? [] : showHidden(lines.slice(block + 1), mode, /\.(doc|rtf)$/i.test(opts.name));
 		return {
 			...result,
 			markdown: block < 0 ? markdown : [...head, ...shown].join("\n") + end,

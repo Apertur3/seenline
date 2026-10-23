@@ -14,6 +14,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { MAX_INPUT } from "../src/documents.ts";
 import { convert } from "../src/index.ts";
 import { createServer } from "../src/mcp.ts";
+import { parseHidden } from "../src/parse-hidden.ts";
 
 const src = (name: string) => new URL(`../src/${name}`, import.meta.url).href;
 const cli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
@@ -47,9 +48,14 @@ const HOSTILE: [string, string][] = [
 		"boundary blanks",
 		`convert(Buffer.from(multipart(" ".repeat(100_000) + "x")), { name: "x.eml" })`,
 	],
+	[
+		"a long body, no hidden block",
+		`convert(eml("Text." + "\\n".repeat(100_000) + "x"), { name: "x.eml" })`,
+	],
+	["too many hidden entries", `parseHidden(Array(100_001).fill("p. 1, white text: words"))`],
 ];
 const CHILD = `
-import { listedValue } from "${src("parse-hidden.ts")}";
+import { listedValue, parseHidden } from "${src("parse-hidden.ts")}";
 import { suspect } from "${src("suspect.ts")}";
 import { scan } from "${src("hidden.ts")}";
 import { xml } from "${src("office-xml.ts")}";
@@ -73,6 +79,12 @@ test("hostile text of 100,000 characters never stalls a regex: each case well un
 	const ms = JSON.parse(child.stdout) as number[];
 	for (const [i, [label]] of HOSTILE.entries())
 		assert.ok((ms[i] ?? 0) < 1000, `${label}: ${ms[i]} ms`);
+});
+
+test("a block of more than 100,000 hidden entries fails closed, naming the cause", () => {
+	const lines = (n: number) => Array(n).fill("p. 1, white text: words");
+	assert.throws(() => parseHidden(lines(100_001)), /more than 100,000 hidden entries/);
+	assert.equal(parseHidden(lines(10)).length, 10);
 });
 
 function run(...args: string[]) {
