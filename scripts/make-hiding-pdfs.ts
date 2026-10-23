@@ -130,6 +130,8 @@ const FILES: Record<string, string | Spec> = {
 	"clip-hole-beside.pdf": `${base}q 0 0 612 792 re 60 100 400 30 re W* n\n${line(visible)}Q\n`,
 	// Text rise (Ts) of 1000 pt: drawn above the page.
 	"rise-off-page.pdf": `${base}${line(canary("PDF-RISE"), "1000 Ts")}`,
+	// Leading of 1000 pt that q and Q keep (TL is graphics state): T* moves the text below the page.
+	"leading-off-page.pdf": `${base}1000 TL q 0 TL Q\n${line(canary("PDF-LEADING"), "T*")}`,
 	// The visible twin: a superscript's rise.
 	"rise-superscript.pdf": `${base}${line(visible, "4 Ts")}`,
 	// Character spacing (Tc) of 1000: the first letter on the page, the rest far off it.
@@ -140,6 +142,15 @@ const FILES: Record<string, string | Spec> = {
 	"matrix-collapsed.pdf": `${base}BT /F1 12 Tf 0 0 0 1 72 660 Tm (${canary("PDF-COLLAPSED")}) Tj ET\n`,
 	// A character drawn in a clipping mode (4 Tr) clips what follows to its outline.
 	"text-clip.pdf": `${base}q BT 4 Tr /F1 12 Tf 72 100 Td (x) Tj ET\n${line(canary("PDF-TEXT-CLIP"), "0 Tr")}Q\n`,
+	// A white box in a layer that is switched off: it does not cover the text under it.
+	"cover-hidden-layer.pdf": {
+		content: `${base}${line(visible)}/OC /L1 BDC 1 g 60 650 400 30 re f EMC\n`,
+		resources: "/Properties << /L1 6 0 R >>",
+		catalog: "/OCProperties << /OCGs [6 0 R] /D << /OFF [6 0 R] >> >>",
+		extra: ["<< /Type /OCG /Name (L1) >>"],
+	},
+	// Kerning that steps each letter back onto the one before: the letters are stacked.
+	"kerning-stacked.pdf": `${base}BT /F1 12 Tf 72 660 Td [${[..."CANARY-PDF-KERNING"].map((c) => `(${c})`).join(" 600 ")}] TJ ET\n`,
 	// A soft mask that lets nothing through (black luminosity) over the text.
 	"mask-hides.pdf": masked("0 g 0 0 612 792 re f", `q /GS1 gs ${line(canary("PDF-MASK"))}Q\n`),
 	// The visible twin: a soft mask that lets everything through.

@@ -59,6 +59,7 @@ interface State {
 	rise: number;
 	charSpacing: number;
 	wordSpacing: number;
+	leading: number;
 	// The clipping paths in force. pdfjs reports `W` before the path it clips to.
 	clips: Fill[];
 }
@@ -110,6 +111,7 @@ const START: State = {
 	rise: 0,
 	charSpacing: 0,
 	wordSpacing: 0,
+	leading: 0,
 	clips: [],
 };
 // A point just outside a clip still counts as in: edges are only as exact as the rounding in the file.
@@ -124,7 +126,7 @@ const inside = (clips: Fill[], x: number, y: number) =>
 	clips.every((c) => NUDGE.some(([dx = 0, dy = 0]) => paints(c, x + dx, y + dy)));
 
 // White is every channel at 0xf0 or more; an invisible mode is "neither fill nor stroke" (3) or clip only (7).
-// Off the page is the run's start or the middle of its letters.
+// Off the page is the run's start or the middle of its letters (a long line may run past the edge).
 function hiding(color: string, mode: number, size: number, points: number[][], v: Matrix) {
 	const why: string[] = [];
 	if (/^#(f[0-9a-f]){3}$/i.test(color)) why.push("white");
@@ -172,7 +174,6 @@ class Walker {
 	private painted: Fill[] = [];
 	private tm = IDENTITY;
 	private tlm = IDENTITY;
-	private leading = 0;
 	// The outlines of text drawn in a clipping mode (Tr 4 to 7) in this text object: the clip after ET.
 	private textClip: [number, number][][] | null = null;
 	// One entry per open marked-content section: true when it is a layer that is switched off.
@@ -258,7 +259,8 @@ class Walker {
 			const [x0, y0, x1, y1] = intersect(bounds([corners]), this.view.slice(0, 4) as Box);
 			if (!this.masks.length) this.pictured += Math.max(0, x1 - x0) * Math.max(0, y1 - y0);
 			// A picture's pixels are not read: under white letters it is unknown, so they stay flagged.
-			if (fn !== OPS.paintImageMaskXObject) this.cover([corners], "", false);
+			// A stencil (image mask) does not count as cover; in a soft mask it makes the mask unknown.
+			if (fn !== OPS.paintImageMaskXObject || this.masks.length) this.cover([corners], "", false);
 		} else if (fn === OPS.shadingFill) {
 			// A shading paints everywhere the clip lets it; its colours are not read, like a picture's.
 			const [x0, y0, x1, y1] = this.view;
@@ -293,7 +295,8 @@ class Walker {
 	// A fill paints only inside the clipping paths in force, and hides what is under it only when it is
 	// near opaque, in a blend mode that does. Inside a soft mask it is the mask, not paint.
 	private cover(polys: [number, number][][], color: string, evenOdd: boolean): void {
-		if (!polys.length) return;
+		// A fill in a layer that is switched off paints nothing.
+		if (!polys.length || this.layers.includes(true)) return;
 		const m = this.masks.at(-1);
 		if (m) {
 			const solid = color && this.s.fillAlpha === 1 && !this.s.soft && m.mask !== "unknown";
@@ -354,7 +357,7 @@ class Walker {
 	private font(id: unknown, size: number): void {
 		const em = this.fonts(String(id))?.[0];
 		this.s.broken = id === "g_font_error";
-		this.s.em = typeof em === "number" && em > 0 ? em : 0.001;
+		this.s.em = typeof em === "number" && Number.isFinite(em) && em !== 0 ? em : 0.001;
 		this.s.fontSize = size;
 	}
 
@@ -365,7 +368,6 @@ class Walker {
 
 	private text(fn: number, a: unknown[]): void {
 		const { OPS, s } = this;
-		const parts = (i: number) => a[i] as (Glyph | number)[];
 		const num = a?.[0] as number;
 		if (fn === OPS.beginText) {
 			this.tm = this.tlm = IDENTITY;
@@ -388,7 +390,7 @@ class Walker {
 		else if (fn === OPS.setTextRise) s.rise = num;
 		else if (fn === OPS.setCharSpacing) s.charSpacing = num;
 		else if (fn === OPS.setWordSpacing) s.wordSpacing = num;
-		else if (fn === OPS.setLeading) this.leading = num;
+		else if (fn === OPS.setLeading) s.leading = num;
 		else if (fn === OPS.setTextMatrix) {
 			this.tm = this.tlm = Array.from(
 				{ length: 6 },
@@ -396,18 +398,12 @@ class Walker {
 			) as Matrix;
 		} else if (fn === OPS.moveText) this.move(a[0] as number, a[1] as number);
 		else if (fn === OPS.setLeadingMoveText) {
-			this.leading = -(a[1] as number);
+			s.leading = -(a[1] as number);
 			this.move(a[0] as number, a[1] as number);
-		} else if (fn === OPS.nextLine) this.move(0, -this.leading);
-		else if (fn === OPS.showText || fn === OPS.showSpacedText) this.show(parts(0));
-		else if (fn === OPS.nextLineShowText || fn === OPS.nextLineSetSpacingShowText) {
-			if (fn === OPS.nextLineSetSpacingShowText) {
-				s.wordSpacing = a[0] as number;
-				s.charSpacing = a[1] as number;
-			}
-			this.move(0, -this.leading);
-			this.show(parts(fn === OPS.nextLineShowText ? 0 : 2));
-		}
+		} else if (fn === OPS.nextLine) this.move(0, -s.leading);
+		// pdfjs hands ' and " over as nextLine, the spacing they set and showText.
+		else if (fn === OPS.showText || fn === OPS.showSpacedText)
+			this.show(a[0] as (Glyph | number)[]);
 	}
 
 	// showText hands over glyphs, showSpacedText glyphs mixed with kerning numbers.
@@ -439,7 +435,8 @@ class Walker {
 					!!part.unicode.trim();
 			}
 		}
-		advance = (advance + natural + spacing) * s.hscale;
+		const net = advance + natural + spacing; // kerning, widths and spacing together
+		advance = net * s.hscale;
 		const point = (x: number, y: number): [number, number] => [
 			user[4] + x * user[0] + y * user[2],
 			user[5] + x * user[1] + y * user[3],
@@ -459,9 +456,9 @@ class Walker {
 				why.push("transparent");
 			if (this.out.length >= MAX_RUNS) throw new Error("too much text");
 			if (this.layers.includes(true)) why.push("hidden layer");
-			// Character spacing that steps each letter back onto the one before stacks them (a step back of
+			// Spacing or kerning that steps each letter back onto the one before stacks them (a step back of
 			// more than a letter only reverses them).
-			const spread = natural > 0 ? Math.min(1, Math.abs(natural + spacing) / natural) : 1;
+			const spread = natural > 0 ? Math.min(1, Math.abs(net) / natural) : 1;
 			const shape = squeeze(user, s.hscale * spread, size);
 			if (!(shape >= MIN_HSCALE && shape <= MAX_HSCALE)) why.push("squeezed");
 			if (unmapped) why.push("unreadable font");

@@ -39,6 +39,8 @@ for (const [name, canary, reason] of [
 	["text-screen.pdf", "CANARY-PDF-SCREEN", "white"],
 	["clip-hole.pdf", "CANARY-PDF-CLIP-HOLE", "clipped"],
 	["rise-off-page.pdf", "CANARY-PDF-RISE", "off-page"],
+	["leading-off-page.pdf", "CANARY-PDF-LEADING", "off-page"],
+	["kerning-stacked.pdf", "CANARY-PDF-KERNING", "squeezed"],
 	["spaced-off-page.pdf", "CANARY-PDF-SPACED", "off-page"],
 	["matrix-collapsed.pdf", "CANARY-PDF-COLLAPSED", "squeezed"],
 	["text-clip.pdf", "CANARY-PDF-TEXT-CLIP", "clipped"],
@@ -78,6 +80,7 @@ for (const [name, text] of [
 	["rise-superscript.pdf", "Shown to every reader."],
 	["letter-spaced.pdf", "Shown to every reader."],
 	["mask-shows.pdf", "Shown to every reader."],
+	["cover-hidden-layer.pdf", "Shown to every reader."],
 	["short-page.pdf", "[p. 1]\nApproved.\n"],
 	["resume.pdf", "Experience\nEducation\nEngineer at a shipping firm\nDegree in applied physics"],
 	[
