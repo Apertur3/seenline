@@ -134,17 +134,46 @@ function fontTiny(font: string | undefined): boolean {
 		return Number.parseFloat(size) === 0;
 	return !size || tiny(size);
 }
-// A box of (almost) no height or width that clips what overflows it; a computed size (min(), max())
-// counts as none when it has a zero among its values.
-const collapsed = (css: Css) =>
-	["overflow", "overflow-x", "overflow-y"].some((k) => /^(?:hidden|clip)\b/.test(css[k] ?? "")) &&
-	["height", "max-height", "width", "max-width", "line-height"].some((k) => {
-		const v = k === "line-height" && /^[\d.]+$/.test(css[k] ?? "") ? `${css[k]}em` : css[k];
-		if (!v) return false;
-		if (v.includes("(")) return /[(,\s]0[a-z%]*\s*[,)]/.test(v);
-		if (Number.parseFloat(v) === 0) return true;
-		return /^(?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)?$/.test(v) && tiny(v);
-	});
+// A size of (almost) none: a tiny length, min() with a zero among its values, max() or clamp() whose
+// result is zero. Another computed size is not none (never zero without proof); a nested one is refused.
+function none(v: string | undefined): boolean {
+	if (!v) return false;
+	if (v.indexOf("(", v.indexOf("(") + 1) > 0) throw new Error("unsupported CSS");
+	const f = /^(min|max|clamp)\(([^()]*)\)$/.exec(v);
+	if (f) {
+		const all = (f[2] as string).split(",").map((x) => none(x.trim()));
+		const [a, b, c] = all; // clamp(min, value, max) is max(min, min(value, max))
+		if (f[1] === "clamp") return !!a && (!!b || !!c);
+		return f[1] === "min" ? all.some(Boolean) : all.every(Boolean);
+	}
+	if (v.includes("(")) return false;
+	if (Number.parseFloat(v) === 0) return true;
+	return /^(?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)?$/.test(v) && tiny(v);
+}
+const some = (v: string | undefined) =>
+	!!v && !none(v) && !/^(?:auto|none|initial|unset|inherit|revert)$/.test(v);
+// Elements whose box a height or width sizes and overflow clips. An ordinary inline element (a span)
+// is not one, nor a table or its cells, which grow to fit their content.
+const BOX =
+	/^(?:p|div|section|article|header|footer|main|aside|nav|ul|ol|li|blockquote|pre|dl|dt|dd|address|h[1-6]|form|fieldset|figure|figcaption|details|summary|center|body|html|input|textarea|select|button|iframe)$/;
+const boxed = (css: Css, tag: string) =>
+	/^(?:absolute|fixed)$/.test(css.position ?? "") ||
+	/^(?:left|right)$/.test(css.float ?? "") ||
+	(css.display && !neutral("", css.display)
+		? !/^(?:inline|contents)$/.test(css.display)
+		: BOX.test(tag));
+// A box of (almost) no height or width that clips what overflows it, a minimum size counted.
+const collapsed = (css: Css, tag: string) => {
+	if (
+		!["overflow", "overflow-x", "overflow-y"].some((k) => /^(?:hidden|clip)\b/.test(css[k] ?? ""))
+	)
+		return false;
+	if (!boxed(css, tag)) return false;
+	const lh = css["line-height"];
+	const lines = none(lh && /^[\d.]+$/.test(lh) ? `${lh}em` : lh) && !some(css.height);
+	const flat = (none(css.height) || none(css["max-height"]) || lines) && !some(css["min-height"]);
+	return flat || ((none(css.width) || none(css["max-width"])) && !some(css["min-width"]));
+};
 const faint = (opacity = "1") =>
 	opacity.includes("(") ||
 	Number.parseFloat(opacity) / (opacity.trim().endsWith("%") ? 100 : 1) < 0.1;
@@ -154,7 +183,7 @@ const neutral = (k: string, v = "") =>
 	(["zoom", "scale"].includes(k) &&
 		/^[\d.]+%?$/.test(v) &&
 		Number.parseFloat(v) / (v.endsWith("%") ? 100 : 1) >= 0.5);
-export function cssHidden(css: Css): boolean {
+export function cssHidden(css: Css, tag = ""): boolean {
 	// The letters' fill: -webkit-text-fill-color where it is set, else the colour.
 	const fill = css["-webkit-text-fill-color"];
 	const ink = fill && fill !== "currentcolor" && !neutral("", fill) ? fill : css.color;
@@ -168,7 +197,7 @@ export function cssHidden(css: Css): boolean {
 		faint(css.opacity) ||
 		tiny(css["font-size"]) ||
 		fontTiny(css.font) ||
-		collapsed(css) ||
+		collapsed(css, tag) ||
 		foreground === "#ffffff" ||
 		foreground === "transparent" ||
 		(!!foreground &&
@@ -206,14 +235,14 @@ export function visibility(
 	for (const rule of rules)
 		if (selected(path, rule.selector)) {
 			Object.assign(css, rule.css);
-			hidden ||= cssHidden(css);
+			hidden ||= cssHidden(css, n.tag);
 		}
 	// An element a rule already hides stays hidden, whatever its own style says.
 	if (!hidden) Object.assign(css, declarations(n.attrs.style ?? ""));
 	if (n.attrs.color) css.color = n.attrs.color.toLowerCase();
 	if (n.attrs.bgcolor) css["background-color"] = n.attrs.bgcolor.toLowerCase();
 	// Cascading conflicts are conservative: an applicable hiding rule always requires review.
-	hidden ||= cssHidden(css) || (n.tag === "font" && Number(n.attrs.size ?? 3) <= 1);
+	hidden ||= cssHidden(css, n.tag) || (n.tag === "font" && Number(n.attrs.size ?? 3) <= 1);
 	const next: Css = {};
 	for (const key of ["font-size", "color", "background", "background-color", "visibility"])
 		if (css[key]) next[key] = css[key];

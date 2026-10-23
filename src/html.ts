@@ -42,12 +42,13 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 		const type = /^hidden$/i.test(n.attrs.type ?? "");
 		if (n.tag === "input" && (type || unseen) && n.attrs.value?.trim())
 			out.hidden.push(`HTML input value: ${flat(n.attrs.value)}`);
-		// A closed <details> shows its summary only.
+		// A closed <details> shows its first summary child only.
 		const shut = n.tag === "details" && !Object.hasOwn(n.attrs, "open");
+		const summary = n.children.find((c) => typeof c !== "string" && c.tag === "summary");
 		let text = n.children
 			.map((c) => {
 				if (typeof c !== "string")
-					return visit(c, [...path, c], state.css, unseen || (shut && c.tag !== "summary"));
+					return visit(c, [...path, c], state.css, unseen || (shut && c !== summary));
 				if (unseen || shut) {
 					if (flat(c)) out.hidden.push(`HTML ${n.tag || "hidden"} text: ${flat(c)}`);
 					return "";

@@ -52,3 +52,8 @@ for (const c of cases)
 			);
 		if (!c.flagged.length) assert.deepEqual(hidden, [], "a visible twin lists nothing");
 	});
+
+test("a nested computed size on a clipping box is refused, never read as zero or as visible", async () => {
+	const html = '<p>Text.</p><div style="height:max(min(0px, 1em), 0px);overflow:hidden">Hi</div>';
+	await assert.rejects(convert(Buffer.from(html), { name: "x.html" }), /computed values/);
+});
