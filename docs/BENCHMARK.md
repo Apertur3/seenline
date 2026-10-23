@@ -31,7 +31,6 @@ Outcome classes for Sets B and C (one per file and tool):
 
 - `leaked`: a payload is in the visible body of the output and the tool gave no signal.
 - `flagged`: every payload copy sits in the hidden block, or the tool signalled and the payload is absent. A tool signals with a flag or a hidden block of its own.
-- `scanner-detected`: a payload is in the output with no signal from the tool, but Plainview's scanner reads those lines as hidden (for example invisible Unicode passed through). The tool made no flag; this is not credited to it as one.
 - `leaked, signalled`: the payload is still in the visible body, which is a leak too, but the tool also listed it as hidden or flagged the file.
 - `correct`: payload absent, no signal, every visible fact intact.
 - `stripped`: payload absent, no signal, visible text not fully intact.
@@ -41,7 +40,7 @@ Outcome classes for Sets B and C (one per file and tool):
 
 `unsupported` and `not-run` cells are not counted in the total rows.
 
-Hidden-ness is judged by Plainview's scanner over every tool's output, so a competitor's raw invisible characters can read as hidden to that scanner; those rows say `scanner-detected`, not `flagged`. The Plainview columns are separate runs of one version: `plainview` (no OCR reader; scans and images fail closed), `plainview-verify` (`--verify`, PDFs) and `plainview-ocr` (`--ocr`, PDFs and images). A `plainview-ocr` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores `leaked`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
+Text counts as hidden when it sits in a `[Hidden in the original]` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Plainview columns are separate runs of one version: `plainview` (no OCR reader; scans and images fail closed), `plainview-verify` (`--verify`, PDFs) and `plainview-ocr` (`--ocr`, PDFs and images). A `plainview-ocr` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores `leaked`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
 
 What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 
@@ -62,7 +61,7 @@ comparison that a reader working from text alone can just approximate; each miss
 | EG_004 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_005 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_006 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
-| EG_007 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | stripped | correct |
+| EG_007 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | correct |
 | EG_008 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_009 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | correct | leaked |
 | EG_010 | extractor-side-payload | flagged | flagged | flagged | leaked | correct | leaked | correct | leaked | leaked | leaked |
@@ -84,14 +83,13 @@ comparison that a reader working from text alone can just approximate; each miss
 | **leaked, no tool signal** |  | 2 | 0 | 2 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
 | **leaked, and the tool signalled it** |  | 0 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **flagged by the tool itself** |  | 20 | 20 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **detected by Plainview's scanner, no tool signal** |  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **stripped** |  | 0 | 0 | 0 | 5 | 6 | 4 | 8 | 4 | 9 | 8 |
+| **stripped** |  | 0 | 0 | 0 | 5 | 6 | 4 | 8 | 4 | 8 | 8 |
 | **absent, no visible text to check** |  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 | **failed-closed** |  | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
-| **correct** |  | 3 | 3 | 3 | 8 | 12 | 9 | 14 | 1 | 15 | 7 |
+| **correct** |  | 3 | 3 | 3 | 8 | 12 | 9 | 14 | 1 | 16 | 7 |
 | **tool signalled, any class (overlaps the rows above)** |  | 20 | 22 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Plainview leaks on: EG_001_canary.pdf, EG_024_canary.pdf.
+Plainview leaks on: inj-pdf-unicode.pdf, unicode-bidi.html, unicode-homoglyph.html, EG_001_canary.pdf, EG_024_canary.pdf.
 
 ### Known limits
 
@@ -128,7 +126,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The inject
 | inj-pdf-attachment.pdf | flagged | flagged | flagged | absent, unchecked | absent, unchecked | absent, unchecked | absent, unchecked | leaked | absent, unchecked | absent, unchecked |
 | inj-pdf-javascript.pdf | flagged | flagged | flagged | absent, unchecked | absent, unchecked | absent, unchecked | absent, unchecked | leaked | absent, unchecked | absent, unchecked |
 | inj-pdf-ocr-layer.pdf | failed-closed | failed-closed | flagged | leaked | leaked | leaked | absent, unchecked | leaked | leaked | leaked |
-| inj-pdf-unicode.pdf | flagged | flagged | flagged | scanner-detected | scanner-detected | scanner-detected | leaked | scanner-detected | scanner-detected | scanner-detected |
+| inj-pdf-unicode.pdf | leaked, signalled | leaked, signalled | leaked, signalled | leaked | leaked | leaked | leaked | leaked | leaked | leaked |
 | inj-img-png-text.png | failed-closed | unsupported | flagged | unsupported | absent, unchecked | failed-closed | absent, unchecked | absent, unchecked | unsupported | unsupported |
 | inj-img-exif.jpg | failed-closed | unsupported | flagged | unsupported | absent, unchecked | failed-closed | absent, unchecked | absent, unchecked | unsupported | unsupported |
 | inj-img-qr.png | failed-closed | unsupported | failed-closed | unsupported | absent, unchecked | failed-closed | absent, unchecked | absent, unchecked | unsupported | unsupported |
@@ -151,36 +149,35 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The inject
 | ring-filled.pdf | flagged | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
 | white-on-light.pdf | flagged | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
 | white-on-picture.pdf | flagged | flagged | flagged | leaked | leaked | leaked | correct | leaked | leaked | leaked |
-| unicode-tag-chars.html | flagged | unsupported | unsupported | scanner-detected | correct | scanner-detected | failed-closed | scanner-detected | unsupported | unsupported |
-| unicode-zero-width.html | flagged | unsupported | unsupported | correct | correct | correct | failed-closed | correct | unsupported | unsupported |
-| unicode-bidi.html | flagged | unsupported | unsupported | scanner-detected | leaked | scanner-detected | failed-closed | scanner-detected | unsupported | unsupported |
-| unicode-homoglyph.html | flagged | unsupported | unsupported | scanner-detected | scanner-detected | scanner-detected | failed-closed | scanner-detected | unsupported | unsupported |
-| unicode-variation-bmp.html | flagged | unsupported | unsupported | scanner-detected | scanner-detected | scanner-detected | failed-closed | scanner-detected | unsupported | unsupported |
-| unicode-variation-supp.html | flagged | unsupported | unsupported | scanner-detected | scanner-detected | scanner-detected | failed-closed | scanner-detected | unsupported | unsupported |
-| **leaked, no tool signal** | 0 | 0 | 1 | 26 | 23 | 29 | 5 | 37 | 8 | 16 |
-| **leaked, and the tool signalled it** | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **flagged by the tool itself** | 44 | 25 | 28 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| **detected by Plainview's scanner, no tool signal** | 0 | 0 | 0 | 6 | 4 | 6 | 0 | 6 | 1 | 1 |
-| **stripped** | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| unicode-tag-chars.html | flagged | unsupported | unsupported | leaked | correct | leaked | failed-closed | leaked | unsupported | unsupported |
+| unicode-zero-width.html | flagged | unsupported | unsupported | stripped | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
+| unicode-bidi.html | leaked, signalled | unsupported | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| unicode-homoglyph.html | leaked, signalled | unsupported | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| unicode-variation-bmp.html | flagged | unsupported | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| unicode-variation-supp.html | flagged | unsupported | unsupported | leaked | leaked | leaked | failed-closed | leaked | unsupported | unsupported |
+| **leaked, no tool signal** | 0 | 0 | 1 | 32 | 27 | 36 | 5 | 44 | 9 | 17 |
+| **leaked, and the tool signalled it** | 3 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **flagged by the tool itself** | 41 | 24 | 27 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| **stripped** | 0 | 0 | 0 | 1 | 2 | 0 | 0 | 0 | 0 | 0 |
 | **absent, no visible text to check** | 0 | 0 | 2 | 6 | 15 | 6 | 19 | 6 | 12 | 8 |
 | **failed-closed** | 7 | 1 | 1 | 0 | 1 | 7 | 17 | 0 | 0 | 0 |
-| **correct** | 0 | 0 | 0 | 5 | 5 | 3 | 8 | 2 | 5 | 1 |
+| **correct** | 0 | 0 | 0 | 4 | 4 | 2 | 8 | 1 | 5 | 1 |
 | **tool signalled, any class (overlaps the rows above)** | 44 | 25 | 28 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Fidelity (facts, rows, order, anchors found, visible text counted)
 
 | tool | files read of offered | facts (files read) | rows | order | anchors | facts (all offered files) |
 | --- | --- | --- | --- | --- | --- | --- |
-| plainview | 189/205 | 631/667 (94.6%) | 61/61 (100.0%) | 87/93 (93.5%) | 161/162 (99.4%) | 631/693 (91.1%) |
+| plainview | 189/205 | 632/668 (94.6%) | 61/61 (100.0%) | 87/93 (93.5%) | 161/162 (99.4%) | 632/694 (91.1%) |
 | plainview-verify | 102/106 | 280/293 (95.6%) | 5/5 (100.0%) | 39/41 (95.1%) | 85/86 (98.8%) | 280/305 (91.8%) |
 | plainview-ocr | 117/118 | 300/319 (94.0%) | 9/11 (81.8%) | 40/42 (95.2%) | 86/87 (98.9%) | 300/319 (94.0%) |
-| markitdown | 187/187 | 546/653 (83.6%) | 59/66 (89.4%) | 67/94 (71.3%) | 69/149 (46.3%) | 546/653 (83.6%) |
-| docling | 197/199 | 634/658 (96.4%) | 61/65 (93.8%) | 87/93 (93.5%) | 91/145 (62.8%) | 634/667 (95.1%) |
-| unstructured | 186/205 | 627/645 (97.2%) | 56/61 (91.8%) | 90/93 (96.8%) | 112/156 (71.8%) | 627/693 (90.5%) |
-| marker | 115/193 | 277/301 (92.0%) | 11/11 (100.0%) | 33/39 (84.6%) | 77/81 (95.1%) | 277/637 (43.5%) |
-| tika | 203/205 | 667/686 (97.2%) | 63/67 (94.0%) | 82/93 (88.2%) | 0/161 (0.0%) | 667/693 (96.2%) |
-| pymupdf4llm | 106/106 | 275/305 (90.2%) | 5/10 (50.0%) | 37/42 (88.1%) | 82/87 (94.3%) | 275/305 (90.2%) |
-| opendataloader | 105/106 | 273/299 (91.3%) | 4/10 (40.0%) | 38/41 (92.7%) | 83/85 (97.6%) | 273/305 (89.5%) |
+| markitdown | 187/187 | 547/654 (83.6%) | 59/66 (89.4%) | 67/94 (71.3%) | 69/149 (46.3%) | 547/654 (83.6%) |
+| docling | 197/199 | 636/659 (96.5%) | 61/65 (93.8%) | 88/93 (94.6%) | 92/145 (63.4%) | 636/668 (95.2%) |
+| unstructured | 186/205 | 628/646 (97.2%) | 56/61 (91.8%) | 91/93 (97.8%) | 113/156 (72.4%) | 628/694 (90.5%) |
+| marker | 115/193 | 278/301 (92.4%) | 11/11 (100.0%) | 33/39 (84.6%) | 78/81 (96.3%) | 278/638 (43.6%) |
+| tika | 203/205 | 667/687 (97.1%) | 63/67 (94.0%) | 82/93 (88.2%) | 0/161 (0.0%) | 667/694 (96.1%) |
+| pymupdf4llm | 106/106 | 279/305 (91.5%) | 5/10 (50.0%) | 38/42 (90.5%) | 84/87 (96.6%) | 279/305 (91.5%) |
+| opendataloader | 105/106 | 274/299 (91.6%) | 4/10 (40.0%) | 39/41 (95.1%) | 84/85 (98.8%) | 274/305 (89.8%) |
 
 Denominators: facts, rows, order and anchors count the files a tool read, and no others. A file it failed on or refused is left out of those four columns, so a tool that refuses hard inputs does not lose recovery there. The last column counts every fact in every file the tool was offered (a refused file recovers none), and the second column says how many files were read. Read the three together. A tool is offered a file when the format is inside its declared formats.
 
@@ -189,10 +186,10 @@ Denominators: facts, rows, order and anchors count the files a tool read, and no
 | format | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 2854 (41 to 5957) | - | - | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | 1932 (27 to 4961) | - | - |
-| docx | 473 (37 to 11967) | - | - | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
+| docx | 479 (37 to 12017) | - | - | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
 | eml | 164 (78 to 296) | - | - | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
 | htm | 50 (50 to 50) | - | - | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
-| html | 553 (18 to 19761) | - | - | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
+| html | 553 (19 to 19761) | - | - | 560 (20 to 39756) | 570 (23 to 40819) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
 | jpg | - | - | 34 (29 to 36) | - | 36 (22 to 38) | - | 40 (23 to 46) | 34 (17 to 36) | - | - |
 | pdf | 46 (25 to 33622) | 50 (27 to 33622) | 48 (26 to 32373) | 38 (11 to 40546) | 43 (14 to 25540) | 43 (18 to 32112) | 26 (11 to 31097) | 40 (14 to 36790) | 38 (11 to 32880) | 42 (11 to 29219) |
 | png | - | - | 39 (14 to 57) | - | 19 (17 to 58) | - | 19 (19 to 59) | 36 (11 to 56) | - | - |
@@ -204,7 +201,7 @@ Common files:95 public files that Plainview, MarkItDown, Docling and Unstructure
 | format | files | plainview | markitdown | docling | unstructured | hidden block share (plainview) |
 | --- | --- | --- | --- | --- | --- | --- |
 | csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
-| docx | 20 | 2373 | 2831 | 2923 | 2264 | 0.5% |
+| docx | 20 | 2385 | 2831 | 2923 | 2264 | 0.5% |
 | html | 7 | 10711 | 21583 | 17244 | 9042 | 0.0% |
 | pdf | 38 | 17860 | 24010 | 15441 | 17483 | 0.0% |
 | pptx | 15 | 2526 | 2694 | 2129 | 2032 | 0.7% |
@@ -218,7 +215,7 @@ Hidden block on ordinary public files (Set A, files Plainview read): the entries
 | docx | 20 | 15 |
 | eml | 3 | 0 |
 | html | 7 | 3 |
-| pdf | 39 | 22 |
+| pdf | 39 | 21 |
 | pptx | 15 | 10 |
 | xlsx | 10 | 6 |
 
@@ -230,16 +227,16 @@ Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shar
 
 | format | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| csv | 0.037 | - | - | 0.003 | 0.006 | 0.005 | - | 0.819 | - | - |
-| docx | 0.022 | - | - | 0.090 | 0.051 | 0.015 | - | 0.867 | - | - |
-| eml | 0.001 | - | - | - | - | 0.001 | - | 1.109 | - | - |
+| csv | 0.001 | - | - | 0.003 | 0.006 | 0.005 | - | 0.819 | - | - |
+| docx | 0.021 | - | - | 0.090 | 0.051 | 0.015 | - | 0.867 | - | - |
+| eml | 0.000 | - | - | - | - | 0.001 | - | 1.109 | - | - |
 | htm | 0.000 | - | - | 0.003 | 0.002 | 0.001 | - | 0.790 | - | - |
 | html | 0.001 | - | - | 0.003 | 0.004 | 0.001 | - | 0.690 | - | - |
-| jpg | - | - | 0.112 | - | 0.990 | - | 1.683 | 1.057 | - | - |
-| pdf | 0.002 | 0.585 | 0.004 | 0.005 | 0.085 | 0.003 | 0.108 | 1.114 | 0.158 | 0.396 |
-| png | - | - | 0.124 | - | 1.414 | - | 1.533 | 0.828 | - | - |
-| pptx | 0.035 | - | - | 0.021 | 0.094 | 0.020 | - | 2.789 | - | - |
-| xlsx | 0.007 | - | - | 0.011 | 0.005 | 0.008 | - | 1.230 | - | - |
+| jpg | - | - | 0.109 | - | 0.990 | - | 1.683 | 1.057 | - | - |
+| pdf | 0.120 | 0.898 | 0.122 | 0.005 | 0.085 | 0.003 | 0.108 | 1.114 | 0.158 | 0.396 |
+| png | - | - | 0.120 | - | 1.414 | - | 1.533 | 0.828 | - | - |
+| pptx | 0.031 | - | - | 0.021 | 0.094 | 0.020 | - | 2.789 | - | - |
+| xlsx | 0.002 | - | - | 0.011 | 0.005 | 0.008 | - | 1.230 | - | - |
 
 Timing covers successful conversions. A `-` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. `plainview` has no OCR reader and refuses images; `plainview-ocr` reads them with a local tesseract, as docling, unstructured, marker and tika do.
 
