@@ -105,7 +105,7 @@ test("the built PDF reader starts under every way of running Node, and a reader 
 	const esm = `import { convert } from "${dist}"; import { readFileSync } from "node:fs"; console.log(await (async () => ${read})().catch((e) => e.code + ": " + e.message));`;
 	const cjs = `const { readFileSync } = require("node:fs"); import(${JSON.stringify(dist)}).then(async ({ convert }) => console.log(${read}));`;
 	const refuse = `data:text/javascript,import { isMainThread } from "node:worker_threads"; if (!isMainThread) throw new Error("no")`;
-	const cases: [string[], string?, string?][] = [
+	const cases: [string[], (string | undefined)?, string?][] = [
 		[["--input-type=module", "-e", esm]],
 		[["--input-type", "module", "-e", esm]],
 		[["--import", "data:text/javascript,export {}", "--input-type=module", "-e", esm]],
