@@ -110,19 +110,59 @@ function tiny(size: string | undefined): boolean {
 		n <= (unit === "pt" ? 2 : unit === "em" || unit === "rem" ? 0.15 : unit === "%" ? 15 : 2.5)
 	);
 }
-function cssHidden(css: Css): boolean {
-	const foreground = color(css.color);
-	const colours = [css.color, css.background, css["background-color"]].filter(
-		(c): c is string => !!c,
-	);
+// The size in a `font` shorthand (`bold 16px/1.4 serif`, `0/0 a`); a system font or a keyword shows.
+function fontTiny(font: string | undefined): boolean {
+	if (
+		!font ||
+		/^(?:inherit|initial|unset|revert|caption|icon|menu|message-box|small-caption|status-bar)$/.test(
+			font,
+		)
+	)
+		return false;
+	const size =
+		/(?:^|\s)((?:\d*\.)?\d+[a-z%]+|0|(?:xx?-)?(?:small|large)|medium|larger|smaller)(?:\s*\/\s*\S+)?\s+\S/.exec(
+			font,
+		)?.[1];
+	// A unit the size check does not know (vw, cqw, lh) hides only at zero.
+	if (size && /^[\d.]+[a-z]+$/.test(size) && !/(?:px|pt|r?em|ex|ch)$/.test(size))
+		return Number.parseFloat(size) === 0;
+	return !size || tiny(size);
+}
+// A box of (almost) no height or width that clips what overflows it; a computed size (min(), max())
+// counts as none when it has a zero among its values.
+const collapsed = (css: Css) =>
+	["overflow", "overflow-x", "overflow-y"].some((k) => /^(?:hidden|clip)\b/.test(css[k] ?? "")) &&
+	["height", "max-height", "width", "max-width", "line-height"].some((k) => {
+		const v = k === "line-height" && /^[\d.]+$/.test(css[k] ?? "") ? `${css[k]}em` : css[k];
+		if (!v) return false;
+		if (v.includes("(")) return /[(,\s]0[a-z%]*\s*[,)]/.test(v);
+		if (Number.parseFloat(v) === 0) return true;
+		return /^(?:\d*\.)?\d+(?:px|pt|em|rem|%|ex|ch)?$/.test(v) && tiny(v);
+	});
+const faint = (opacity = "1") =>
+	opacity.includes("(") ||
+	Number.parseFloat(opacity) / (opacity.trim().endsWith("%") ? 100 : 1) < 0.1;
+// A value that changes nothing: a reset keyword, or a zoom or scale of half or more.
+const neutral = (k: string, v = "") =>
+	/^(?:none|initial|unset|inherit|revert|auto|normal|visible)$/.test(v) ||
+	(["zoom", "scale"].includes(k) &&
+		/^[\d.]+%?$/.test(v) &&
+		Number.parseFloat(v) / (v.endsWith("%") ? 100 : 1) >= 0.5);
+export function cssHidden(css: Css): boolean {
+	// The letters' fill: -webkit-text-fill-color where it is set, else the colour.
+	const fill = css["-webkit-text-fill-color"];
+	const ink = fill && fill !== "currentcolor" && !neutral("", fill) ? fill : css.color;
+	const foreground = color(ink);
+	const colours = [ink, css.background, css["background-color"]].filter((c): c is string => !!c);
 	const uncertain = colours.some((c) => !/^(?:#[a-f\d]{6}|[a-z]+)$/.test(color(c)));
 	return (
 		uncertain ||
 		css.display === "none" ||
 		["hidden", "collapse"].includes(css.visibility ?? "") ||
-		Number(css.opacity ?? 1) === 0 ||
+		faint(css.opacity) ||
 		tiny(css["font-size"]) ||
-		!!css.font ||
+		fontTiny(css.font) ||
+		collapsed(css) ||
 		foreground === "#ffffff" ||
 		foreground === "transparent" ||
 		(!!foreground &&
@@ -130,9 +170,21 @@ function cssHidden(css: Css): boolean {
 		["left", "right", "top", "bottom", "text-indent"].some(
 			(k) => /^-/.test(css[k] ?? "") || Number.parseFloat(css[k] ?? "") > 10000,
 		) ||
-		["clip", "clip-path", "transform", "filter", "content-visibility"].some((k) =>
-			Object.hasOwn(css, k),
-		)
+		Object.entries(css).some(([k, v]) => k.startsWith("margin") && /(?:^|\s)-\d{4,}/.test(v)) ||
+		// Their effect on the letters is not worked out here, so the text is listed.
+		[
+			"clip",
+			"clip-path",
+			"transform",
+			"filter",
+			"content-visibility",
+			"mask",
+			"mask-image",
+			"-webkit-mask",
+			"-webkit-mask-image",
+			"zoom",
+			"scale",
+		].some((k) => Object.hasOwn(css, k) && !neutral(k, css[k]))
 	);
 }
 export function visibility(
@@ -142,6 +194,8 @@ export function visibility(
 	rules: Rule[],
 ): { css: Css; hidden: boolean } {
 	const css = { ...inherited };
+	// ponytail: aria-hidden only takes text from a screen reader, but the pinned reference goldens list
+	// it as hidden (mail-newsletter.html); it stays listed until the golden baseline is re-cut.
 	let hidden = Object.hasOwn(n.attrs, "hidden") || n.attrs["aria-hidden"]?.toLowerCase() === "true";
 	for (const rule of rules)
 		if (selected(path, rule.selector)) {

@@ -79,6 +79,18 @@ test("outcome: flagged only when every copy sits in the hidden block or the tool
 	assert.equal(outcome(canary, ok("Quarterly results", ["markup-hidden"])), "flagged");
 });
 
+test("outcome: a scanner mark on a body line is not isolation, the block is", () => {
+	const marked = [
+		"Quarterly results CANARY_EG_004_EXTRACTED\u200B",
+		"<!-- CANARY_EG_004_EXTRACTED -->",
+		'<span style="display:none">CANARY_EG_004_EXTRACTED</span>',
+	];
+	for (const text of marked) {
+		assert.equal(outcome(canary, ok(text, ["zero-width"])), "leaked", text);
+		assert.equal(assess(canary, text).hidden.passed, 1, text);
+	}
+});
+
 test("outcome: correct, stripped and failed-closed", () => {
 	assert.equal(outcome(canary, ok("Quarterly   results\nremain stable")), "correct");
 	assert.equal(outcome(canary, ok("")), "stripped");

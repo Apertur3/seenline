@@ -163,8 +163,9 @@ type Edited = { fixture: string; edits: string[][]; seen: string[]; flagged: str
 for (const [title, c] of Object.entries(twins.edits as Record<string, Edited>)) {
 	test(title, async () => {
 		const files = unzipSync(officeFixtures()[c.fixture] as Uint8Array);
+		// An edit of a part the fixture lacks (from "") adds it.
 		for (const [part = "", from = "", to = ""] of c.edits)
-			files[part] = strToU8(strFromU8(files[part] as Uint8Array).replace(from, to));
+			files[part] = strToU8(strFromU8(files[part] ?? new Uint8Array()).replace(from, to));
 		expect(await convertOffice(zipSync(files), c.fixture), c);
 	});
 }

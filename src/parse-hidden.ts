@@ -14,10 +14,12 @@ const NAME_TOKEN =
 
 /**
  * Whether a metadata value (a document property, a custom XML value) is worth listing: free text a
- * model could read. Machine values are not; a name field only when it does not read as names.
+ * model could read. Machine values are not; a name field only when it does not read as names. A
+ * value that reads like an instruction to an AI is always listed, whatever its field and shape.
  */
 export function listedValue(field: string, value: string): boolean {
 	const v = norm(value);
+	if (suspect(v)) return true;
 	if (MACHINE.test(v) || BASE64.test(v)) return false;
 	const tokens = v.split(/[\s,;]+/).filter(Boolean);
 	const names = tokens.length <= 8 && !/\d/.test(v) && tokens.every((t) => NAME_TOKEN.test(t));
@@ -84,7 +86,7 @@ function parseLine(line: string): HiddenText {
 	if (at?.[1]?.startsWith("p. ")) reason = reason.replace(/ text$/, "");
 	const labelled =
 		at ||
-		/^(?:hidden run|field code|tiny text|white or same-background text|tracked deletion|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
+		/^(?:hidden run|field code|tiny text|white or same-background text|tracked deletion|hidden cue style|unused (?:header|footer)|(?:tag|zero-width) characters|variation selectors|HTML\b|Mail\b|metadata\b|image\b|attachment\b|javascript\b|docProps\/|customXml\/|.*comments?\d*\.xml\b|Legacy conversion\b)/.test(
 			reason,
 		);
 	return {
@@ -139,7 +141,7 @@ const NAMED =
 // The reasons the readers write. Describe shows a label only when it is made of these, so text that
 // merely looks like a label (an OCR extra, a name with "and" in it) never reaches the Markdown.
 const REASONS = new Set(
-	"white,tiny,invisible,off-page,covered,transparent,hidden layer,squeezed,unreadable font,clipped,reading order,annotation,hidden run,tiny text,white text,white or same-background text,tracked deletion,field code,hidden row,hidden column,hidden sheet,hidden shape,off-slide shape,hidden slide,hidden content".split(
+	"white,tiny,invisible,off-page,covered,transparent,hidden layer,squeezed,unreadable font,clipped,reading order,annotation,hidden run,tiny text,white text,white or same-background text,tracked deletion,field code,hidden row,hidden column,hidden sheet,hidden shape,off-slide shape,hidden slide,hidden content,hidden cue style,unused header,unused footer,tag characters,zero-width characters,variation selectors,hidden by number format,transparent text".split(
 		",",
 	),
 );

@@ -152,8 +152,12 @@ test("CLI --fail-on-hidden preserves output, detects scanner flags and gives fil
 		await writeFile(unicode, "name\nhello\u200Bworld\n");
 		const result = run("--fail-on-hidden", "--json", unicode);
 		assert.equal(result.status, 3);
-		assert.deepEqual(JSON.parse(result.stdout).hidden, []);
+		const zero = { anchor: "", reasons: ["zero-width characters"], text: "hello[U+200B]world" };
+		assert.deepEqual(JSON.parse(result.stdout).hidden, [zero]);
 		assert.deepEqual(JSON.parse(result.stdout).flags, ["zero-width"]);
+		assert.ok(
+			JSON.parse(result.stdout).markdown.startsWith("[row 1]\nname\n[row 2]\nhelloworld\n"),
+		);
 		assert.equal(run("--fail-on-hidden", "--hidden", "text", "--out", scratch, hidden).status, 3);
 		assert.equal(await readFile(join(scratch, "office-book.md"), "utf8"), flagged.stdout);
 	} finally {
