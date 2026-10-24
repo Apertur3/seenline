@@ -4,6 +4,8 @@ Format: one heading per version. The anchor lines and the `[Hidden in the origin
 
 ## 0.1.0 (prepared, not yet released)
 
+- Images with OCR extras but no recognised body text keep those extras as hidden content; images with neither still fail closed.
+
 First release: the readers, the hidden-content block, the CLI and the stdio MCP server, as listed below. Output contract: anchor lines and the `[Hidden in the original]` grammar as in the pinned reference; with the default hidden=describe the entries under the block give a character count instead of the text (`--hidden text` gives the reference's form).
 
 - A reviewer's confirmation pass. The PDF reader's worker starts from a string that imports it, so it runs under `node --input-type=module -e` (a worker started from a file refused that flag, and the failure read as `damaged PDF`); a reader that cannot start at all (under `--permission` without `--allow-worker`, or a preload that fails in workers) is `unavailable: the PDF reader could not start: ...`, never a damaged document. WebVTT `STYLE` blocks are read by the HTML style reader: an unclosed comment runs to the end in one scan (100,000 openings took seconds), and a block that is not whole rules (`::cue {opacity:0` with no closing brace, a stray or nested brace) fails the file with `a subtitle style that cannot be read safely`; speaker tags scan each character once.

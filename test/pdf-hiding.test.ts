@@ -170,9 +170,21 @@ test("weak-page.pdf: without text recognition the near-empty page is marked, not
 	);
 });
 
+test("an image with only OCR extras keeps them hidden and leaves the body empty", async () => {
+	const bytes = await readFile(new URL("./fixtures/documents/screenshot.png", import.meta.url));
+	const ocr = async () => ({ pages: [""], extras: ["qr payload"] });
+	const result = await convert(bytes, { name: "s.png", ocr, hidden: "text" });
+	assert.equal(result.markdown, "[Hidden in the original]\nqr payload\n");
+	assert.equal(result.pages, 1);
+	assert.deepEqual(
+		result.hidden.map((entry) => entry.text),
+		["qr payload"],
+	);
+});
+
 test("an image that recognition finds no text in fails closed, metadata or not", async () => {
 	const bytes = await readFile(new URL("./fixtures/documents/screenshot.png", import.meta.url));
-	const ocr = async () => ({ pages: [" "], extras: ["image text: none"] });
+	const ocr = async () => ({ pages: [" "], extras: [] });
 	await assert.rejects(convert(bytes, { name: "s.png", ocr }), /no text found in it/);
 });
 

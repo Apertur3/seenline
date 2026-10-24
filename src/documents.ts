@@ -60,8 +60,8 @@ export async function documentToText(
 async function fromImage(bytes: Uint8Array, ocr: () => Promise<OcrResult>) {
 	const read = await ocr();
 	const body = read.pages.flatMap(nonEmpty).map(safe);
-	// Metadata alone is not the picture's text: an image recognition found nothing in fails.
-	if (!body.length)
+	// OCR extras count as recognised content; image metadata alone does not.
+	if (!body.length && !read.extras.some((extra) => extra.trim()))
 		throw new PlainviewError("invalid", "could not read this file: no text found in it");
 	return {
 		body,
