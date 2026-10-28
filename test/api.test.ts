@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { access, readFile, stat } from "node:fs/promises";
 import { dirname } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { strToU8, unzipSync, zipSync } from "fflate";
 import { officeFixtures } from "../scripts/office-fixtures.ts";
 import { convert, PlainviewError } from "../src/index.ts";
@@ -75,9 +76,9 @@ test("a supplied OCR path is forwarded and left intact", async () => {
 	const bytes = await readFile(file);
 	const result = await convert(bytes, {
 		name: "scan.pdf",
-		path: file.pathname,
+		path: fileURLToPath(file),
 		ocr: async (path) => {
-			assert.equal(path, file.pathname);
+			assert.equal(path, fileURLToPath(file));
 			return { pages: ["Recognised scan"], extras: [], reader: "fixture-ocr" };
 		},
 	});

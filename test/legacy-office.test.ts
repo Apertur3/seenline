@@ -3,6 +3,7 @@ import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { convert } from "./text-mode.ts";
 
 const documentToText = async (path: string, name: string, bytes: Uint8Array) =>
@@ -34,7 +35,7 @@ for (const extension of ["doc", "rtf"]) {
 		const file = new URL(name, fixtures);
 		const bytes = await readFile(file);
 		await inScratch(async (directory) => {
-			const output = await documentToText(file.pathname, name, bytes);
+			const output = await documentToText(fileURLToPath(file), name, bytes);
 			for (const fact of [
 				"Harbor legacy report",
 				"Budget is 42000 EUR",
@@ -86,7 +87,7 @@ for (const extension of ["doc", "rtf"]) {
 		const name = `office-legacy.${extension}`;
 		const file = new URL(name, fixtures);
 		await assert.rejects(
-			documentToText(file.pathname, name, await readFile(file)),
+			documentToText(fileURLToPath(file), name, await readFile(file)),
 			/could not read this file/,
 		);
 	});

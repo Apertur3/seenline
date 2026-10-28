@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
-const SRC = new URL("../src/", import.meta.url).pathname;
+const SRC = fileURLToPath(new URL("../src/", import.meta.url));
 const NETWORK =
 	/node:(?:https?|http2|net|tls|dns|dgram)\b|(?:from\s*|import\s*\(|require\s*\()\s*["'](?:https?|http2|net|tls|dns|dgram)["']|\bfetch\s*\(|XMLHttpRequest|WebSocket|\bEventSource\b/;
 

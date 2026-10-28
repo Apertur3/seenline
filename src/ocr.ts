@@ -36,7 +36,7 @@ const isImage = (bytes: Uint8Array) => {
 // One program run: input on stdin, output on stdout, killed at `timeout` or the file's `deadline`.
 function run(cmd: string, args: string[], input: Uint8Array, limit: Limit) {
 	return new Promise<Buffer>((done, reject) => {
-		const child = spawn(cmd, args, { stdio: ["pipe", "pipe", "ignore"] });
+		const child = spawn(cmd, args, { env: process.env, stdio: ["pipe", "pipe", "ignore"] });
 		const chunks: Buffer[] = [];
 		let size = 0;
 		const fail = (message: string, code: "invalid" | "unavailable" = "invalid") => {

@@ -18,7 +18,10 @@ for (const group of ["documents", "injection", "subtitles"]) {
 			const bytes = await readFile(new URL(name, fixtures));
 			const before = Buffer.from(bytes);
 			const { markdown } = await convert(bytes, { name, ocr: async () => fixtureOcr(name) });
-			assert.deepEqual(Buffer.from(markdown), await readFile(new URL(`${name}.md`, goldens)));
+			// textutil stamps its OS-specific build into docProps; the rest stays byte-identical.
+			const same = (text: string) => text.replace(/(CocoaOOXMLWriter\/)[\d.]+/, "$1x");
+			const golden = await readFile(new URL(`${name}.md`, goldens), "utf8");
+			assert.deepEqual(Buffer.from(same(markdown)), Buffer.from(same(golden)));
 			assert.deepEqual(bytes, before, "conversion leaves caller bytes unchanged");
 		});
 	}
