@@ -213,3 +213,48 @@ test("MCP with roots reads inside them only, by real path, and never names the p
 		await rm(dir, { recursive: true, force: true });
 	}
 });
+
+test("PDF calls reuse one worker, including concurrent calls with distinct documents", async () => {
+	const { readFile } = await import("node:fs/promises");
+	const workers: import("node:worker_threads").Worker[] = [];
+	const capture = (worker: import("node:worker_threads").Worker) => workers.push(worker);
+	process.on("worker", capture);
+	try {
+		const invoice = await readFile(fixture("invoice.pdf"));
+		const report = await readFile(fixture("report.pdf"));
+		const first = await convert(invoice, { name: "invoice.pdf" });
+		assert.deepEqual(await convert(invoice, { name: "invoice.pdf" }), first);
+		const expected = await convert(report, { name: "report.pdf" });
+		const results = await Promise.all([
+			convert(invoice, { name: "invoice.pdf" }),
+			convert(report, { name: "report.pdf" }),
+		]);
+		assert.deepEqual(results, [first, expected]);
+		assert.equal(workers.length, 1);
+	} finally {
+		process.off("worker", capture);
+		await workers[0]?.terminate();
+	}
+});
+
+test("a crashed PDF worker fails its document and is replaced for the next one", async () => {
+	const { readFile } = await import("node:fs/promises");
+	const { readPdf } = await import("../src/pdf.ts");
+	const workers: import("node:worker_threads").Worker[] = [];
+	const capture = (worker: import("node:worker_threads").Worker) => workers.push(worker);
+	process.on("worker", capture);
+	try {
+		const bytes = await readFile(fixture("invoice.pdf"));
+		const expected = await readPdf(bytes);
+		const pending = readPdf(bytes);
+		const failed = assert.rejects(pending, /damaged PDF/);
+		await workers[0]?.terminate();
+		await failed;
+		assert.deepEqual(await readPdf(bytes), expected);
+		assert.equal(workers.length, 2);
+		assert.notEqual(workers[0], workers[1]);
+	} finally {
+		process.off("worker", capture);
+		await workers.at(-1)?.terminate();
+	}
+});

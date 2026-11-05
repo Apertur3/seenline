@@ -39,7 +39,12 @@ async function openPdf(bytes: Uint8Array) {
 		cMapUrl: `${dir}cmaps/`,
 		cMapPacked: true,
 	});
-	return { pdfjs, task, doc: await task.promise };
+	try {
+		return { pdfjs, task, doc: await task.promise };
+	} catch (error) {
+		await task.destroy();
+		throw error;
+	}
 }
 
 // A small file can decompress to gigabytes of streams and drawing operators, and pdfjs reads a page
@@ -55,55 +60,104 @@ const OVER_MEMORY = `the PDF needs more memory to read than the limit (${MEMORY_
 const broken = (why: string) =>
 	new SeenlineError("unavailable", `the PDF reader could not start: ${why}`);
 
-/** Reads every page and what the file carries outside its pages; throws `invalid` for a file that is not a readable PDF. */
+let reader: { worker: Worker; started: boolean } | undefined;
+let idle: ReturnType<typeof setTimeout> | undefined;
+let queue: Promise<unknown> = Promise.resolve();
+
+/** Reads every page and what the file carries outside its pages; serializes calls on one reusable worker. */
 export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
-	return new Promise((done, reject) => {
-		let worker: Worker;
+	const result = queue.then(() => readOne(bytes));
+	queue = result.then(
+		() => {},
+		() => {},
+	);
+	return result;
+}
+
+function getReader() {
+	if (!reader) {
 		try {
-			// Started from a string that imports this file: the worker inherits the process's flags, and a
-			// worker started from a file refuses to run under `--input-type` (`node --input-type=module -e`).
-			worker = new Worker(`import(${JSON.stringify(import.meta.url)})`, {
+			// A string import also works under --input-type; inherit the process's flags.
+			const worker = new Worker(`import(${JSON.stringify(import.meta.url)})`, {
 				eval: true,
-				workerData: { seenlinePdf: bytes },
+				workerData: { seenlinePdf: true },
 				resourceLimits: { maxOldGenerationSizeMb: MEMORY_MB / 2 },
 				stdout: true,
 				stderr: true,
 			});
+			reader = { worker, started: false };
+			// An idle worker can fail too: discard it, and never leave an unhandled error.
+			const discard = () => {
+				if (reader?.worker === worker) reader = undefined;
+			};
+			worker.on("error", discard);
+			worker.once("exit", discard);
 		} catch (error) {
-			return reject(broken((error as Error).message)); // as under --permission without --allow-worker
+			throw broken((error as Error).message); // --permission without --allow-worker
 		}
-		worker.stdout.resume();
-		worker.stderr.resume();
-		const [start, base] = [Date.now(), process.memoryUsage.rss()];
-		let started = false; // the worker has loaded its code and pdfjs: a failure from here on is the file's
-		const stop = (why: string) => {
-			reject(fail(why));
-			void worker.terminate();
-		};
-		const watch = setInterval(() => {
-			if (process.memoryUsage.rss() - base > MEMORY_MB * 2 ** 20) stop(OVER_MEMORY);
-			if (Date.now() - start > DEADLINE_S * 1000)
-				stop(`the PDF took longer than ${DEADLINE_S} seconds to read`);
-		}, 50);
-		worker.on("message", (m: { started?: true; doc?: PdfDoc; error?: string }) => {
-			started = true;
-			if (m.started) return;
-			clearInterval(watch);
-			void worker.terminate();
-			m.doc ? done(m.doc) : reject(new SeenlineError("invalid", m.error as string));
+	}
+	return reader;
+}
+
+async function readOne(bytes: Uint8Array): Promise<PdfDoc> {
+	clearTimeout(idle);
+	const current = getReader();
+	const { worker } = current;
+	worker.ref();
+	worker.stdout.resume();
+	worker.stderr.resume();
+	let cleanup = () => {};
+	try {
+		return await new Promise<PdfDoc>((done, reject) => {
+			const [start, base] = [Date.now(), process.memoryUsage.rss()];
+			const watch = setInterval(() => {
+				if (process.memoryUsage.rss() - base > MEMORY_MB * 2 ** 20) reject(fail(OVER_MEMORY));
+				if (Date.now() - start > DEADLINE_S * 1000)
+					reject(fail(`the PDF took longer than ${DEADLINE_S} seconds to read`));
+			}, 50);
+			const message = (m: { started?: true; doc?: PdfDoc; error?: string }) => {
+				if (m.started) {
+					current.started = true;
+					return;
+				}
+				m.doc ? done(m.doc) : reject(new SeenlineError("invalid", m.error as string));
+			};
+			const error = (e: Error & { code?: string }) =>
+				reject(
+					e.code === "ERR_WORKER_OUT_OF_MEMORY"
+						? fail(OVER_MEMORY)
+						: current.started
+							? fail("damaged PDF")
+							: broken(e.message),
+				);
+			const exit = () => reject(current.started ? fail("damaged PDF") : broken("it exited"));
+			worker.on("message", message);
+			worker.once("error", error);
+			worker.once("exit", exit);
+			cleanup = () => {
+				clearInterval(watch);
+				worker.off("message", message);
+				worker.off("error", error);
+				worker.off("exit", exit);
+			};
+			worker.postMessage(bytes);
 		});
-		worker.once("error", (error: Error & { code?: string }) => {
-			if (error.code === "ERR_WORKER_OUT_OF_MEMORY") stop(OVER_MEMORY);
-			else if (!started) {
-				reject(broken(error.message));
+	} catch (error) {
+		reader = undefined;
+		await worker.terminate();
+		throw error;
+	} finally {
+		cleanup();
+		worker.unref();
+		// Captured stdio has its own ref in Node: end it by retiring the idle worker promptly.
+		if (reader === current) {
+			idle = setTimeout(() => {
+				reader = undefined;
 				void worker.terminate();
-			} else stop("damaged PDF");
-		});
-		worker.once("exit", () => {
-			clearInterval(watch);
-			reject(started ? fail("damaged PDF") : broken("it exited"));
-		});
-	});
+			}, 100);
+			idle.unref();
+		}
+	}
 }
 
 async function parse(bytes: Uint8Array): Promise<PdfDoc> {
@@ -118,10 +172,9 @@ async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 		);
 	}
 	const { pdfjs, task, doc } = opened;
-	if (doc.numPages > MAX_PAGES) {
-		throw new SeenlineError("invalid", `could not read this file: more than ${MAX_PAGES} pages`);
-	}
 	try {
+		if (doc.numPages > MAX_PAGES)
+			throw new SeenlineError("invalid", `could not read this file: more than ${MAX_PAGES} pages`);
 		const layers = await doc.getOptionalContentConfig();
 		const visible = (layer: unknown) => layers.isVisible(layer as { type: string; id: string });
 		const pages: PdfPage[] = [];
@@ -201,12 +254,16 @@ if (!isMainThread && parentPort && workerData?.seenlinePdf) {
 	const port = parentPort;
 	await import("pdfjs-dist/legacy/build/pdf.mjs");
 	port.postMessage({ started: true });
-	await parse(workerData.seenlinePdf).then(
-		(doc) => port.postMessage({ doc }),
-		(error: Error) =>
-			port.postMessage({
-				error:
-					error instanceof SeenlineError ? error.message : "could not read this file: damaged PDF",
-			}),
-	);
+	port.on("message", async (bytes: Uint8Array) => {
+		await parse(bytes).then(
+			(doc) => port.postMessage({ doc }),
+			(error: Error) =>
+				port.postMessage({
+					error:
+						error instanceof SeenlineError
+							? error.message
+							: "could not read this file: damaged PDF",
+				}),
+		);
+	});
 }
