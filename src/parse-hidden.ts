@@ -63,7 +63,11 @@ export function unseen(body: string[], hidden: string[]): string[] {
 	const keep = entries.map((e, i) => {
 		const text = norm(e?.text ?? "");
 		if (!text) return null;
-		if (listed.has(hidden[i] as string) || contains(seen, text)) return word(i) ? false : null;
+		if (
+			listed.has(hidden[i] as string) ||
+			(!NOTICE.test(hidden[i] as string) && contains(seen, text))
+		)
+			return word(i) ? false : null;
 		listed.add(hidden[i] as string);
 		return true;
 	});
@@ -165,6 +169,12 @@ const REASONS = new Set(
 	),
 );
 REASONS.add("text not drawn as written");
+for (const reason of [
+	"HTML linked stylesheet not read",
+	"HTML inline CSS not fully read",
+	"HTML text may be hidden by unread styles",
+])
+	REASONS.add(reason);
 // parseHidden drops " text" from these on a PDF page; describe puts it back so the kind reads as in text mode.
 const PDF_TEXT = new Set(
 	"white,tiny,invisible,off-page,covered,transparent,squeezed,unreadable font,clipped,reading order".split(
@@ -173,9 +183,10 @@ const PDF_TEXT = new Set(
 );
 // Notices that carry no document text: they read the same in every mode. The verify line holds counts only.
 const NOTICE =
-	/^(?:HTML (?:script|style) present \(code omitted\)|p\. \d+, text differs from page image: (?:\d+ words? only in the text layer, \d+ words? only in the page image|not compared, too many words))$/;
+	/^(?:HTML (?:script|style) present \(code omitted\)|HTML (?:linked stylesheet not read|inline CSS not fully read): \d+|p\. \d+, text differs from page image: (?:\d+ words? only in the text layer, \d+ words? only in the page image|not compared, too many words))$/;
 function kind(reasons: string[]): string {
 	const label = reasons.join(" and ");
+	if (REASONS.has(label)) return label;
 	const named = NAMED.exec(label)?.[0] ?? (/comments?\d*\.xml$/i.test(label) && "comments");
 	return named || (reasons.every((r) => REASONS.has(r)) ? label : "hidden content");
 }

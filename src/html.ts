@@ -1,5 +1,6 @@
 import { type Css, styleRules, visibility } from "./html-style.ts";
 import { type HtmlNode, htmlTree } from "./html-tree.ts";
+import { suspect } from "./suspect.ts";
 
 export interface MailText {
 	body: string[];
@@ -11,7 +12,7 @@ const flat = (s: string) => s.replace(/\s+/g, " ").trim();
 const BLOCK =
 	/^(?:p|div|section|article|header|footer|main|aside|nav|ul|ol|table|blockquote|pre|dl|dt|dd|address)$/;
 
-function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
+function reader(out: MailText, rules: ReturnType<typeof styleRules>["rules"], unread: () => void) {
 	const visit = (n: HtmlNode, path: HtmlNode[], inherited: Css, hidden: boolean): string => {
 		if (n.tag === "script" || n.tag === "style") {
 			out.hidden.push(`HTML ${n.tag} present (code omitted)`);
@@ -19,9 +20,8 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 		}
 		if (n.tag === "meta" || n.tag === "link" || n.tag === "base") {
 			// A charset, or a link to an icon, a feed or another address, holds no text. Listed: any meta
-			// content and any link title (free text), and a stylesheet, which this reader cannot see into,
-			// so it hides the whole page here.
-			const link = n.attrs.title !== undefined || /stylesheet/i.test(n.attrs.rel ?? "");
+			// content and any link title (free text). Unread stylesheets are counted separately.
+			const link = n.attrs.title !== undefined;
 			const listed = n.tag === "base" || (n.tag === "meta" ? n.attrs.content !== undefined : link);
 			if (listed)
 				out.hidden.push(
@@ -33,7 +33,7 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 				);
 			return "";
 		}
-		const state = visibility(n, path, inherited, rules);
+		const state = visibility(n, path, inherited, rules, unread);
 		const unseen =
 			hidden ||
 			state.hidden ||
@@ -81,12 +81,23 @@ function reader(out: MailText, rules: ReturnType<typeof styleRules>) {
 }
 export function readHtml(raw: string): MailText {
 	const root = htmlTree(raw),
-		rules = styleRules(root);
+		{ rules, unread } = styleRules(root);
 	const out: MailText = { body: [], hidden: [] };
-	const visit = reader(out, rules);
-	out.body = visit(root, [root], {}, false)
+	const visit = reader(out, rules, () => {
+		unread.inline ||= 1;
+	});
+	const lines = visit(root, [root], {}, false)
 		.split("\n")
-		.map((l) => l.trim())
-		.filter(Boolean);
+		.map((l) => l.trim());
+	out.hidden.unshift(
+		...(unread.linked ? [`HTML linked stylesheet not read: ${unread.linked}`] : []),
+		...(unread.inline ? [`HTML inline CSS not fully read: ${unread.inline}`] : []),
+	);
+	out.body = lines.filter((line) => {
+		if (!line) return false;
+		if ((!unread.linked && !unread.inline) || !suspect(line)) return true;
+		out.hidden.push(`HTML text may be hidden by unread styles: ${line}`);
+		return false;
+	});
 	return out;
 }

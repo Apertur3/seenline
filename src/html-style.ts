@@ -29,9 +29,6 @@ const inert = (raw: string) =>
 	raw
 		.split(";")
 		.every((d) => !d.trim() || INERT.test(/^\s*([a-z-]+)\s*:/i.exec(d)?.[1]?.toLowerCase() ?? ""));
-const linked = (n: HtmlNode): boolean =>
-	(n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? "")) ||
-	n.children.some((c) => typeof c !== "string" && linked(c));
 /** A style sheet's rules as [selectors, declarations]; anything else (an unclosed or nested block, a stray brace) throws. */
 export function cssRules(sheet: string): [string, string][] {
 	// An unclosed comment runs to the end, as in a browser; each pattern scans a character once.
@@ -45,23 +42,48 @@ export function cssRules(sheet: string): [string, string][] {
 	if (raw.slice(at).trim()) throw new Error("CSS rules");
 	return out;
 }
-export function styleRules(root: HtmlNode): Rule[] {
-	// A linked stylesheet is unknown, so every element is flagged and no rule in the page can hide more.
-	if (linked(root)) return [{ selector: "*", css: { display: "none" } }];
+export function styleRules(root: HtmlNode): {
+	rules: Rule[];
+	unread: { linked: number; inline: number };
+} {
 	const rules: Rule[] = [];
+	let linked = 0,
+		inline = 0;
 	const walk = (n: HtmlNode) => {
-		if (n.tag === "style")
-			for (const [selectors, body] of cssRules(n.children.join("")))
-				for (const selector of selectors.split(",")) {
-					if (/^[\w.*#\s-]+$/.test(selector))
-						rules.push({ selector: selector.trim(), css: declarations(body) });
-					else if (!inert(body)) throw new Error("unsupported CSS selector");
-				}
+		if (n.tag === "link" && /(?:^|\s)stylesheet(?:$|\s)/i.test(n.attrs.rel ?? "")) linked++;
+		if (n.tag === "style") {
+			let incomplete = false;
+			try {
+				for (const [selectors, body] of cssRules(n.children.join("")))
+					for (const selector of selectors.split(",")) {
+						try {
+							if (/^[\w.*#\s-]+$/.test(selector)) {
+								const css = declarations(body);
+								rules.push({ selector: selector.trim(), css });
+							} else if (!inert(body)) incomplete = true;
+						} catch {
+							incomplete = true;
+						}
+					}
+			} catch {
+				incomplete = true;
+			}
+			if (incomplete) inline++;
+		}
+		if (n.attrs.style) {
+			try {
+				declarations(n.attrs.style);
+			} catch {
+				// This tree belongs to the reader: omit an unreadable attribute before visibility walks it.
+				delete n.attrs.style;
+				inline++;
+			}
+		}
 		for (const c of n.children) if (typeof c !== "string") walk(c);
 	};
 	walk(root);
 	if (rules.length > 1000) throw new Error("CSS rule budget");
-	return rules;
+	return { rules, unread: { linked, inline } };
 }
 function matches(n: HtmlNode, selector: string): boolean {
 	return (selector.match(/[#.]?[\w-]+|\*/g) ?? []).every(
@@ -188,13 +210,22 @@ const neutral = (k: string, v = "") =>
 	(["zoom", "scale"].includes(k) &&
 		/^[\d.]+%?$/.test(v) &&
 		Number.parseFloat(v) / (v.endsWith("%") ? 100 : 1) >= 0.5);
-export function cssHidden(css: Css, tag = ""): boolean {
+export function cssHidden(css: Css, tag = "", unread?: () => void): boolean {
 	// The letters' fill: -webkit-text-fill-color where it is set, else the colour.
 	const fill = css["-webkit-text-fill-color"];
 	const ink = fill && fill !== "currentcolor" && !neutral("", fill) ? fill : css.color;
 	const foreground = color(ink);
 	const colours = [ink, css.background, css["background-color"]].filter((c): c is string => !!c);
 	const uncertain = colours.some((c) => !/^(?:#[a-f\d]{6}|[a-z]+)$/.test(color(c)));
+	const clipped = () => {
+		try {
+			return collapsed(css, tag);
+		} catch (error) {
+			if (!unread) throw error;
+			unread();
+			return false;
+		}
+	};
 	return (
 		uncertain ||
 		css.display === "none" ||
@@ -202,7 +233,7 @@ export function cssHidden(css: Css, tag = ""): boolean {
 		faint(css.opacity) ||
 		tiny(css["font-size"]) ||
 		fontTiny(css.font) ||
-		collapsed(css, tag) ||
+		clipped() ||
 		foreground === "#ffffff" ||
 		foreground === "transparent" ||
 		(!!foreground &&
@@ -232,6 +263,7 @@ export function visibility(
 	path: HtmlNode[],
 	inherited: Css,
 	rules: Rule[],
+	unread?: () => void,
 ): { css: Css; hidden: boolean } {
 	const css = { ...inherited };
 	// ponytail: aria-hidden only takes text from a screen reader, but the pinned reference goldens list
@@ -240,14 +272,14 @@ export function visibility(
 	for (const rule of rules)
 		if (selected(path, rule.selector)) {
 			Object.assign(css, rule.css);
-			hidden ||= cssHidden(css, n.tag);
+			hidden ||= cssHidden(css, n.tag, unread);
 		}
 	// An element a rule already hides stays hidden, whatever its own style says.
 	if (!hidden) Object.assign(css, declarations(n.attrs.style ?? ""));
 	if (n.attrs.color) css.color = n.attrs.color.toLowerCase();
 	if (n.attrs.bgcolor) css["background-color"] = n.attrs.bgcolor.toLowerCase();
 	// Cascading conflicts are conservative: an applicable hiding rule always requires review.
-	hidden ||= cssHidden(css, n.tag) || (n.tag === "font" && Number(n.attrs.size ?? 3) <= 1);
+	hidden ||= cssHidden(css, n.tag, unread) || (n.tag === "font" && Number(n.attrs.size ?? 3) <= 1);
 	const next: Css = {};
 	for (const key of ["font-size", "color", "background", "background-color", "visibility"])
 		if (css[key]) next[key] = css[key];

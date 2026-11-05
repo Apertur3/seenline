@@ -219,8 +219,11 @@ in the page)` in a PDF). Word, HTML and email have no location anchors.
   characters. HTML and subtitle styles are read for a fixed set of hiding properties (display, visibility, opacity under
   10%, tiny fonts, a block or positioned box of no size that clips or scrolls, its minimum size and `min()`, `max()` and
   `clamp()` counted, white or same-colour text, off-screen offsets, clipping, masks, transforms, a closed `<details>`
-  past its initial summary); a nested computed size on such a box fails the file; hiding by stacking one element over
-  another, by a parent's clipping or by animation is not worked out. `aria-hidden` text is still listed as hidden
+  past its initial summary); hiding by stacking one element over another, by a parent's clipping or by animation is not
+  worked out. Styles Seenline cannot read (a linked stylesheet, `var()` or `calc()`, a selector it does not match, a
+  nested computed size) do not empty the page: its text stays in the body, the block says `HTML linked stylesheet not
+  read` or `HTML inline CSS not fully read`, and a line that reads like an instruction to an AI moves to the block as
+  `HTML text may be hidden by unread styles`. Other text such styles hide stays in the body. `aria-hidden` text is still listed as hidden
   although a sighted reader sees it. A subtitle `STYLE` block that can hide cues lists every cue; one that is not whole
   CSS rules (an unclosed block, a nested or stray brace) fails the file.
 - Email alternatives. In a `multipart/alternative` message the `text/plain` part is the body, though an HTML client
