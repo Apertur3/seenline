@@ -152,13 +152,13 @@ Set B: 25 third-party Split-View PDF canaries. Results of the tools tested, with
 | Outcome | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | leaked with no signal | 2 | 0 | 2 | 12 | 7 | 12 | 3 | 19 | 1 | 10 |
-| flagged by the tool itself | 20 | 20 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| flagged by the tool itself | 20 | 22 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 We wrote the scorer and ran it ourselves. Tool versions, dates, configurations and all outcomes are in
 [docs/BENCHMARK.md](docs/BENCHMARK.md). This is not an independent ranking. Seenline's two known leaks in this set are
 EG_001, whose `/ToUnicode` map substitutes code points for visible letters, and EG_024, whose Type 3 glyphs draw
-different letters from their names. Both have internally consistent text metadata. `--verify` signals both pages but
-keeps the text layer in the body, so both remain leaks. These two rows do not cover every outcome: text can also be
+different letters from their names. Both have internally consistent text metadata. `--verify` now moves the disputed
+lines into the hidden block, so neither leaks in that mode. These two rows do not cover every outcome: text can also be
 removed without a signal, recovered correctly, or refused. Different files can give different results.
 
 ## Formats
@@ -184,9 +184,9 @@ in the page)` in a PDF). Word, HTML and email have no location anchors.
 - Font remapping. A `/ToUnicode` map that sends a visible letter to a different code point, or a Type 3 font whose
   glyphs draw other letters than their names say, leaves a text layer that is consistent with itself, so nothing in it
   differs from what an extractor returns. By default Seenline does not catch it. The opt-in `--verify` (below) renders
-  each page and compares it with the text layer; it lists the Split-View cases of this kind that were tested (EG_001 and
-  EG_024, as canaries and as task documents) by page, but the text layer stays in the body, it also lists clean pages
-  (recognition errors), and it misses changes it cannot tell from recognition noise (see below). Text in a font the file
+  each page and compares it with the text layer; it moves disputed lines in the tested Split-View canaries (EG_001 and
+  EG_024) into the hidden block as `text not drawn as written`. It can also move clean lines when recognition errs,
+  and misses changes it cannot tell from recognition noise (see below). Text in a font the file
   gives no letter mapping for is listed as `unreadable font`.
 - Small text from 2.25 pt up. Text under 2.25 pt is listed as tiny; slightly larger text (3 or 4 pt) is not, because
   ordinary papers set figure labels at 2.5 pt and footnotes at 4 to 5 pt. Hidden text drawn a glyph per text object is
@@ -330,8 +330,10 @@ has a text layer is rendered and read by `tesseract`, and its words are compared
 punctuation and common recognition confusions ignored, one letter in three allowed to differ). Where a stretch of the
 text layer and a stretch of the page image sit between the same shared words and each has a word of four or more letters
 that the other side lacks anywhere on the page, the page is listed as `text differs from page image`, with counts of
-words unique to each side. The entry gives counts rather than the words, so the line reads the same in every `--hidden`
-mode: the body keeps the text layer, and recognised text never goes in the output.
+words unique to each side. The counts read the same in every `--hidden` mode. Lines containing those disputed
+text-layer words leave the body and are kept whole under `text not drawn as written`, including short words on the
+same line. Other lines stay in the body. The usual hidden modes apply: describe gives a character count, while
+`hidden[]` keeps the full line. Recognised text never replaces the body: the callback supplies no confidence scores.
 
 Not compared, so not caught: text-layer words the image does not show at all (a recognition miss looks the same; white,
 tiny, clipped and covered text is left to the static checks), order, numbers and words with digits, words under four
@@ -347,7 +349,10 @@ words`.
 It is slow and not quiet: about 0.5 to 0.9 seconds for a short page and 2.4 for a dense page of a paper (one page after
 another, 16-core laptop), and on the benchmark's public PDFs it listed 24 of 1,409 pages in 9 of the 39 files it read
 where nothing was hidden (math with subscripts, sideways pages, a typeset logo, a chart label, small sequence text, an
-accent drawn apart from its letter). Use it with `--fail-on-hidden` to send a file for a human look, not as a filter.
+accent drawn apart from its letter). The disagreement threshold is unchanged; those errors can now move clean lines.
+Use `hidden[]` to review quarantined text and `--fail-on-hidden` to send the file for a human look.
+
+In the 2026-11-05 re-run, verify moved 54 of 73,694 clean body lines (0.073%), containing 352 whitespace-delimited words (0.051%), on 24 of 1,409 pages in 9 of 39 files. Details and the before/after outcomes are in [the benchmark update](docs/BENCHMARK.md#verify-quarantine-update-2026-11-05).
 
 ## MCP details
 

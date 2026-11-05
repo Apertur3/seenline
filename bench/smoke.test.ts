@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, test } from "node:test";
 import { corpus } from "./corpus.ts";
-import { ours } from "./ours.ts";
+import { ours, verifyCost } from "./ours.ts";
 import { HEAD, markdown, rows, tsv } from "./report.ts";
 
 const cache = await mkdtemp(join(tmpdir(), "seenline-bench-"));
@@ -31,7 +31,8 @@ test("the corpus holds the fixtures once each, with the Unicode and PDF-hiding c
 });
 
 test("Seenline leaks no hidden payload of the control set, and the report is complete", async () => {
-	await ours(cache, entries, 1);
+	const pending = entries.values();
+	await Promise.all([ours(cache, pending, 1), ours(cache, pending, 1)]);
 	const rs = rows(cache);
 	const mine = rs.filter((r) => r.candidate === "seenline");
 	assert.equal(mine.length, entries.length);
@@ -57,4 +58,26 @@ test("Seenline leaks no hidden payload of the control set, and the report is com
 	])
 		assert.ok(doc.includes(heading), heading);
 	assert.doesNotMatch(doc, /\b(first|only)\b/i);
+});
+
+test("verify cost counts quarantined body lines, excluding already hidden text", async () => {
+	const original = entries.find((e) => e.file === "clipped.pdf");
+	assert.ok(original);
+	const entry = { ...original, set: "A" as const };
+	await ours(cache, [entry], 1, "describe", {
+		name: "verify",
+		read: async () => ({ pages: ["Rejected."], extras: [] }),
+	});
+	assert.deepEqual(await verifyCost(cache, [entry]), {
+		files: 1,
+		pages: 1,
+		lines: 1,
+		words: 6,
+		signalFiles: 1,
+		signals: 1,
+		movedFiles: 1,
+		movedPages: 1,
+		movedLines: 1,
+		movedWords: 6,
+	});
 });

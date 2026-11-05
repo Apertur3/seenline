@@ -240,6 +240,7 @@ export const scrub = (text: string): string =>
 interface Limits {
 	leaked: { gap: string; reason: string }[];
 	flagged: { gaps: string[]; reason: string }[];
+	verify?: string;
 }
 
 /** Known limits of Seenline on Set B, with the reason; the text lives in bench/data/limits.json. */
@@ -250,6 +251,7 @@ function limits(): string {
 		"",
 		...l.leaked.map((x) => `- ${x.gap}: leaked. ${x.reason}`),
 		...l.flagged.map((x) => `- ${x.gaps.join(", ")}: flagged. ${x.reason}`),
+		...(l.verify ? ["", l.verify] : []),
 	].join("\n");
 }
 

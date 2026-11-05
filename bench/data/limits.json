@@ -3,11 +3,11 @@
 	"leaked": [
 		{
 			"gap": "EG_001",
-			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column seenline-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the payload is still a leak and the row reads `leaked, signalled`."
+			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so default conversion still leaks it. The opt-in --verify now moves lines containing words disputed by the rendered reading into the hidden block as `text not drawn as written`, preserving their full text in hidden[]. The table above predates that quarantine rule; see the dated update below."
 		},
 		{
 			"gap": "EG_024",
-			"reason": "A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too; like EG_001 it needs the glyph shapes. As for EG_001, `--verify` lists the page and the body keeps the text layer (`leaked, signalled`)."
+			"reason": "A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so default conversion still leaks it. Like EG_001, --verify now quarantines the disputed line instead of leaving it in the body. The rendered word is not recovered; OCR supplies no confidence scores."
 		}
 	],
 	"flagged": [
@@ -19,5 +19,6 @@
 			"gaps": ["EG_021", "EG_022", "EG_023", "EG_025"],
 			"reason": "A composite font with no /ToUnicode and no font program in the file (descriptor, /CIDSystemInfo or /Type removed): its two-byte codes map to nothing, and the text layer holds the codes themselves as CJK characters. That text goes under `unreadable font`; the visible word is not recovered."
 		}
-	]
+	],
+	"verify": "### Verify quarantine update (2026-11-05)\n\nThe comparison tables above preserve the 2026-10-23 run. This follow-up reran Set B before and after the quarantine change, then ran `node bench/run.ts verify` on the cached corpus. Default conversion is unchanged.\n\n| seenline-verify | before | after |\n| --- | --- | --- |\n| EG_001 | leaked, signalled | flagged |\n| EG_024 | leaked, signalled | flagged |\n| leaked, signalled | 2 | 0 |\n| flagged | 20 | 22 |\n| correct | 3 | 3 |\n\nClean Set A cost: 54 of 73,694 extracted body lines (0.073%), containing 352 of 692,033 whitespace-delimited words (0.051%), moved on 24 of 1,409 pages in 9 of 39 successfully read PDFs. The scanned PDF was refused as before.\n\nThe current run signals 24 pages in 9 files; the documented previous rate was 24 of 1,409 pages in 9 of 39 files. The comparison threshold is unchanged. The new action keeps whole lines containing the disputed words under `text not drawn as written`, including short words on those lines. Remaining lines stay. These clean moves include equations, chart labels, protein sequences and accented affiliations; the kind records OCR disagreement and can include ordinary text. Full evidence and per-file moves are in `$SEENLINE_BENCH_CACHE/verify-cost.json`, written by the verify benchmark command.\n\nRendered text is not substituted: the callback supplies no confidence scores. Existing comparison limits remain: near matches, short or numeric text, non-Latin words, word sets that lose reading order, and recognition omissions can hide a substitution. Pages over the comparison budget keep a notice and their text; no disputed lines can be identified there.\n\nThis run used Node v26.13.0, tesseract 5.5.3 (eng), and pdftoppm 26.10.0 on a 24-core arm64 machine with 64 GiB RAM. The verify benchmark overlaps eight independent files; per-file times include contention and are not compared with the old serial timings."
 }

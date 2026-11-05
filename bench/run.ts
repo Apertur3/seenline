@@ -11,7 +11,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { corpus } from "./corpus.ts";
-import { modes, ours } from "./ours.ts";
+import { modes, ours, verifyCost } from "./ours.ts";
 import { prepare } from "./prepare.ts";
 import { markdown, rows, tsv } from "./report.ts";
 
@@ -56,7 +56,14 @@ else if (command === "modes") process.stdout.write(await modes(cache, corpus(cac
 else if (command === "verify") {
 	const { tesseract } = await import("../src/ocr.ts");
 	const pdfs = corpus(cache).filter((e) => /\.pdf$/i.test(e.file));
-	await ours(cache, pdfs, 1, "describe", { name: "verify", read: tesseract("eng") });
+	// Independent files overlap OCR; per-file timings include contention, not serial throughput.
+	const pending = pdfs.values();
+	await Promise.all(
+		Array.from({ length: 8 }, () =>
+			ours(cache, pending, 1, "describe", { name: "verify", read: tesseract("eng") }),
+		),
+	);
+	process.stdout.write(`${JSON.stringify(await verifyCost(cache, pdfs), null, 2)}\n`);
 } else if (command === "ocr") {
 	const { tesseract } = await import("../src/ocr.ts");
 	const files = corpus(cache).filter((e) => /\.(pdf|png|jpe?g|bmp|gif|webp)$/i.test(e.file));

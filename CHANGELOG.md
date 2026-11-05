@@ -4,6 +4,7 @@ Format: one heading per version. The anchor lines and the `[Hidden in the origin
 
 ## 0.1.0 (prepared, not yet released)
 
+- `--verify` acts on what it finds: on a page where the rendered image does not show what the text layer says, the disputed lines leave the body and are listed as `text not drawn as written` (Split-View EG_001 and EG_024 are now flagged in that mode; on clean public files 54 of 73,694 lines moved). The default conversion is unchanged.
 - Renamed from Plainview to Seenline: package, CLI binary, MCP server name, `SeenlineError` and the `SEENLINE_` environment variables. The output contract is unchanged.
 - Images with OCR extras but no recognised body text keep those extras as hidden content; images with neither still fail closed.
 

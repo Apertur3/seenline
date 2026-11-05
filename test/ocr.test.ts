@@ -234,7 +234,7 @@ test("OCR flags are opt-in and checked before conversion", () => {
 
 const memo = fixture("pdf-hiding/short-page.pdf");
 const differs =
-	"[Hidden in the original]\np. 1, text differs from page image: 1 word only in the text layer, 1 word only in the page image\n";
+	"[Hidden in the original]\np. 1, text differs from page image: 1 word only in the text layer, 1 word only in the page image\np. 1, text not drawn as written: 9 characters not shown\n";
 test("--verify lists a page whose image shows other words and fails closed without the tools", () => {
 	const same = run(both, ["--verify", "--fail-on-hidden", memo], "text:Approved.");
 	assert.equal(same.status, 0, same.stderr);
@@ -245,7 +245,7 @@ test("--verify lists a page whose image shows other words and fails closed witho
 		"text:Rejected.",
 	);
 	assert.equal(other.status, 3, other.stderr);
-	assert.equal(other.stdout, `[p. 1]\nApproved.\n${differs}`);
+	assert.equal(other.stdout, `[p. 1]\n${differs}`);
 	for (const [path, hint] of [
 		[none, "needs pdftoppm (install poppler"],
 		[onlyPdftoppm, "needs tesseract (install it"],
@@ -272,13 +272,14 @@ test("seenline mcp --verify lists the page in the structured result", async () =
 		await client.connect(transport);
 		const result = await client.callTool({ name: "convert_file", arguments: { path: memo } });
 		assert.ok(!result.isError, JSON.stringify(result.content));
-		assert.deepEqual(result.content, [{ type: "text", text: `[p. 1]\nApproved.\n${differs}` }]);
+		assert.deepEqual(result.content, [{ type: "text", text: `[p. 1]\n${differs}` }]);
 		assert.deepEqual((result.structuredContent as { hidden: unknown }).hidden, [
 			{
 				anchor: "p. 1",
 				reasons: ["text differs from page image"],
 				text: "1 word only in the text layer, 1 word only in the page image",
 			},
+			{ anchor: "p. 1", reasons: ["text not drawn as written"], text: "Approved." },
 		]);
 	} finally {
 		await client.close();
@@ -334,8 +335,10 @@ test("real tesseract: --verify lists the remapped font and not its twin", {
 	assert.equal(remapped.status, 0, remapped.stderr);
 	assert.match(
 		remapped.stdout,
-		/\nFGBC CNLZRAG ABJ\n\[Hidden in the original\]\np\. 1, text differs from page image: /,
+		/\n\[Hidden in the original\]\np\. 1, text differs from page image: /,
 	);
+	assert.match(remapped.stdout, /p\. 1, text not drawn as written: 16 characters not shown/);
+	assert.doesNotMatch(remapped.stdout, /FGBC|CNLZRAG|ABJ/);
 	const twin = run(process.env.PATH ?? "", [
 		"--verify",
 		fixture("pdf-hiding/font-remapped-true.pdf"),

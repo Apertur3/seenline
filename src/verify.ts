@@ -92,22 +92,22 @@ function matches(a: string[], b: string[]): [number, number, number][] {
  * the same shared words and each has a word the other side lacks anywhere on the page. A page too long to
  * compare is reported as such, never passed.
  */
-export function differs(
+function disagreement(
 	text: string,
 	image: string,
-): { text: number; image: number } | "too long" | null {
+): { text: string[]; image: number } | "too long" | null {
 	const a = words(text);
 	const b = words(image);
 	if ((a.length + 1) * (b.length + 1) > MAX_PAIRS) return "too long";
 	const compared = (w: string) => w.length >= MIN_WORD && /^[a-z]+$/.test(w);
 	// An image with no word at all where the text layer has some is not a match (no clean page did this).
 	if (!b.some((w) => w.length >= MIN_WORD)) {
-		const only = a.filter(compared).length;
-		return only > 0 ? { text: only, image: 0 } : null;
+		const only = a.filter(compared);
+		return only.length > 0 ? { text: only, image: 0 } : null;
 	}
 	const inImage = seenIn(b);
 	const inText = seenIn(a);
-	let only = 0;
+	const only: string[] = [];
 	let shown = 0;
 	let ai = 0;
 	let bi = 0;
@@ -122,17 +122,23 @@ export function differs(
 			const spaced = other.every((w) => w.length === 1) && joined.length >= MIN_WORD;
 			const seen = extra || (spaced && !inText(joined) ? 1 : 0);
 			if (missing.length > 0 && seen > 0) {
-				only += missing.length;
+				for (const w of missing) only.push(w);
 				shown += seen;
 			}
 		}
 		ai = i + k;
 		bi = j + k;
 	}
-	return only > 0 ? { text: only, image: shown } : null;
+	return only.length > 0 ? { text: only, image: shown } : null;
 }
 
-/** Hidden-block lines for the pages whose text layer the rendered page shows differently; one reading per page. */
+/** Counts of the words disputed by the existing, recognition-error-tolerant comparison. */
+export function differs(text: string, image: string) {
+	const d = disagreement(text, image);
+	return d && (d === "too long" ? d : { text: d.text.length, image: d.image });
+}
+
+/** Quarantine disputed lines in place and return their hidden entries and counts; one reading per page. */
 export async function compare(
 	pages: PdfPage[],
 	read: (pages: number[]) => Promise<OcrResult>,
@@ -144,12 +150,22 @@ export async function compare(
 		const image = seen[p.number - 1];
 		if (image === undefined)
 			throw new SeenlineError("invalid", "could not read this file: text recognition failed");
-		const d = differs(p.lines.join("\n"), image);
+		const d = disagreement(p.lines.join("\n"), image);
 		if (!d) return [];
+		const moved: string[] = [];
+		if (d !== "too long") {
+			const disputed = new Set(d.text);
+			p.lines = p.lines.filter((line) => {
+				if (!words(line).some((w) => disputed.has(w))) return true;
+				// Keep the full line as evidence, including short words the comparison cannot judge.
+				moved.push(`p. ${p.number}, text not drawn as written: ${line.replace(/\s+/g, " ")}`);
+				return false;
+			});
+		}
 		const counts =
 			d === "too long"
 				? "not compared, too many words"
-				: `${n(d.text)} only in the text layer, ${n(d.image)} only in the page image`;
-		return [`p. ${p.number}, text differs from page image: ${counts}`];
+				: `${n(d.text.length)} only in the text layer, ${n(d.image)} only in the page image`;
+		return [`p. ${p.number}, text differs from page image: ${counts}`, ...moved];
 	});
 }

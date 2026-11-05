@@ -25,7 +25,7 @@ Convert local documents to Markdown. Scans and images fail closed unless --ocr i
   --ocr              Read scans and images with a local tesseract (PDF pages also need
                      pdftoppm from poppler); off by default, nothing leaves the machine
   --verify           Compare each PDF page's text layer with a text recognition reading of
-                     the rendered page (same tools as --ocr) and list the pages that differ
+                     the rendered page (same tools as --ocr); quarantine disputed lines
   --ocr-lang <lang>  Tesseract languages for --ocr and --verify, for example deu or eng+nld
                      (default eng)
   --help             Show this help

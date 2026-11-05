@@ -253,7 +253,7 @@ test("differs: flags text the image replaces, not recognition errors, misses or 
 	assert.equal(differs(long, long), "too long");
 });
 
-test("verify: a page whose image shows other words is listed, the body is kept; a match is silent", async () => {
+test("verify: disputed lines leave the body; a match is silent", async () => {
 	const pages: number[][] = [];
 	const verify =
 		(said: string) =>
@@ -264,13 +264,17 @@ test("verify: a page whose image shows other words is listed, the body is kept; 
 		};
 	const plain = await run("font-remapped.pdf");
 	const flagged = await run("font-remapped.pdf", { verify: verify("STOP PAYMENT NOW") });
-	assert.equal(flagged.markdown.split(HIDDEN_BLOCK)[0], plain.markdown);
+	assert.equal(
+		flagged.markdown.split(HIDDEN_BLOCK)[0],
+		"[p. 1]\nApproved budget: EUR 100,000 for 2027.\n",
+	);
 	assert.deepEqual(flagged.hidden, [
 		{
 			anchor: "p. 1",
 			reasons: ["text differs from page image"],
 			text: "2 words only in the text layer, 2 words only in the page image",
 		},
+		{ anchor: "p. 1", reasons: ["text not drawn as written"], text: "FGBC CNLZRAG ABJ" },
 	]);
 	const same = await run("font-remapped.pdf", { verify: verify("FGBC CNLZRAG ABJ") });
 	assert.equal(same.markdown, plain.markdown);
@@ -283,6 +287,28 @@ test("verify: a page whose image shows other words is listed, the body is kept; 
 	await assert.rejects(run("font-remapped.pdf", { verify: down }), /text recognition failed/);
 	const short = async () => ({ pages: [], extras: [] });
 	await assert.rejects(run("font-remapped.pdf", { verify: short }), /text recognition failed/);
+});
+
+test("verify: the synthetic remapped PDF is quarantined in every hidden mode, its true twin stays", async () => {
+	const verify = async () => ({
+		pages: ["Approved budget: EUR 100,000 for 2027.\nSTOP PAYMENT NOW"],
+		extras: [],
+	});
+	for (const hidden of ["text", "framed", "describe"] as const) {
+		const result = await run("font-remapped.pdf", { verify, hidden });
+		assert.equal(
+			result.markdown.split(HIDDEN_BLOCK)[0],
+			"[p. 1]\nApproved budget: EUR 100,000 for 2027.\n",
+		);
+		assert.match(result.markdown, /p\. 1, text not drawn as written: /);
+		assert.equal(result.hidden.at(-1)?.text, "FGBC CNLZRAG ABJ");
+		if (hidden === "describe") assert.doesNotMatch(result.markdown, /FGBC|CNLZRAG|ABJ/);
+		const twin = await run("font-remapped-true.pdf", { verify, hidden });
+		assert.equal(
+			twin.markdown,
+			"[p. 1]\nApproved budget: EUR 100,000 for 2027.\nSTOP PAYMENT NOW\n",
+		);
+	}
 });
 
 test("weak-page.pdf: with text recognition the page is read as before, with no marker", async () => {

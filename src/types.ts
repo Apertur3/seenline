@@ -9,7 +9,7 @@ export interface ConvertOptions {
 	path?: string;
 	/** For a PDF, `pages` lists the 1-based pages to read; return text at index page - 1. `bytes` is always the input being converted: read it rather than the path, which can change after parsing. */
 	ocr?: (path: string, pages?: number[], bytes?: Uint8Array) => Promise<OcrResult>;
-	/** For a PDF, reads the rendered pages that have a text layer (called as `ocr`) and lists a page whose text layer has words the page image shows differently as `text differs from page image`; any failure fails the file. */
+	/** For a PDF, reads rendered pages (called as `ocr`), lists disagreements and moves disputed text-layer lines to hidden as `text not drawn as written`; any failure fails the file. */
 	verify?: (path: string, pages?: number[], bytes?: Uint8Array) => Promise<OcrResult>;
 	maxRows?: number;
 	/** How the Markdown's hidden block shows hidden text (default describe); `hidden` in the result always keeps it. */

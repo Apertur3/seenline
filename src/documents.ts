@@ -49,7 +49,7 @@ export async function documentToText(
 		? await fromPdf(bytes, ocr, verify)
 		: { ...(await fromImage(bytes, ocr)), checked: [] };
 	const { body, hidden, pages, readers, checked } = result;
-	// A comparison's counts are not document text, so the body never suppresses them.
+	// Keep comparison counts and disputed lines even when their text also occurs elsewhere.
 	const listed = [...unseen(body, hidden), ...checked];
 	const lines = listed.length > 0 ? [...body, HIDDEN_BLOCK, ...listed] : body;
 	if (lines.every((l) => l.trim() === "" || l === NO_TEXT_LAYER || /^\[p\. \d+\]$/.test(l)))
@@ -85,6 +85,12 @@ async function fromPdf(bytes: Uint8Array, ocr: Reader, verify?: Reader) {
 				return null;
 			})
 		: { pages: [], extras: [] };
+	const checked = verify
+		? await compare(
+				pages.filter((p, i) => !weak[i] && p.lines.length),
+				verify,
+			)
+		: [];
 	// A page recognition returned no text for keeps the marker: it was not read, not found empty.
 	const body = pages.flatMap((p, i) => {
 		const recognised = read ? nonEmpty(read.pages[i] ?? "") : [];
@@ -98,12 +104,6 @@ async function fromPdf(bytes: Uint8Array, ocr: Reader, verify?: Reader) {
 			(h) => `p. ${p.number}, ${h.why.join(" and ")} text: ${h.text.replace(/\s+/g, " ")}`,
 		),
 	);
-	const checked = verify
-		? await compare(
-				pages.filter((p, i) => !weak[i] && p.lines.length),
-				verify,
-			)
-		: [];
 	return {
 		body,
 		hidden: [...hidden, ...extras, ...(read?.extras ?? [])],

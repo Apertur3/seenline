@@ -5,7 +5,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { arch, cpus, platform, release, totalmem } from "node:os";
 import { join } from "node:path";
+import { HIDDEN_BLOCK } from "../src/hidden.ts";
 import { convert } from "../src/index.ts";
+import { parseHidden } from "../src/parse-hidden.ts";
+import { readPdf } from "../src/pdf.ts";
 import type { ConvertOptions } from "../src/types.ts";
 import { version } from "../src/version.ts";
 import type { Entry } from "./corpus.ts";
@@ -13,6 +16,68 @@ import { type Outcome, outcome } from "./score.ts";
 import { median } from "./stats.ts";
 
 export const REPS = 3;
+
+/** Clean Set A cost of acting on verify: whole extracted lines/whitespace words, before quarantine. */
+export async function verifyCost(cache: string, entries: Entry[]) {
+	type Metric =
+		| "pages"
+		| "lines"
+		| "words"
+		| "signals"
+		| "movedPages"
+		| "movedLines"
+		| "movedWords";
+	const files: (Record<Metric, number> & {
+		file: string;
+		moved: { anchor: string; text: string }[];
+	})[] = [];
+	for (const e of entries.filter((e) => e.set === "A" && /\.pdf$/i.test(e.file))) {
+		const run = JSON.parse(
+			readFileSync(join(cache, "seenline-verify", `${e.file}.json`), "utf8"),
+		) as {
+			status: string;
+			text: string;
+			held: string[];
+		};
+		if (run.status !== "ok") continue;
+		const { pages } = await readPdf(readFileSync(e.path));
+		const block = run.text.split(`\n${HIDDEN_BLOCK}\n`)[1] ?? "";
+		const hidden = parseHidden(block.trimEnd().split("\n"));
+		if (hidden.length !== run.held.length) throw new Error(`Hidden entry mismatch: ${e.file}`);
+		const moved = hidden.flatMap((h, i) =>
+			h.reasons.includes("text not drawn as written")
+				? [{ anchor: h.anchor, text: run.held[i] as string }]
+				: [],
+		);
+		const words = (s: string) => s.split(/\s+/u).filter(Boolean).length;
+		files.push({
+			file: e.file,
+			pages: pages.length,
+			lines: pages.reduce((n, p) => n + p.lines.length, 0),
+			words: pages.reduce((n, p) => n + p.lines.reduce((n, l) => n + words(l), 0), 0),
+			signals: hidden.filter((h) => h.reasons.includes("text differs from page image")).length,
+			movedPages: new Set(moved.map((h) => h.anchor)).size,
+			movedLines: moved.length,
+			movedWords: moved.reduce((n, h) => n + words(h.text), 0),
+			moved,
+		});
+	}
+	const sum = (key: Metric) => files.reduce((n, f) => n + f[key], 0);
+	const totals = {
+		files: files.length,
+		pages: sum("pages"),
+		lines: sum("lines"),
+		words: sum("words"),
+		signalFiles: files.filter((f) => f.signals).length,
+		signals: sum("signals"),
+		movedFiles: files.filter((f) => f.movedLines).length,
+		movedPages: sum("movedPages"),
+		movedLines: sum("movedLines"),
+		movedWords: sum("movedWords"),
+	};
+	writeFileSync(join(cache, "verify-cost.json"), JSON.stringify({ totals, files }, null, 2));
+	return totals;
+}
 
 /** Hardware stated generically: class of machine, not a name. */
 export const hardware = () => ({
@@ -29,7 +94,7 @@ const dirOf = (cache: string, mode: Mode) =>
 
 export async function ours(
 	cache: string,
-	entries: Entry[],
+	entries: Iterable<Entry>,
 	reps = REPS,
 	hidden: Mode = "describe",
 	reader?: { name: "verify" | "ocr"; read: NonNullable<ConvertOptions["ocr"]> },

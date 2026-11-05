@@ -164,6 +164,7 @@ const REASONS = new Set(
 		",",
 	),
 );
+REASONS.add("text not drawn as written");
 // parseHidden drops " text" from these on a PDF page; describe puts it back so the kind reads as in text mode.
 const PDF_TEXT = new Set(
 	"white,tiny,invisible,off-page,covered,transparent,squeezed,unreadable font,clipped,reading order".split(
