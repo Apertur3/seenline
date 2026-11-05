@@ -3,7 +3,7 @@
 # The owner's name is allowed only in the LICENSE copyright line. Exit 1 on any hit.
 set -eu
 cd "$(dirname "$0")/.."
-PATTERN='/Users/|@gmail|192\.168\.|100\.64\.|co-authored-by|generated with \[claude|anthropic\.com|\bcodex\b|\bagent'
+PATTERN='/Users/|@gmail|192\.168\.|100\.64\.|co-authored-by|generated with \[claude|anthropic\.com|\bcodex\b|(^|[^-[:alnum:]_])agent' # an HTTP user-agent header is not agent residue
 OWNER='Copyright (c) 2026 Martijn Hermans'
 # src/suspect.json is detector data: its rules must name what an injection says to an AI (agent,
 # assistant), so it is the one source file left out of both greps. test/suspect.test.ts pins the list.
