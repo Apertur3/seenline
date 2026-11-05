@@ -129,8 +129,8 @@
 	},
 	{
 		"file": "wiki-water_cycle.html",
-		"url": "https://en.wikipedia.org/api/rest_v1/page/html/Water_cycle/1368240581",
-		"sha256": "e700e0ee6bd34cff69c36d59c145bee5fd5dc3a5e81fa166ab3a2e191d229947",
+		"url": "https://web.archive.org/web/20261024235545id_/https://en.wikipedia.org/wiki/Water_cycle",
+		"sha256": "464a04e1648fb69904f95f235c4ae18fa3a7986720ef53f84d2632af82fadb5e",
 		"license": "CC-BY-SA-4.0",
 		"licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
 		"transform": null,

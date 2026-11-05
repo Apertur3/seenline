@@ -856,7 +856,7 @@
 	},
 	{
 		"file": "eu-ai_act.pdf",
-		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401689",
+		"url": "https://web.archive.org/web/20261027031424id_/https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202401689",
 		"sha256": "bba630444b3278e881066774002a1d7824308934f49ccfa203e65be43692f55e",
 		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
 		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
@@ -892,7 +892,7 @@
 	},
 	{
 		"file": "eu-data_act.pdf",
-		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ:L_202302854",
+		"url": "https://web.archive.org/web/20260831181723id_/https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=OJ%3AL_202302854",
 		"sha256": "0d100d513136adfaa5655d77784d3af00f477b8588471cbb51dea7aff8687838",
 		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
 		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
@@ -927,7 +927,7 @@
 	},
 	{
 		"file": "eu-dsa.pdf",
-		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022R2065",
+		"url": "https://web.archive.org/web/20260925064428id_/https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022R2065",
 		"sha256": "04b688f2ea13fc0f0e0f615b6835608405ee848b17892d26a1b69dcf1bae71a0",
 		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
 		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
@@ -963,7 +963,7 @@
 	},
 	{
 		"file": "eu-gdpr.pdf",
-		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679",
+		"url": "https://web.archive.org/web/20261017063610id_/https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32016R0679",
 		"sha256": "bd84e63f5b622b739a83389afc3b30d240f792bb88d8eb03a816c9a82b0c2499",
 		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
 		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
@@ -998,7 +998,7 @@
 	},
 	{
 		"file": "eu-nis2.pdf",
-		"url": "https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022L2555",
+		"url": "https://web.archive.org/web/20261017100014id_/https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32022L2555",
 		"sha256": "20d29e9c5300ae1095530996f04731311bf82bb7d4d6a7a0102cd0f075755cf3",
 		"license": "CC-BY-4.0 (EU Decision 2011/833/EU reuse)",
 		"licenseUrl": "https://eur-lex.europa.eu/content/legal-notice/legal-notice.html",
@@ -1285,7 +1285,7 @@
 	},
 	{
 		"file": "sec-cyber-rule-33-11216.pdf",
-		"url": "https://www.sec.gov/files/rules/final/2023/33-11216.pdf",
+		"url": "https://web.archive.org/web/20261002130707id_/https://www.sec.gov/files/rules/final/2023/33-11216.pdf",
 		"sha256": "1900e0c066715f4b53671145d5f2872baa7c20281181c8a9935359f11d9827d5",
 		"license": "US Government work (public domain, 17 USC 105)",
 		"licenseUrl": "https://www.law.cornell.edu/uscode/text/17/105",
