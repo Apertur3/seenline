@@ -41,7 +41,7 @@ let onlyTesseract = "";
 let onlyPdftoppm = "";
 
 before(async () => {
-	scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-test-"));
+	scratch = await mkdtemp(join(tmpdir(), "seenline-ocr-test-"));
 	both = join(scratch, "both");
 	none = join(scratch, "none");
 	onlyTesseract = join(scratch, "tesseract");
@@ -260,7 +260,7 @@ test("--verify lists a page whose image shows other words and fails closed witho
 	assert.equal(run(none, [memo]).stdout, "[p. 1]\nApproved.\n");
 });
 
-test("plainview mcp --verify lists the page in the structured result", async () => {
+test("seenline mcp --verify lists the page in the structured result", async () => {
 	const client = new Client({ name: "verify-test", version: "1.0.0" });
 	const transport = new StdioClientTransport({
 		command: process.execPath,
@@ -285,7 +285,7 @@ test("plainview mcp --verify lists the page in the structured result", async () 
 	}
 });
 
-test("plainview mcp --ocr reads a scan over stdio", async () => {
+test("seenline mcp --ocr reads a scan over stdio", async () => {
 	const client = new Client({ name: "ocr-test", version: "1.0.0" });
 	const transport = new StdioClientTransport({
 		command: process.execPath,

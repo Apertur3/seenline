@@ -1,9 +1,9 @@
 {
-	"note": "Known limits of Plainview on the Split-View set, with the reason. Gaps not listed here scored flagged or correct in the run with no further caveat.",
+	"note": "Known limits of Seenline on the Split-View set, with the reason. Gaps not listed here scored flagged or correct in the run with no further caveat.",
 	"leaked": [
 		{
 			"gap": "EG_001",
-			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column plainview-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the payload is still a leak and the row reads `leaked, signalled`."
+			"reason": "A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column seenline-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the payload is still a leak and the row reads `leaked, signalled`."
 		},
 		{
 			"gap": "EG_024",

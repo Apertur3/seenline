@@ -1,16 +1,16 @@
 {
-  "name": "plainview",
+  "name": "seenline",
   "version": "0.0.0",
   "private": true,
   "description": "Local document-to-Markdown converter with built-in hidden-content flagging",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Apertur3/plainview.git"
+    "url": "git+https://github.com/Apertur3/seenline.git"
   },
-  "homepage": "https://github.com/Apertur3/plainview#readme",
+  "homepage": "https://github.com/Apertur3/seenline#readme",
   "bugs": {
-    "url": "https://github.com/Apertur3/plainview/issues"
+    "url": "https://github.com/Apertur3/seenline/issues"
   },
   "keywords": [
     "document",
@@ -41,7 +41,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "plainview": "./dist/cli.js"
+    "seenline": "./dist/cli.js"
   },
   "exports": {
     ".": {

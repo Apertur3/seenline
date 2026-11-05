@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { convert } from "plainview";
-import { scan } from "plainview/hidden";
+import { convert } from "seenline";
+import { scan } from "seenline/hidden";
 
 for (const name of ["report.pdf", "office-memo.docx", "office-book.xlsx"]) {
 	const bytes = await readFile(new URL(`../test/fixtures/documents/${name}`, import.meta.url));

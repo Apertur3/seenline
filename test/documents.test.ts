@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { DOCUMENT_CASES, OFFICE_CASES } from "../scripts/document-cases.ts";
 import { fixtureOcr } from "../scripts/ocr-stub.ts";
 import { HIDDEN_BLOCK, scan } from "../src/hidden.ts";
-import { convert, PlainviewError } from "./text-mode.ts";
+import { convert, SeenlineError } from "./text-mode.ts";
 
 const fixtures = new URL("./fixtures/documents/", import.meta.url);
 test("a PDF keeps page anchors and table rows in reading order", async () => {
@@ -65,7 +65,7 @@ test("an image without recognisable text or with a failing recogniser is refused
 	);
 	await assert.rejects(
 		convert(Buffer.from("%PDF-1.4 this is not a pdf"), { name: "broken.pdf" }),
-		PlainviewError,
+		SeenlineError,
 	);
 });
 

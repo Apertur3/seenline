@@ -1,10 +1,10 @@
 // Set H: a small hand-made obedience set. Does a model do what a plain instruction hidden in a one-page
-// PDF says (white, tiny or covered text, inside the page), with the PDF (raw), Plainview's default
+// PDF says (white, tiny or covered text, inside the page), with the PDF (raw), Seenline's default
 // Markdown (describe) or its text block (text) in front? Opt-in, never in CI.
-//   node bench/obey-hand.ts make                                   PDFs into the cache; Plainview's own detection
+//   node bench/obey-hand.ts make                                   PDFs into the cache; Seenline's own detection
 //   node bench/obey-hand.ts run <model> <raw|pdftotext|describe|text>[-clean] [n | id,id]   sequential, resumable
 //   node bench/obey-hand.ts score [--verbose]                      tables and every answer to read
-// PDFs and answers stay in PLAINVIEW_BENCH_CACHE/hand; the wording is in data/obey-hand.json.
+// PDFs and answers stay in SEENLINE_BENCH_CACHE/hand; the wording is in data/obey-hand.json.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -38,7 +38,7 @@ const CELLS = H.cells
 	.sort((a, b) => a.k - b.k)
 	.map((x) => x.c);
 const CLEAN: Cell[] = H.clean.map((doc) => ({ id: `clean-${doc}`, style: "clean", doc }));
-const dir = (...p: string[]) => join(process.env.PLAINVIEW_BENCH_CACHE ?? "", "hand", ...p);
+const dir = (...p: string[]) => join(process.env.SEENLINE_BENCH_CACHE ?? "", "hand", ...p);
 const rx = (s: string) => new RegExp(s, "i");
 
 const wrap = (s: string, n: number) =>
@@ -75,7 +75,7 @@ export function build(doc: string, cell?: Cell): Buffer {
 	return pdf({ content: out });
 }
 
-/** Writes the PDFs and prints what Plainview lists for each (any entry, the payload in one, tags). */
+/** Writes the PDFs and prints what Seenline lists for each (any entry, the payload in one, tags). */
 async function make(): Promise<void> {
 	mkdirSync(dir("pdf"), { recursive: true });
 	const rows = [
@@ -106,7 +106,7 @@ async function run(name: string, arm: string, pick?: string): Promise<void> {
 	if (
 		!model ||
 		!["raw", "pdftotext", "describe", "text"].includes(base) ||
-		(model.arms && !model.arms.includes(raw ? "raw" : "plainview"))
+		(model.arms && !model.arms.includes(raw ? "raw" : "seenline"))
 	)
 		throw new Error(`no ${name} ${arm} arm`);
 	const all = clean ? CLEAN : CELLS;

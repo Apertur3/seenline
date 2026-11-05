@@ -242,7 +242,7 @@ interface Limits {
 	flagged: { gaps: string[]; reason: string }[];
 }
 
-/** Known limits of Plainview on Set B, with the reason; the text lives in bench/data/limits.json. */
+/** Known limits of Seenline on Set B, with the reason; the text lives in bench/data/limits.json. */
 function limits(): string {
 	const l = data<Limits>("limits.json");
 	return [
@@ -288,11 +288,11 @@ export function markdown(rs: Row[], cache: string): string {
 			CANDIDATES[t]?.configuration ?? "",
 		];
 	});
-	const plainviewLeaks = rs
-		.filter((r) => r.candidate === "plainview" && r.outcome === "leaked")
+	const seenlineLeaks = rs
+		.filter((r) => r.candidate === "seenline" && r.outcome === "leaked")
 		.map((r) => r.entry.file);
-	const env = existsSync(join(cache, "plainview", "environment.json"))
-		? read(join(cache, "plainview", "environment.json"))
+	const env = existsSync(join(cache, "seenline", "environment.json"))
+		? read(join(cache, "seenline", "environment.json"))
 		: {};
 	return `# Benchmark
 
@@ -310,13 +310,13 @@ ${table(["tool", "version", "date", "files read of offered", "not run because", 
 
 ## How to read these tables
 
-This benchmark is synthetic and small, and the authors of Plainview wrote the corpus selection, the answer keys and the scorer and ran it themselves. It describes how these tools behave on these files; it is not an independent ranking, and a different corpus can give different results. Everything is reproducible with \`npm run bench\`.
+This benchmark is synthetic and small, and the authors of Seenline wrote the corpus selection, the answer keys and the scorer and ran it themselves. It describes how these tools behave on these files; it is not an independent ranking, and a different corpus can give different results. Everything is reproducible with \`npm run bench\`.
 
 Outcome classes for Sets B and C (one per file and tool):
 
 ${DEFINITIONS}
 
-Text counts as hidden when it sits in a \`[Hidden in the original]\` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Plainview columns are separate runs of one version: \`plainview\` (no OCR reader; scans and images fail closed), \`plainview-verify\` (\`--verify\`, PDFs) and \`plainview-ocr\` (\`--ocr\`, PDFs and images). A \`plainview-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
+Text counts as hidden when it sits in a \`[Hidden in the original]\` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Seenline columns are separate runs of one version: \`seenline\` (no OCR reader; scans and images fail closed), \`seenline-verify\` (\`--verify\`, PDFs) and \`seenline-ocr\` (\`--ocr\`, PDFs and images). A \`seenline-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
 
 What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 
@@ -331,11 +331,11 @@ comparison that a reader working from text alone can just approximate; each miss
 
 ${outcomes(rs, "B", (e) => [e.gap ?? e.file, e.family ?? ""], ["gap", "family"])}
 
-${rs.some((r) => r.entry.set === "B") ? `Plainview leaks on: ${plainviewLeaks.length ? plainviewLeaks.join(", ") : "none of the files in this run"}.\n\n${limits()}` : "Set B was not run (no `prepare`); no claim is made."}
+${rs.some((r) => r.entry.set === "B") ? `Seenline leaks on: ${seenlineLeaks.length ? seenlineLeaks.join(", ") : "none of the files in this run"}.\n\n${limits()}` : "Set B was not run (no `prepare`); no claim is made."}
 
 ## Set C: the repository's own injection and Unicode cases
 
-Synthetic fixtures in \`test/fixtures\`. Same outcome classes as set B. The injection fixtures have no visible-text key, so a tool that drops the payload shows \`absent, unchecked\`, not \`correct\`. The image fixtures are read by \`plainview-ocr\` with text recognition on.
+Synthetic fixtures in \`test/fixtures\`. Same outcome classes as set B. The injection fixtures have no visible-text key, so a tool that drops the payload shows \`absent, unchecked\`, not \`correct\`. The image fixtures are read by \`seenline-ocr\` with text recognition on.
 
 ${outcomes(rs, "C", (e) => [e.file], ["file"])}
 
@@ -372,7 +372,7 @@ ${byFormat(
 	(xs) => median(xs).toFixed(3),
 )}
 
-Timing covers successful conversions. A \`-\` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. \`plainview\` has no OCR reader and refuses images; \`plainview-ocr\` reads them with a local tesseract, as docling, unstructured, marker and tika do.
+Timing covers successful conversions. A \`-\` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. \`seenline\` has no OCR reader and refuses images; \`seenline-ocr\` reads them with a local tesseract, as docling, unstructured, marker and tika do.
 
 ${anchorSection(cache, rs)}
 ${speedSection(cache, env.version ?? "?", `${env.os ?? "?"} ${env.arch ?? ""}, ${env.cores ?? "?"} cores, ${env.memoryGiB ?? "?"} GiB RAM`)}`;

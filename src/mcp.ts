@@ -3,14 +3,14 @@ import { isAbsolute } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import { convertFile, formatError, type Readers } from "./file.ts";
 import { HIDDEN_MODES } from "./parse-hidden.ts";
 import { version } from "./version.ts";
 
 /** The server; with `roots` (real paths of folders) it reads only files whose real path lies inside one. */
 export function createServer(readers: Readers = {}, roots?: string[]): McpServer {
-	const server = new McpServer({ name: "plainview", version });
+	const server = new McpServer({ name: "seenline", version });
 	server.registerTool(
 		"convert_file",
 		{
@@ -41,7 +41,7 @@ export function createServer(readers: Readers = {}, roots?: string[]): McpServer
 		},
 		async ({ path, hidden: mode }) => {
 			try {
-				if (!isAbsolute(path)) throw new PlainviewError("invalid", "path must be absolute");
+				if (!isAbsolute(path)) throw new SeenlineError("invalid", "path must be absolute");
 				const { markdown, pages, flags, hidden } = await convertFile(
 					path,
 					{ ...readers, ...(mode && { hidden: mode }), noTempFiles: true },

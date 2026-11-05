@@ -1,4 +1,4 @@
-// Plainview through convert(), the same call the CLI and the MCP server make. No OCR callback is
+// Seenline through convert(), the same call the CLI and the MCP server make. No OCR callback is
 // supplied, so scans and images fail closed; that is recorded, not hidden. The verify and ocr variants pass
 // the CLI's own `--verify` and `--ocr` reader (a local tesseract and pdftoppm) and run each file once.
 
@@ -25,7 +25,7 @@ export const hardware = () => ({
 type Mode = NonNullable<ConvertOptions["hidden"]>;
 const MODES: Mode[] = ["text", "framed", "describe"];
 const dirOf = (cache: string, mode: Mode) =>
-	join(cache, mode === "describe" ? "plainview" : `plainview-${mode}`);
+	join(cache, mode === "describe" ? "seenline" : `seenline-${mode}`);
 
 export async function ours(
 	cache: string,
@@ -34,12 +34,12 @@ export async function ours(
 	hidden: Mode = "describe",
 	reader?: { name: "verify" | "ocr"; read: NonNullable<ConvertOptions["ocr"]> },
 ): Promise<void> {
-	const dir = reader ? join(cache, `plainview-${reader.name}`) : dirOf(cache, hidden);
+	const dir = reader ? join(cache, `seenline-${reader.name}`) : dirOf(cache, hidden);
 	mkdirSync(dir, { recursive: true });
 	writeFileSync(
 		join(dir, "environment.json"),
 		JSON.stringify({
-			candidate: reader ? `plainview-${reader.name}` : "plainview",
+			candidate: reader ? `seenline-${reader.name}` : "seenline",
 			version,
 			date: new Date().toISOString().slice(0, 10),
 			node: process.version,

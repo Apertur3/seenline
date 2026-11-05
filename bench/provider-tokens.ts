@@ -1,7 +1,7 @@
 // Optional set E step: token counts from a provider's count endpoint, for the native PDF upload and for
 // each tool's Markdown. Not part of the default run (it makes network calls and bills nothing but needs a key).
 // The key is read from the macOS Keychain at run time and never written anywhere:
-//   security add-generic-password -U -a plainview-bench -s plainview-bench-provider -w
+//   security add-generic-password -U -a seenline-bench -s seenline-bench-provider -w
 // BENCH_COUNT_URL is the count endpoint (Messages count_tokens shape); BENCH_COUNT_MODEL the model id.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -30,7 +30,7 @@ export async function providerTokens(cache: string, entries: Entry[]): Promise<v
 	if (!url || !model) throw new Error("set BENCH_COUNT_URL and BENCH_COUNT_MODEL");
 	const key = execFileSync(
 		"security",
-		["find-generic-password", "-a", "plainview-bench", "-s", "plainview-bench-provider", "-w"],
+		["find-generic-password", "-a", "seenline-bench", "-s", "seenline-bench-provider", "-w"],
 		{ encoding: "utf8" },
 	).trim();
 	const out: Record<string, Record<string, number>> = {};

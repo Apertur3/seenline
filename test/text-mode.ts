@@ -3,6 +3,6 @@
 import { convert as convertAs } from "../src/index.ts";
 import type { ConvertOptions } from "../src/types.ts";
 
-export { PlainviewError } from "../src/index.ts";
+export { SeenlineError } from "../src/index.ts";
 export const convert = (input: Uint8Array, opts: ConvertOptions) =>
 	convertAs(input, { hidden: "text", ...opts });

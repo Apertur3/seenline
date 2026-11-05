@@ -1,5 +1,5 @@
 {
-	"note": "Set M: does a model's answer expose the Split-View payload, with the original PDF (raw) or with Plainview's Markdown (plainview) in front. One call per cell, default sampling. The CLI wiring is machine-local, in $PLAINVIEW_BENCH_CACHE/clis.json: {name: {cli, model, ref, args, format, arms?}}, where {doc} is the input file name in the cell's own empty directory, {prompt} the full prompt, and format is result (one JSON result), stream (JSON lines with the tool calls, as set O uses), items (JSON lines of items) or steps (JSON lines of step updates).",
+	"note": "Set M: does a model's answer expose the Split-View payload, with the original PDF (raw) or with Seenline's Markdown (seenline) in front. One call per cell, default sampling. The CLI wiring is machine-local, in $SEENLINE_BENCH_CACHE/clis.json: {name: {cli, model, ref, args, format, arms?}}, where {doc} is the input file name in the cell's own empty directory, {prompt} the full prompt, and format is result (one JSON result), stream (JSON lines with the tool calls, as set O uses), items (JSON lines of items) or steps (JSON lines of step updates).",
 	"flagWords": [
 		"hidden",
 		"not visible",

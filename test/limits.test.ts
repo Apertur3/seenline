@@ -133,7 +133,7 @@ function run(...args: string[]) {
 }
 
 test("the CLI refuses a pipe, a device, a folder and an oversized file without waiting or reading it", async () => {
-	const dir = await mkdtemp(join(tmpdir(), "plainview-limits-"));
+	const dir = await mkdtemp(join(tmpdir(), "seenline-limits-"));
 	try {
 		const fifo = join(dir, "pipe.pdf");
 		assert.equal(spawnSync("mkfifo", [fifo]).status, 0);
@@ -164,14 +164,14 @@ test("the CLI refuses a pipe, a device, a folder and an oversized file without w
 	}
 });
 
-test("plainview mcp --root takes existing folders only", () => {
-	const result = run("mcp", "--root", join(tmpdir(), "plainview-no-such-folder"));
+test("seenline mcp --root takes existing folders only", () => {
+	const result = run("mcp", "--root", join(tmpdir(), "seenline-no-such-folder"));
 	assert.equal(result.status, 2);
 	assert.match(result.stderr, /--root takes an existing folder/);
 });
 
 test("MCP with roots reads inside them only, by real path, and never names the path in an error", async () => {
-	const dir = await realpath(await mkdtemp(join(tmpdir(), "plainview-root-")));
+	const dir = await realpath(await mkdtemp(join(tmpdir(), "seenline-root-")));
 	const server = createServer({}, [dir]);
 	const client = new Client({ name: "limits", version: "1.0.0" });
 	const [a, b] = InMemoryTransport.createLinkedPair();
@@ -196,7 +196,7 @@ test("MCP with roots reads inside them only, by real path, and never names the p
 			assert.equal(text(result), outside, path);
 		}
 		// A missing file and a link inside the root to a missing file elsewhere read the same.
-		await symlink(join(tmpdir(), "plainview-no-such-target"), join(dir, "dangling.pdf"));
+		await symlink(join(tmpdir(), "seenline-no-such-target"), join(dir, "dangling.pdf"));
 		for (const name of ["missing.pdf", "dangling.pdf"])
 			assert.equal(
 				text(await call(join(dir, name))),

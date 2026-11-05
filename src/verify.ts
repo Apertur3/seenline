@@ -4,7 +4,7 @@
 // EG_024). Recognition misses alone (a figure label, sideways text) do not count, and neither does order:
 // on the benchmark's short pages order differences from recognition were as large as a reordered table.
 
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import type { PdfPage } from "./pdf.ts";
 import type { OcrResult } from "./types.ts";
 
@@ -143,7 +143,7 @@ export async function compare(
 	return pages.flatMap((p) => {
 		const image = seen[p.number - 1];
 		if (image === undefined)
-			throw new PlainviewError("invalid", "could not read this file: text recognition failed");
+			throw new SeenlineError("invalid", "could not read this file: text recognition failed");
 		const d = differs(p.lines.join("\n"), image);
 		if (!d) return [];
 		const counts =

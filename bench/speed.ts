@@ -1,4 +1,4 @@
-// Set F: cold start, peak memory, install size and warm per-page time of Plainview, measured on a
+// Set F: cold start, peak memory, install size and warm per-page time of Seenline, measured on a
 // clean install of the packed tarball. `speed` writes <cache>/speed.json; `speedSection` renders it.
 import { execFileSync, spawnSync } from "node:child_process";
 import {
@@ -44,7 +44,7 @@ function peakMemory(bin: string): { bytes: number; tool: string } | null {
 }
 
 export async function speed(cache: string): Promise<void> {
-	const work = mkdtempSync(join(tmpdir(), "plainview-speed-"));
+	const work = mkdtempSync(join(tmpdir(), "seenline-speed-"));
 	try {
 		sh("npm", ["run", "build", "--silent"], root);
 		const tarball = sh("npm", ["pack", "--silent", "--pack-destination", work], root).trim();
@@ -56,7 +56,7 @@ export async function speed(cache: string): Promise<void> {
 			["install", "--silent", "--ignore-scripts", "--prefer-offline", join(work, tarball)],
 			app,
 		);
-		const bin = join(app, "node_modules/plainview/dist/cli.js");
+		const bin = join(app, "node_modules/seenline/dist/cli.js");
 		const wall = Array.from({ length: REPS }, () => {
 			const t = performance.now();
 			const run = spawnSync(process.execPath, [bin, sample], { stdio: "ignore" });
@@ -123,7 +123,7 @@ export function speedSection(cache: string, version: string, hardware: string): 
 	const mib = (b: number) => `${(b / 2 ** 20).toFixed(1)} MiB`;
 	return `## Speed and size (set F)
 
-Plainview ${version}, ${s.date}, Node ${s.node}. Hardware: ${hardware}, CPU class ${s.cpu}. Measured on a clean install of the
+Seenline ${version}, ${s.date}, Node ${s.node}. Hardware: ${hardware}, CPU class ${s.cpu}. Measured on a clean install of the
 packed tarball (\`npm pack\`, then \`npm install\` into an empty directory), on \`report.pdf\` (${s.pages} pages), median of ${REPS} runs.
 
 | measure | value |

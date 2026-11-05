@@ -8,8 +8,8 @@ import { HIDDEN_MODES } from "./parse-hidden.ts";
 import type { ConvertOptions } from "./types.ts";
 import { version } from "./version.ts";
 
-const HELP = `Usage: plainview <file> [more files] [options]
-       plainview mcp [--root <dir>]... [--ocr] [--verify] [--ocr-lang <lang>] [--help]
+const HELP = `Usage: seenline <file> [more files] [options]
+       seenline mcp [--root <dir>]... [--ocr] [--verify] [--ocr-lang <lang>] [--help]
 
 Convert local documents to Markdown. Scans and images fail closed unless --ocr is set.
 
@@ -175,13 +175,13 @@ async function run(args: string[]): Promise<number> {
 }
 
 function usage(message: string): number {
-	process.stderr.write(`plainview: ${message}\nRun plainview --help for usage.\n`);
+	process.stderr.write(`seenline: ${message}\nRun seenline --help for usage.\n`);
 	return 2;
 }
 
 try {
 	process.exitCode = await run(process.argv.slice(2));
 } catch (error) {
-	process.stderr.write(`plainview: ${formatError(error)}\n`);
+	process.stderr.write(`seenline: ${formatError(error)}\n`);
 	process.exitCode = 1;
 }

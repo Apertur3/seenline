@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { convertOffice, OFFICE_FAILURE } from "./office.ts";
 
@@ -20,7 +20,7 @@ export async function legacyOfficeToText(bytes: Uint8Array, name: string): Promi
 		const header = Buffer.from(bytes.subarray(0, 8));
 		if (ext === "doc" ? !header.equals(DOC_MAGIC) : !header.toString("ascii").startsWith("{\\rtf"))
 			throw new Error("format");
-		dir = await mkdtemp(join(tmpdir(), "plainview-office-"));
+		dir = await mkdtemp(join(tmpdir(), "seenline-office-"));
 		const input = join(dir, `input.${ext}`),
 			output = join(dir, "converted.docx");
 		await writeFile(input, bytes, { flag: "wx", mode: 0o600 });
@@ -41,7 +41,7 @@ export async function legacyOfficeToText(bytes: Uint8Array, name: string): Promi
 		if (Buffer.byteLength(result) > 5 * 1024 * 1024) throw new Error("text size");
 		return result;
 	} catch {
-		throw new PlainviewError("invalid", OFFICE_FAILURE);
+		throw new SeenlineError("invalid", OFFICE_FAILURE);
 	} finally {
 		if (dir) await rm(dir, { recursive: true, force: true });
 	}

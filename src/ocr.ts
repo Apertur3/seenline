@@ -5,7 +5,7 @@
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import type { OcrResult } from "./types.ts";
 
 const MAX_OUTPUT = 32 << 20;
@@ -42,7 +42,7 @@ function run(cmd: string, args: string[], input: Uint8Array, limit: Limit) {
 		const fail = (message: string, code: "invalid" | "unavailable" = "invalid") => {
 			clearTimeout(timer);
 			child.kill("SIGKILL");
-			reject(new PlainviewError(code, `could not read this file: ${message}`));
+			reject(new SeenlineError(code, `could not read this file: ${message}`));
 		};
 		const left = limit.deadline - Date.now();
 		const late =
@@ -87,7 +87,7 @@ export function tesseract(lang: string, timeout = 60_000, base = 120_000, perPag
 		const limit = { timeout, lang, deadline: Date.now() + base + perPage * (pages?.length ?? 1) };
 		if (!pages) {
 			if (!isImage(data))
-				throw new PlainviewError(
+				throw new SeenlineError(
 					"unavailable",
 					"could not read this file: text recognition reads PNG, JPEG, GIF, BMP and WebP images only",
 				);
@@ -102,7 +102,7 @@ export function tesseract(lang: string, timeout = 60_000, base = 120_000, perPag
 				limit,
 			);
 			if (!isImage(png))
-				throw new PlainviewError(
+				throw new SeenlineError(
 					"invalid",
 					"could not read this file: text recognition failed (pdftoppm returned no image)",
 				);

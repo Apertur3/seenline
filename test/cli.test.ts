@@ -46,7 +46,7 @@ test("CLI JSON is one result per successful file, names its input and excludes o
 });
 
 test("CLI --out writes multiple Markdown files without stdout", async () => {
-	const scratch = await mkdtemp(join(tmpdir(), "plainview-cli-"));
+	const scratch = await mkdtemp(join(tmpdir(), "seenline-cli-"));
 	try {
 		const out = join(scratch, "nested", "output");
 		const result = run(
@@ -93,7 +93,7 @@ test("CLI reads a PDF with one near-empty page and marks that page", () => {
 });
 
 test("CLI failed conversion writes no --out file and batches continue after errors", async () => {
-	const out = await mkdtemp(join(tmpdir(), "plainview-cli-"));
+	const out = await mkdtemp(join(tmpdir(), "seenline-cli-"));
 	try {
 		const result = run("--out", out, fixture("scan.pdf"), fixture("report.pdf"));
 		assert.equal(result.status, 1);
@@ -108,7 +108,7 @@ test("CLI failed conversion writes no --out file and batches continue after erro
 });
 
 test("CLI empty, damaged, unsupported and unwritable files fail closed", async () => {
-	const scratch = await mkdtemp(join(tmpdir(), "plainview-cli-"));
+	const scratch = await mkdtemp(join(tmpdir(), "seenline-cli-"));
 	try {
 		for (const [name, text] of [
 			["empty.csv", ""],
@@ -146,7 +146,7 @@ test("CLI --fail-on-hidden preserves output, detects scanner flags and gives fil
 	assert.equal(run("--fail-on-hidden", fixture("report.pdf")).status, 0);
 	assert.equal(run("--fail-on-hidden", "--json", hidden, fixture("missing.pdf")).status, 1);
 	assert.equal(run("--fail-on-hidden", "--json", hidden).status, 3);
-	const scratch = await mkdtemp(join(tmpdir(), "plainview-cli-"));
+	const scratch = await mkdtemp(join(tmpdir(), "seenline-cli-"));
 	try {
 		const unicode = join(scratch, "unicode.csv");
 		await writeFile(unicode, "name\nhello\u200Bworld\n");
@@ -188,7 +188,7 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 	const help = run("--help");
 	assert.equal(help.status, 0);
-	assert.match(help.stdout, /Usage: plainview/);
+	assert.match(help.stdout, /Usage: seenline/);
 	assert.equal(help.stderr, "");
 	const mcpHelp = run("mcp", "--help");
 	assert.deepEqual([mcpHelp.status, mcpHelp.stdout, mcpHelp.stderr], [0, help.stdout, ""]);
@@ -196,7 +196,7 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	assert.equal(run("--version").status, 0);
 	assert.equal(run("--version").stderr, "");
 	assert.equal(run("--", fixture("report.pdf")).stdout, await golden("report.pdf"));
-	assert.equal(pkg.bin.plainview, "./dist/cli.js");
+	assert.equal(pkg.bin.seenline, "./dist/cli.js");
 	assert.equal(pkg.exports["./package.json"], "./package.json");
 	assert.equal(pkg.private, true);
 	assert.ok((await readFile(cli, "utf8")).startsWith("#!/usr/bin/env node\n"));

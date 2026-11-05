@@ -2,12 +2,12 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
 import { documentToText } from "./documents.ts";
-import { NotRead, PlainviewError } from "./error.ts";
+import { NotRead, SeenlineError } from "./error.ts";
 import { carriers, HIDDEN_BLOCK, scan } from "./hidden.ts";
 import { HIDDEN_MODES, parseHidden, showHidden } from "./parse-hidden.ts";
 import type { ConvertOptions, ConvertResult } from "./types.ts";
 
-export { PlainviewError } from "./error.ts";
+export { SeenlineError } from "./error.ts";
 export type { ConvertOptions, ConvertResult, HiddenText, OcrResult } from "./types.ts";
 
 /** Convert locally; optional OCR and verify callbacks receive the supplied path or a private temporary copy, for a PDF the page numbers to read, and the input bytes. */
@@ -21,7 +21,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 				"unavailable",
 				"could not read this file: text recognition without a path requires temporary file writes",
 			);
-		scratch = await mkdtemp(join(tmpdir(), "plainview-ocr-"));
+		scratch = await mkdtemp(join(tmpdir(), "seenline-ocr-"));
 		const path = join(scratch, `input${extname(opts.name)}`);
 		await writeFile(path, input, { flag: "wx", mode: 0o600 });
 		return path;
@@ -41,7 +41,7 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 				throw new Error("shape");
 			return read;
 		} catch (error) {
-			if (error instanceof PlainviewError) throw error;
+			if (error instanceof SeenlineError) throw error;
 			throw new NotRead("invalid", "could not read this file: text recognition failed");
 		}
 	};
@@ -75,8 +75,8 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 			flags: scan(raw).flags,
 		};
 	} catch (error) {
-		if (error instanceof PlainviewError) throw error;
-		throw new PlainviewError("invalid", "could not read this file: invalid input");
+		if (error instanceof SeenlineError) throw error;
+		throw new SeenlineError("invalid", "could not read this file: invalid input");
 	} finally {
 		if (scratch) await rm(scratch, { recursive: true, force: true });
 	}
@@ -84,11 +84,11 @@ export async function convert(input: Uint8Array, opts: ConvertOptions): Promise<
 
 function check(input: Uint8Array, opts: ConvertOptions): void {
 	if (input.length === 0)
-		throw new PlainviewError("invalid", "could not read this file: empty input");
+		throw new SeenlineError("invalid", "could not read this file: empty input");
 	if (opts.maxRows !== undefined && (!Number.isSafeInteger(opts.maxRows) || opts.maxRows < 1))
-		throw new PlainviewError("invalid", "maxRows must be a positive safe integer");
+		throw new SeenlineError("invalid", "maxRows must be a positive safe integer");
 	if (opts.hidden !== undefined && !HIDDEN_MODES.includes(opts.hidden))
-		throw new PlainviewError("invalid", "hidden must be text, framed or describe");
+		throw new SeenlineError("invalid", "hidden must be text, framed or describe");
 }
 
 function strings(value: unknown): value is string[] {

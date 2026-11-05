@@ -97,7 +97,7 @@ test("MCP in-memory discovery, golden conversion and fail-closed tool errors", a
 	}
 });
 
-test("built plainview mcp speaks stdio with no extra stdout or diagnostics", async () => {
+test("built seenline mcp speaks stdio with no extra stdout or diagnostics", async () => {
 	const client = new Client({ name: "stdio-test", version: "1.0.0" });
 	const transport = new StdioClientTransport({
 		command: process.execPath,
@@ -130,7 +130,7 @@ test("built plainview mcp speaks stdio with no extra stdout or diagnostics", asy
 	assert.equal(stderr, "");
 });
 
-test("built plainview mcp keeps library logging off stdout", async () => {
+test("built seenline mcp keeps library logging off stdout", async () => {
 	// Logs on every console channel from the moment the server reads stdin, as a chatty library would.
 	const preload = `data:text/javascript,process.stdin.once("newListener",()=>setInterval(()=>{console.log("noise");console.info("noise");console.debug("noise");console.dir("noise");console.table(["noise"]);console.count("noise")},5).unref())`;
 	const client = new Client({ name: "stdio-noise-test", version: "1.0.0" });

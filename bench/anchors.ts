@@ -71,7 +71,7 @@ export function anchorSection(cache: string, rs: Row[]): string {
 		return "## Anchors (set D)\n\nNot run for this report (`npm run bench -- anchors`); no claim is made.\n";
 	}
 	const found = new Map<string, [number, number]>();
-	for (const r of rs.filter((r) => r.candidate === "plainview" && r.status === "ok")) {
+	for (const r of rs.filter((r) => r.candidate === "seenline" && r.status === "ok")) {
 		const [hit, all] = (r.score[3] ?? "0/0").split("/").map(Number);
 		const ext = extname(r.entry.file).slice(1).toLowerCase();
 		const prior = found.get(ext) ?? [0, 0];
@@ -80,7 +80,7 @@ export function anchorSection(cache: string, rs: Row[]): string {
 	const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 	return `## Anchors (set D)
 
-Anchor overhead is the share of o200k tokens in Plainview's output that the anchors account for (page, slide,
+Anchor overhead is the share of o200k tokens in Seenline's output that the anchors account for (page, slide,
 sheet and row lines; the timestamp prefix of a cue). Median per file over the fixture documents and subtitle files;
 formats without anchors show 0.
 

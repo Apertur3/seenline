@@ -3,7 +3,7 @@
 // to flag it. Pure JavaScript, no network, no rendering.
 import { fileURLToPath } from "node:url";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import { extras } from "./pdf-extras.ts";
 import { lines, readingOrder } from "./pdf-order.ts";
 import { type Item, type Matrix, walk } from "./pdf-walk.ts";
@@ -49,11 +49,11 @@ async function openPdf(bytes: Uint8Array) {
 // stay far below both.
 const MEMORY_MB = 2048;
 const DEADLINE_S = 120;
-const fail = (why: string) => new PlainviewError("invalid", `could not read this file: ${why}`);
+const fail = (why: string) => new SeenlineError("invalid", `could not read this file: ${why}`);
 const OVER_MEMORY = `the PDF needs more memory to read than the limit (${MEMORY_MB / 2} MB heap, ${MEMORY_MB} MB in all)`;
 // A worker that cannot start is this process's problem, never the document's.
 const broken = (why: string) =>
-	new PlainviewError("unavailable", `the PDF reader could not start: ${why}`);
+	new SeenlineError("unavailable", `the PDF reader could not start: ${why}`);
 
 /** Reads every page and what the file carries outside its pages; throws `invalid` for a file that is not a readable PDF. */
 export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
@@ -64,7 +64,7 @@ export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 			// worker started from a file refuses to run under `--input-type` (`node --input-type=module -e`).
 			worker = new Worker(`import(${JSON.stringify(import.meta.url)})`, {
 				eval: true,
-				workerData: { plainviewPdf: bytes },
+				workerData: { seenlinePdf: bytes },
 				resourceLimits: { maxOldGenerationSizeMb: MEMORY_MB / 2 },
 				stdout: true,
 				stderr: true,
@@ -90,7 +90,7 @@ export function readPdf(bytes: Uint8Array): Promise<PdfDoc> {
 			if (m.started) return;
 			clearInterval(watch);
 			void worker.terminate();
-			m.doc ? done(m.doc) : reject(new PlainviewError("invalid", m.error as string));
+			m.doc ? done(m.doc) : reject(new SeenlineError("invalid", m.error as string));
 		});
 		worker.once("error", (error: Error & { code?: string }) => {
 			if (error.code === "ERR_WORKER_OUT_OF_MEMORY") stop(OVER_MEMORY);
@@ -112,14 +112,14 @@ async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 		opened = await openPdf(bytes);
 	} catch (error) {
 		const locked = (error as Error).name === "PasswordException";
-		throw new PlainviewError(
+		throw new SeenlineError(
 			"invalid",
 			`could not read this file: ${locked ? "the PDF is password protected" : "not a readable PDF"}`,
 		);
 	}
 	const { pdfjs, task, doc } = opened;
 	if (doc.numPages > MAX_PAGES) {
-		throw new PlainviewError("invalid", `could not read this file: more than ${MAX_PAGES} pages`);
+		throw new SeenlineError("invalid", `could not read this file: more than ${MAX_PAGES} pages`);
 	}
 	try {
 		const layers = await doc.getOptionalContentConfig();
@@ -136,7 +136,7 @@ async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 		}
 		return { pages, extras: await extras(doc) };
 	} catch (error) {
-		if (error instanceof PlainviewError) throw error;
+		if (error instanceof SeenlineError) throw error;
 		// The walker's text budget (pdf-walk.ts) is a limit, not damage: name it.
 		const runs = (error as Error | null)?.message === "too much text";
 		throw fail(runs ? "a page has more than 100,000 text runs" : "damaged PDF");
@@ -197,16 +197,16 @@ function text(runs: Item[], cell: string): string[] {
 }
 
 // In the worker: read the file, post the result or the cause.
-if (!isMainThread && parentPort && workerData?.plainviewPdf) {
+if (!isMainThread && parentPort && workerData?.seenlinePdf) {
 	const port = parentPort;
 	await import("pdfjs-dist/legacy/build/pdf.mjs");
 	port.postMessage({ started: true });
-	await parse(workerData.plainviewPdf).then(
+	await parse(workerData.seenlinePdf).then(
 		(doc) => port.postMessage({ doc }),
 		(error: Error) =>
 			port.postMessage({
 				error:
-					error instanceof PlainviewError ? error.message : "could not read this file: damaged PDF",
+					error instanceof SeenlineError ? error.message : "could not read this file: damaged PDF",
 			}),
 	);
 }

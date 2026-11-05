@@ -4,7 +4,7 @@
 // operators are read here. Pure JavaScript, no rendering.
 
 import { light } from "./colour.ts";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import {
 	type Box,
 	bounds,
@@ -290,7 +290,7 @@ class Walker {
 		this.s.clips = [...this.s.clips, { ...this.region(polys, rule), approx }];
 		// Every run is tested against every clip in force; real pages nest a handful.
 		if (this.s.clips.length > MAX_CLIPS)
-			throw new PlainviewError(
+			throw new SeenlineError(
 				"invalid",
 				"could not read this file: too many nested PDF clipping paths",
 			);

@@ -6,7 +6,7 @@ import { HIDDEN_BLOCK } from "../src/hidden.ts";
 import { readingOrder } from "../src/pdf-order.ts";
 import type { ConvertOptions } from "../src/types.ts";
 import { differs } from "../src/verify.ts";
-import { convert, PlainviewError } from "./text-mode.ts";
+import { convert, SeenlineError } from "./text-mode.ts";
 
 const run = async (name: string, opts: Partial<ConvertOptions> = {}) =>
 	convert(await readFile(new URL(`./fixtures/pdf-hiding/${name}`, import.meta.url)), {
@@ -155,7 +155,7 @@ test("weak-page.pdf: without text recognition the near-empty page is marked, not
 	};
 	assert.equal((await run("weak-page.pdf", { ocr })).markdown, markdown);
 	const named = async () => {
-		throw new PlainviewError("unavailable", "could not read this file: recogniser missing");
+		throw new SeenlineError("unavailable", "could not read this file: recogniser missing");
 	};
 	await assert.rejects(run("weak-page.pdf", { ocr: named }), /recogniser missing/);
 	// Recognition that returns nothing (or blanks) for the page leaves it marked, not emptied.

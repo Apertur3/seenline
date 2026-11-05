@@ -1,6 +1,6 @@
 // CrackedPDFs (arXiv:2607.19396, MIT): detection and false-positive run. The PDFs are adversarial
 // and are only ever parsed by convert(); they live in the cache, never in the repository.
-//   node bench/cracked.ts prepare | run [test|train|all] | report [test|train|all]   (PLAINVIEW_BENCH_CACHE as in run.ts)
+//   node bench/cracked.ts prepare | run [test|train|all] | report [test|train|all]   (SEENLINE_BENCH_CACHE as in run.ts)
 // Detected = a hidden entry or a scanner flag, the same test --fail-on-hidden applies.
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -195,7 +195,7 @@ export function reportCracked(cache: string, which = "test"): string {
 			lines.push(`  ${v}\t${rate(inj.filter((m) => m[key] === v))}`);
 	}
 	// Length proxies (the metadata has no payload length): "bytes" = what a file adds over its benign original;
-	// "hidden" = characters in Plainview's own hidden block. Tied = confounder within 10% of the injected one.
+	// "hidden" = characters in Seenline's own hidden block. Tied = confounder within 10% of the injected one.
 	const size = (m: Meta) => statSync(join(dir, m.file_path)).size;
 	const pairs = new Map<string, Record<string, Meta>>();
 	for (const m of metas(dir)) pairs.set(m.pair_id, { ...pairs.get(m.pair_id), [m.pdf_role]: m });
@@ -283,7 +283,7 @@ export function reportCracked(cache: string, which = "test"): string {
 }
 
 if (import.meta.main) {
-	const cache = process.env.PLAINVIEW_BENCH_CACHE ?? "";
+	const cache = process.env.SEENLINE_BENCH_CACHE ?? "";
 	const [cmd, which] = process.argv.slice(2);
 	if (cmd === "prepare") await prepareCracked(cache);
 	else if (cmd === "run") await runCracked(cache, which);

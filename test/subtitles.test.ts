@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import { convert, PlainviewError } from "./text-mode.ts";
+import { convert, SeenlineError } from "./text-mode.ts";
 
 for (const ext of ["vtt", "srt"]) {
 	test(`${ext} preserves speakers, time spans, entities and cue order`, async () => {
@@ -26,7 +26,7 @@ test("subtitles without cues fail closed", async () => {
 	await assert.rejects(
 		convert(Buffer.from("WEBVTT\n\nNOTE nothing here\n"), { name: "empty.vtt" }),
 		(error: unknown) =>
-			error instanceof PlainviewError &&
+			error instanceof SeenlineError &&
 			error.code === "invalid" &&
 			error.message === "no subtitle cues found",
 	);

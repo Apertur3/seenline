@@ -1,7 +1,7 @@
 {
 	"python": "3.12",
 	"candidates": {
-		"plainview": {
+		"seenline": {
 			"formats": [
 				"pdf",
 				"docx",
@@ -27,11 +27,11 @@
 			],
 			"configuration": "convert() from src, no OCR callback (scans and images fail closed)"
 		},
-		"plainview-verify": {
+		"seenline-verify": {
 			"formats": ["pdf"],
 			"configuration": "the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file"
 		},
-		"plainview-ocr": {
+		"seenline-ocr": {
 			"formats": ["pdf", "png", "jpg", "jpeg", "bmp", "gif", "webp"],
 			"configuration": "the same with --ocr (tesseract eng; pdftoppm for PDF pages without a text layer); one run per file"
 		},

@@ -1,5 +1,5 @@
 // Local mail/web conversion shares the document hidden-content boundary.
-import { failure, PlainviewError } from "./error.ts";
+import { failure, SeenlineError } from "./error.ts";
 import { HIDDEN_BLOCK, written } from "./hidden.ts";
 import { type MailText, readHtml } from "./html.ts";
 import { decodeCharset, headerText, type MimePart, mimeParams, readMime } from "./mime.ts";
@@ -96,7 +96,7 @@ function email(bytes: Uint8Array): MailText {
 }
 export function convertMail(bytes: Uint8Array, name: string): string {
 	if (/\.msg$/i.test(name))
-		throw new PlainviewError(
+		throw new SeenlineError(
 			"invalid",
 			"could not read this file: export or save Outlook mail as .eml",
 		);

@@ -10,4 +10,4 @@
 
 Node built-ins supply file handling, temporary directories, decompression and the test runner. OCR is a caller callback; the CLI and MCP `--ocr` option runs `tesseract` and `pdftoppm` (poppler) when the user has installed them, with no npm package. Legacy `.doc` and `.rtf` use macOS `/usr/bin/textutil` and fail closed on other systems.
 
-The core library and `plainview/hidden` never import the MCP SDK or zod. The CLI loads the MCP entry only for `plainview mcp`. The SDK installs additional transitive dependencies, including network transports; Plainview uses its stdio transport only. `npm run licences` checks the entire installed runtime tree.
+The core library and `seenline/hidden` never import the MCP SDK or zod. The CLI loads the MCP entry only for `seenline mcp`. The SDK installs additional transitive dependencies, including network transports; Seenline uses its stdio transport only. `npm run licences` checks the entire installed runtime tree.

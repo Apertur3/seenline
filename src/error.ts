@@ -1,15 +1,15 @@
-export class PlainviewError extends Error {
+export class SeenlineError extends Error {
 	readonly code: "invalid" | "unavailable";
 
 	constructor(code: "invalid" | "unavailable", message: string) {
 		super(message);
-		this.name = "PlainviewError";
+		this.name = "SeenlineError";
 		this.code = code;
 	}
 }
 
 /** OCR was not given, or failed without a reason of its own: a PDF with other text pages marks the page instead. */
-export class NotRead extends PlainviewError {}
+export class NotRead extends SeenlineError {}
 
 // A reader's internal failure, named by its class of cause in plain words; never document content.
 const CAUSES: [RegExp, string][] = [
@@ -37,10 +37,10 @@ const CAUSES: [RegExp, string][] = [
 ];
 
 /** The error for a failed read: its class of cause when known, else the reader's own fallback. */
-export function failure(error: unknown, fallback: string): PlainviewError {
-	if (error instanceof PlainviewError) return error;
+export function failure(error: unknown, fallback: string): SeenlineError {
+	if (error instanceof SeenlineError) return error;
 	const m = (error as { code?: string; message?: string } | null) ?? {};
 	const key = m.code === "ERR_ENCODING_INVALID_ENCODED_DATA" ? "encoding" : String(m.message);
 	const cause = CAUSES.find(([pattern]) => pattern.test(key))?.[1];
-	return new PlainviewError("invalid", cause ? `could not read this file: ${cause}` : fallback);
+	return new SeenlineError("invalid", cause ? `could not read this file: ${cause}` : fallback);
 }

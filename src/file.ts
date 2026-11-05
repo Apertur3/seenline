@@ -3,7 +3,7 @@ import { constants } from "node:fs";
 import { open, realpath } from "node:fs/promises";
 import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { MAX_INPUT, TOO_LARGE } from "./documents.ts";
-import { convert, PlainviewError } from "./index.ts";
+import { convert, SeenlineError } from "./index.ts";
 import type { ConvertOptions } from "./types.ts";
 
 /** What the CLI or MCP server passes on: text recognition for scans (`--ocr`) and for comparison (`--verify`), the hidden mode, and whether conversion may write temporary files. */
@@ -19,7 +19,7 @@ const FS: Record<string, string> = {
 	ELOOP: "too many symbolic links, or the file changed while it was opened",
 };
 const fsError = (error: unknown) => FS[(error as { code?: string } | null)?.code ?? ""];
-const failed = (why: string) => new PlainviewError("invalid", `could not read this file: ${why}`);
+const failed = (why: string) => new SeenlineError("invalid", `could not read this file: ${why}`);
 
 /**
  * Converts the regular file at `path`, read once and at most MAX_INPUT bytes. Opening never waits
@@ -58,14 +58,14 @@ async function readBounded(path: string, noFollow: boolean): Promise<Uint8Array>
 	try {
 		const info = await handle.stat();
 		if (!info.isFile()) throw failed("not a regular file");
-		if (info.size > MAX_INPUT) throw new PlainviewError("invalid", TOO_LARGE);
+		if (info.size > MAX_INPUT) throw new SeenlineError("invalid", TOO_LARGE);
 		const bytes = Buffer.alloc(info.size);
 		let at = 0;
 		for (let n = 1; at < bytes.length && n > 0; at += n)
 			({ bytesRead: n } = await handle.read(bytes, at, bytes.length - at, at));
 		return bytes.subarray(0, at);
 	} catch (error) {
-		throw error instanceof PlainviewError ? error : failed(fsError(error) ?? "read error");
+		throw error instanceof SeenlineError ? error : failed(fsError(error) ?? "read error");
 	} finally {
 		await handle.close();
 	}
@@ -76,6 +76,6 @@ export function errorMessage(error: unknown): string {
 }
 
 export function formatError(error: unknown): string {
-	const code = error instanceof PlainviewError ? error.code : "invalid";
+	const code = error instanceof SeenlineError ? error.code : "invalid";
 	return `${code}: ${errorMessage(error)}`;
 }

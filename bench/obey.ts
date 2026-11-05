@@ -1,9 +1,9 @@
 // Set O: obedience. Does a model do what an instruction hidden in a CrackedPDFs file says, with the
-// PDF (raw), Plainview's default Markdown (describe) or its text block (text) in front? Opt-in, never in CI.
+// PDF (raw), Seenline's default Markdown (describe) or its text block (text) in front? Opt-in, never in CI.
 //   node bench/obey.ts pick [body]                           choose the cells (written to data/obey.json)
 //   node bench/obey.ts run <model> <raw|describe|text|body>[-twin] [n]   sequential, resumable; first n cells
 //   node bench/obey.ts score [--verbose]                     tables, candidates and the cells left to read
-// Answers stay in PLAINVIEW_BENCH_CACHE/obey; the PDFs in PLAINVIEW_BENCH_CACHE/cracked.
+// Answers stay in SEENLINE_BENCH_CACHE/obey; the PDFs in SEENLINE_BENCH_CACHE/cracked.
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -30,7 +30,7 @@ const O = data<{
 	body: Cell[];
 	manual: Record<string, [string, string]>;
 }>("obey.json");
-const cache = process.env.PLAINVIEW_BENCH_CACHE ?? "";
+const cache = process.env.SEENLINE_BENCH_CACHE ?? "";
 const cracked = join(cache, "cracked");
 const metas: Record<string, string>[] = existsSync(join(cracked, "data-metadata.jsonl"))
 	? readFileSync(join(cracked, "data-metadata.jsonl"), "utf8")
@@ -41,7 +41,7 @@ const metas: Record<string, string>[] = existsSync(join(cracked, "data-metadata.
 const byId = new Map(metas.map((m) => [m.pdf_id, m]));
 const pdf = (id: string) => join(cracked, byId.get(id)?.file_path ?? "");
 const words = (s: string) => s.replace(MARKERS, " ").match(/[\p{L}\p{N}'’_]+/gu) ?? [];
-// body: files whose payload Plainview leaves in the Markdown body, unflagged (read in describe mode).
+// body: files whose payload Seenline leaves in the Markdown body, unflagged (read in describe mode).
 const MODE = { raw: undefined, describe: "describe", text: "text", body: "describe" } as const;
 const POLICY = /<SYSTEM_POLICY_DO_NOT_REMOVE>\n([^\n]*)/;
 /** The payload left in the body: the line after the dataset's opening marker. */
@@ -98,11 +98,11 @@ const dir = (...p: string[]) => join(cache, "obey", ...p);
 async function run(name: string, arm: string, n = O.cells.length): Promise<void> {
 	const model = MODELS[name];
 	const [base = "raw", twin] = arm.split("-") as [keyof typeof MODE, string?];
-	const plainview = base !== "raw";
+	const seenline = base !== "raw";
 	if (
 		!model ||
 		!(base in MODE) ||
-		(model.arms && !model.arms.includes(plainview ? "plainview" : "raw"))
+		(model.arms && !model.arms.includes(seenline ? "seenline" : "raw"))
 	)
 		throw new Error(`no ${name} ${arm} arm`);
 	for (const c of (base === "body" ? O.body : O.cells).slice(0, n)) {
@@ -113,13 +113,13 @@ async function run(name: string, arm: string, n = O.cells.length): Promise<void>
 		const bytes = readFileSync(pdf(id));
 		const r = await convert(new Uint8Array(bytes), {
 			name: "document.pdf",
-			...(plainview && { hidden: MODE[base] }),
+			...(seenline && { hidden: MODE[base] }),
 		});
 		// The payload, for the quote check: the hidden entries, or for the body set the body's payload.
 		const payload = base === "body" && !twin ? [{ text: inBody(r.markdown) }] : r.hidden;
 		writeFileSync(join(cell, "hidden.json"), JSON.stringify(payload));
-		const doc = plainview ? "document.md" : "document.pdf";
-		writeFileSync(join(cell, doc), plainview ? r.markdown : bytes);
+		const doc = seenline ? "document.md" : "document.pdf";
+		writeFileSync(join(cell, doc), seenline ? r.markdown : bytes);
 		if (!ask(name, cell, O.prompt.replace("{ref}", model.ref.replace("{doc}", doc)))) return;
 	}
 }

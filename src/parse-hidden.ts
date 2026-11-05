@@ -1,4 +1,4 @@
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { suspect } from "./suspect.ts";
 import type { ConvertOptions, HiddenText } from "./types.ts";
@@ -117,7 +117,7 @@ function parseLine(line: string): HiddenText {
 const MAX_ENTRIES = 100_000;
 function withSuspect(entries: HiddenText[]): HiddenText[] {
 	if (entries.length > MAX_ENTRIES)
-		throw new PlainviewError(
+		throw new SeenlineError(
 			"invalid",
 			"could not read this file: more than 100,000 hidden entries",
 		);

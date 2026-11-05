@@ -1,10 +1,10 @@
 // Set M: model exposure. Each cell is one subscription-CLI call on one Split-View file, either the
-// original PDF (raw) or Plainview's Markdown (plainview: the default hidden mode, as shipped), in its own
+// original PDF (raw) or Seenline's Markdown (seenline: the default hidden mode, as shipped), in its own
 // empty directory. Opt-in, never in CI.
-//   node bench/models.ts run <name> <A|B> <raw|plainview[-text|-framed|-describe]>   sequential, resumable
-//   (a cell whose Markdown equals the plainview-text cell's reuses that answer)
+//   node bench/models.ts run <name> <A|B> <raw|seenline[-text|-framed|-describe]>   sequential, resumable
+//   (a cell whose Markdown equals the seenline-text cell's reuses that answer)
 //   node bench/models.ts score                                             table and per-cell verdicts
-// Answers stay in PLAINVIEW_BENCH_CACHE/models; nothing here is committed or published.
+// Answers stay in SEENLINE_BENCH_CACHE/models; nothing here is committed or published.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -45,9 +45,9 @@ const M = data<{
 }>("models.json");
 const B = M.sets.B;
 
-const cache = process.env.PLAINVIEW_BENCH_CACHE ?? "";
+const cache = process.env.SEENLINE_BENCH_CACHE ?? "";
 if (!isAbsolute(cache))
-	throw new Error("Set PLAINVIEW_BENCH_CACHE to an absolute scratch directory");
+	throw new Error("Set SEENLINE_BENCH_CACHE to an absolute scratch directory");
 const dir = (...p: string[]) => join(cache, "models", ...p);
 /** The CLI wiring is machine-local: which logged-in CLIs exist and how they are called. */
 export const MODELS: Record<string, Model> = existsSync(join(cache, "clis.json"))
@@ -115,7 +115,7 @@ async function run(name: string, set: string, arm: string): Promise<void> {
 		mkdirSync(cell, { recursive: true });
 		const bytes = readFileSync(pdf);
 		let doc = "document.pdf";
-		if (base === "plainview") {
+		if (base === "seenline") {
 			doc = "document.md";
 			try {
 				const { markdown } = await convert(bytes, {
@@ -124,9 +124,9 @@ async function run(name: string, set: string, arm: string): Promise<void> {
 					...(mode && { hidden: mode }),
 				});
 				writeFileSync(join(cell, doc), markdown);
-				const text = dir(set, name, "plainview-text", item.gap);
+				const text = dir(set, name, "seenline-text", item.gap);
 				if (
-					arm !== "plainview-text" &&
+					arm !== "seenline-text" &&
 					existsSync(join(text, "answer.json")) &&
 					readFileSync(join(text, doc), "utf8") === markdown
 				) {
@@ -135,7 +135,7 @@ async function run(name: string, set: string, arm: string): Promise<void> {
 					continue;
 				}
 			} catch (e) {
-				// Nothing reaches the model when Plainview fails closed; recorded as such, not called.
+				// Nothing reaches the model when Seenline fails closed; recorded as such, not called.
 				writeFileSync(
 					join(cell, "answer.json"),
 					JSON.stringify({ status: "failed-closed", error: String(e) }),
@@ -250,10 +250,10 @@ function score(): void {
 		for (const [name, model] of Object.entries(MODELS))
 			for (const arm of [
 				"raw",
-				"plainview",
-				"plainview-text",
-				"plainview-framed",
-				"plainview-describe",
+				"seenline",
+				"seenline-text",
+				"seenline-framed",
+				"seenline-describe",
 			]) {
 				if (!existsSync(dir(set, name, arm))) continue;
 				const by: Record<string, string[]> = { content: [], flagged: [], clean: [], none: [] };
@@ -291,5 +291,5 @@ if (import.meta.main) {
 	const [cmd, name = "", set = "A", arm = "raw"] = process.argv.slice(2);
 	if (cmd === "run") await run(name, set, arm);
 	else if (cmd === "score") score();
-	else throw new Error("usage: models.ts run <model> <A|B> <raw|plainview> | score [--verbose]");
+	else throw new Error("usage: models.ts run <model> <A|B> <raw|seenline> | score [--verbose]");
 }

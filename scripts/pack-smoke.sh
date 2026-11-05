@@ -13,6 +13,6 @@ extra=$(echo "$files" | grep -v -E '^(dist/|docs/|README\.md$|LICENSE$|CHANGELOG
 [ -z "$extra" ] || { echo "pack-smoke: unexpected files in the tarball:"; echo "$extra"; exit 1; }
 mkdir "$work/app"
 (cd "$work/app" && npm init -y >/dev/null && npm install --silent --ignore-scripts --prefer-offline "../$tarball")
-"$work/app/node_modules/.bin/plainview" test/fixtures/documents/report.pdf | cmp - test/golden/documents/report.pdf.md \
+"$work/app/node_modules/.bin/seenline" test/fixtures/documents/report.pdf | cmp - test/golden/documents/report.pdf.md \
 	|| { echo "pack-smoke: installed binary output differs from the golden"; exit 1; }
 echo "pack-smoke: ok ($(echo "$files" | wc -l | tr -d ' ') files)"

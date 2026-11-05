@@ -5,11 +5,11 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { strToU8, unzipSync, zipSync } from "fflate";
 import { officeFixtures } from "../scripts/office-fixtures.ts";
-import { convert, PlainviewError } from "../src/index.ts";
+import { convert, SeenlineError } from "../src/index.ts";
 
 const fixtures = new URL("./fixtures/documents/", import.meta.url);
 const noOcr = (error: unknown) =>
-	error instanceof PlainviewError &&
+	error instanceof SeenlineError &&
 	error.code === "unavailable" &&
 	error.message === "could not read this file: no text recognition available";
 
@@ -53,7 +53,7 @@ test("OCR failure and malformed results clean up temporary bytes", async () => {
 					return bad as unknown as { pages: string[]; extras: string[] };
 				},
 			}),
-			(error: unknown) => error instanceof PlainviewError && error.code === "invalid",
+			(error: unknown) => error instanceof SeenlineError && error.code === "invalid",
 		);
 		await assert.rejects(access(dirname(temporary)), { code: "ENOENT" });
 	}
@@ -170,8 +170,8 @@ test("empty and truncated input fails closed for every fixture format", async ()
 		["broken.vtt", Buffer.from("WEBVTT\n\n00:00:01.000 -->")],
 	];
 	for (const [name, bytes] of samples) {
-		await assert.rejects(convert(new Uint8Array(), { name }), PlainviewError, `${name} empty`);
-		await assert.rejects(convert(bytes, { name }), PlainviewError, `${name} truncated`);
+		await assert.rejects(convert(new Uint8Array(), { name }), SeenlineError, `${name} empty`);
+		await assert.rejects(convert(bytes, { name }), SeenlineError, `${name} truncated`);
 	}
 });
 
@@ -179,7 +179,7 @@ test("encrypted Office containers and ZIP encryption flags fail closed", async (
 	for (const name of ["locked.docx", "locked.pptx", "locked.xlsx"])
 		await assert.rejects(
 			convert(Buffer.from([0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]), { name }),
-			PlainviewError,
+			SeenlineError,
 		);
 	const parts = unzipSync(officeFixtures()["office-memo.docx"] as Uint8Array);
 	const zip = zipSync(parts, { level: 0 });
@@ -188,7 +188,7 @@ test("encrypted Office containers and ZIP encryption flags fail closed", async (
 		if (zip[i + 2] === 3 && zip[i + 3] === 4) zip[i + 6] = (zip[i + 6] ?? 0) | 1;
 		if (zip[i + 2] === 1 && zip[i + 3] === 2) zip[i + 8] = (zip[i + 8] ?? 0) | 1;
 	}
-	await assert.rejects(convert(zip, { name: "locked.docx" }), PlainviewError);
+	await assert.rejects(convert(zip, { name: "locked.docx" }), SeenlineError);
 });
 
 test("a valid password-protected PDF fails closed with the reference's reason", async () => {
@@ -197,7 +197,7 @@ test("a valid password-protected PDF fails closed with the reference's reason", 
 	) as { code: string; message: string };
 	const bytes = await readFile(new URL("./fixtures/invalid/password.pdf", import.meta.url));
 	await assert.rejects(convert(bytes, { name: "password.pdf" }), (error: unknown) => {
-		assert.ok(error instanceof PlainviewError);
+		assert.ok(error instanceof SeenlineError);
 		assert.deepEqual({ code: error.code, message: error.message }, expected);
 		assert.match(error.message, /password protected/);
 		return true;

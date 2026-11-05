@@ -4,10 +4,10 @@
 //   npm run bench -- ocr             ours with --ocr on the PDFs and images, once each (same tools)
 //   npm run bench -- prepare         download the pinned corpora (the only networked step)
 //   sh bench/run-adapters.sh <cache> run the competitor adapters in isolated uv environments
-//   npm run bench -- modes           sets B and C under each --hidden mode, printed (into plainview-<mode>)
+//   npm run bench -- modes           sets B and C under each --hidden mode, printed (into seenline-<mode>)
 //   npm run bench -- speed|anchors   sets F and D into the cache (speed packs and installs; --prefer-offline)
 //   npm run bench -- provider-tokens optional provider token counts (key read from the Keychain)
-// PLAINVIEW_BENCH_CACHE must be an absolute scratch directory outside the repository.
+// SEENLINE_BENCH_CACHE must be an absolute scratch directory outside the repository.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { corpus } from "./corpus.ts";
@@ -16,10 +16,10 @@ import { prepare } from "./prepare.ts";
 import { markdown, rows, tsv } from "./report.ts";
 
 const root = resolve(import.meta.dirname, "..");
-const cache = process.env.PLAINVIEW_BENCH_CACHE ?? "";
+const cache = process.env.SEENLINE_BENCH_CACHE ?? "";
 if (!cache || !isAbsolute(cache) || resolve(cache).startsWith(root))
 	throw new Error(
-		"Set PLAINVIEW_BENCH_CACHE to an absolute scratch directory outside the repository",
+		"Set SEENLINE_BENCH_CACHE to an absolute scratch directory outside the repository",
 	);
 
 /** The inputs every tool reads, copied side by side, and the manifest the adapters take them from. */

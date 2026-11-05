@@ -17,7 +17,7 @@ export TORCH_HOME=${TORCH_HOME:-$root/cache/torch}
 export OMP_NUM_THREADS=${OMP_NUM_THREADS:-4}
 export TOKENIZERS_PARALLELISM=false
 python=$(python3 -I -c "import json,sys;print(json.load(open(sys.argv[1]))['python'])" "$here/data/environment.json")
-[ $# -gt 0 ] || set -- $(python3 -I -c "import json,sys;print(' '.join(k for k in json.load(open(sys.argv[1]))['candidates'] if k!='plainview'))" "$here/data/environment.json")
+[ $# -gt 0 ] || set -- $(python3 -I -c "import json,sys;print(' '.join(k for k in json.load(open(sys.argv[1]))['candidates'] if k!='seenline'))" "$here/data/environment.json")
 for candidate in "$@"; do
   venv=$root/venvs/$candidate
   mkdir -p "$root/$candidate"

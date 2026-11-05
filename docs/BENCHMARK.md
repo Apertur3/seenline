@@ -10,9 +10,9 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read of offered | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| plainview | 0.0.0 | 2026-10-23 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
-| plainview-verify | 0.0.0 | 2026-10-23 | 102/106 |  | the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file |
-| plainview-ocr | 0.0.0 | 2026-10-23 | 117/118 |  | the same with --ocr (tesseract eng; pdftoppm for PDF pages without a text layer); one run per file |
+| seenline | 0.0.0 | 2026-10-23 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| seenline-verify | 0.0.0 | 2026-10-23 | 102/106 |  | the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file |
+| seenline-ocr | 0.0.0 | 2026-10-23 | 117/118 |  | the same with --ocr (tesseract eng; pdftoppm for PDF pages without a text layer); one run per file |
 | markitdown | 0.1.8 | 2026-10-19 | 187/187 |  | stock; plugins disabled; no LLM |
 | docling | 2.140.0 | 2026-10-19 | 197/199 |  | standard local layout, table and OCR; page metadata exported |
 | unstructured | 0.27.28 | 2026-10-19 | 186/205 |  | auto strategy for PDFs; ocr_only for images; page metadata exported |
@@ -25,7 +25,7 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 ## How to read these tables
 
-This benchmark is synthetic and small, and the authors of Plainview wrote the corpus selection, the answer keys and the scorer and ran it themselves. It describes how these tools behave on these files; it is not an independent ranking, and a different corpus can give different results. Everything is reproducible with `npm run bench`.
+This benchmark is synthetic and small, and the authors of Seenline wrote the corpus selection, the answer keys and the scorer and ran it themselves. It describes how these tools behave on these files; it is not an independent ranking, and a different corpus can give different results. Everything is reproducible with `npm run bench`.
 
 Outcome classes for Sets B and C (one per file and tool):
 
@@ -40,7 +40,7 @@ Outcome classes for Sets B and C (one per file and tool):
 
 `unsupported` and `not-run` cells are not counted in the total rows.
 
-Text counts as hidden when it sits in a `[Hidden in the original]` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Plainview columns are separate runs of one version: `plainview` (no OCR reader; scans and images fail closed), `plainview-verify` (`--verify`, PDFs) and `plainview-ocr` (`--ocr`, PDFs and images). A `plainview-ocr` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores `leaked`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
+Text counts as hidden when it sits in a `[Hidden in the original]` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Seenline columns are separate runs of one version: `seenline` (no OCR reader; scans and images fail closed), `seenline-verify` (`--verify`, PDFs) and `seenline-ocr` (`--ocr`, PDFs and images). A `seenline-ocr` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores `leaked`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
 
 What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 
@@ -53,7 +53,7 @@ The authors' own counts for their runs (Docling 18 of 25, Unstructured 17 of 25,
 table below is a re-run. Gaps in the font-decoding and reading-order families depend on a render-versus-text
 comparison that a reader working from text alone can just approximate; each miss is a known limit, not a hidden one.
 
-| gap | family | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| gap | family | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | EG_001 | tounicode-actualtext | leaked | leaked, signalled | leaked | leaked | stripped | leaked | stripped | leaked | stripped | leaked |
 | EG_002 | tounicode-actualtext | correct | correct | correct | correct | stripped | correct | stripped | leaked | correct | correct |
@@ -89,20 +89,20 @@ comparison that a reader working from text alone can just approximate; each miss
 | **correct** |  | 3 | 3 | 3 | 8 | 12 | 9 | 14 | 1 | 16 | 7 |
 | **tool signalled, any class (overlaps the rows above)** |  | 20 | 22 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
-Plainview leaks on: inj-pdf-unicode.pdf, unicode-bidi.html, unicode-homoglyph.html, EG_001_canary.pdf, EG_024_canary.pdf.
+Seenline leaks on: inj-pdf-unicode.pdf, unicode-bidi.html, unicode-homoglyph.html, EG_001_canary.pdf, EG_024_canary.pdf.
 
 ### Known limits
 
-- EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column plainview-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the payload is still a leak and the row reads `leaked, signalled`.
+- EG_001: leaked. A /ToUnicode map sends a visible letter to a different code point. The text layer is internally consistent, so nothing in it differs from what an extractor would return. Detection needs a comparison of glyph shapes with the mapped text. Tracked in issue 3. The opt-in `--verify` (column seenline-verify) lists the page as `text differs from page image`, but the text layer stays in the body, so the payload is still a leak and the row reads `leaked, signalled`.
 - EG_024: leaked. A Type 3 font without /ToUnicode whose glyph names match their codes (A_glyph at A) while each glyph draws another letter. The font metadata is consistent, so a static check has nothing to key on short of flagging every Type 3 font, which clean files use too; like EG_001 it needs the glyph shapes. As for EG_001, `--verify` lists the page and the body keeps the text layer (`leaked, signalled`).
 - EG_019, EG_020: flagged. The composite font lacks its /Subtype (EG_019 on the Type 0 font, EG_020 on the CIDFont), so pdfjs cannot load it and has no letters for the text. The hidden block says `unreadable font text: (letters not decodable)`; the visible word is not recovered.
 - EG_021, EG_022, EG_023, EG_025: flagged. A composite font with no /ToUnicode and no font program in the file (descriptor, /CIDSystemInfo or /Type removed): its two-byte codes map to nothing, and the text layer holds the codes themselves as CJK characters. That text goes under `unreadable font`; the visible word is not recovered.
 
 ## Set C: the repository's own injection and Unicode cases
 
-Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The injection fixtures have no visible-text key, so a tool that drops the payload shows `absent, unchecked`, not `correct`. The image fixtures are read by `plainview-ocr` with text recognition on.
+Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The injection fixtures have no visible-text key, so a tool that drops the payload shows `absent, unchecked`, not `correct`. The image fixtures are read by `seenline-ocr` with text recognition on.
 
-| file | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| file | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | hidden-text.pdf | flagged | flagged | flagged | leaked | leaked | leaked | correct | leaked | correct | leaked |
 | office-memo.docx | flagged | unsupported | unsupported | correct | stripped | leaked | failed-closed | leaked | unsupported | unsupported |
@@ -168,9 +168,9 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The inject
 
 | tool | files read of offered | facts (files read) | rows | order | anchors | facts (all offered files) |
 | --- | --- | --- | --- | --- | --- | --- |
-| plainview | 189/205 | 632/668 (94.6%) | 61/61 (100.0%) | 87/93 (93.5%) | 161/162 (99.4%) | 632/694 (91.1%) |
-| plainview-verify | 102/106 | 280/293 (95.6%) | 5/5 (100.0%) | 39/41 (95.1%) | 85/86 (98.8%) | 280/305 (91.8%) |
-| plainview-ocr | 117/118 | 300/319 (94.0%) | 9/11 (81.8%) | 40/42 (95.2%) | 86/87 (98.9%) | 300/319 (94.0%) |
+| seenline | 189/205 | 632/668 (94.6%) | 61/61 (100.0%) | 87/93 (93.5%) | 161/162 (99.4%) | 632/694 (91.1%) |
+| seenline-verify | 102/106 | 280/293 (95.6%) | 5/5 (100.0%) | 39/41 (95.1%) | 85/86 (98.8%) | 280/305 (91.8%) |
+| seenline-ocr | 117/118 | 300/319 (94.0%) | 9/11 (81.8%) | 40/42 (95.2%) | 86/87 (98.9%) | 300/319 (94.0%) |
 | markitdown | 187/187 | 547/654 (83.6%) | 59/66 (89.4%) | 67/94 (71.3%) | 69/149 (46.3%) | 547/654 (83.6%) |
 | docling | 197/199 | 636/659 (96.5%) | 61/65 (93.8%) | 88/93 (94.6%) | 92/145 (63.4%) | 636/668 (95.2%) |
 | unstructured | 186/205 | 628/646 (97.2%) | 56/61 (91.8%) | 91/93 (97.8%) | 113/156 (72.4%) | 628/694 (90.5%) |
@@ -183,7 +183,7 @@ Denominators: facts, rows, order and anchors count the files a tool read, and no
 
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
-| format | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| format | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 2854 (41 to 5957) | - | - | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | 1932 (27 to 4961) | - | - |
 | docx | 479 (37 to 12017) | - | - | 613 (38 to 13980) | 574 (36 to 14758) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
@@ -196,9 +196,9 @@ Denominators: facts, rows, order and anchors count the files a tool read, and no
 | pptx | 1692 (53 to 3478) | - | - | 1958 (47 to 3919) | 1733 (17 to 2876) | 1566 (35 to 2755) | - | 1644 (38 to 4570) | - | - |
 | xlsx | 923 (62 to 76044) | - | - | 1007 (55 to 72074) | 1419 (49 to 83120) | 987 (40 to 42602) | - | 845 (45 to 52385) | - | - |
 
-Common files:95 public files that Plainview, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
+Common files:95 public files that Seenline, MarkItDown, Docling and Unstructured all read (median o200k tokens per file).
 
-| format | files | plainview | markitdown | docling | unstructured | hidden block share (plainview) |
+| format | files | seenline | markitdown | docling | unstructured | hidden block share (seenline) |
 | --- | --- | --- | --- | --- | --- | --- |
 | csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
 | docx | 20 | 2385 | 2831 | 2923 | 2264 | 0.5% |
@@ -207,7 +207,7 @@ Common files:95 public files that Plainview, MarkItDown, Docling and Unstructure
 | pptx | 15 | 2526 | 2694 | 2129 | 2032 | 0.7% |
 | xlsx | 10 | 4471 | 3608 | 4171 | 2973 | 0.0% |
 
-Hidden block on ordinary public files (Set A, files Plainview read): the entries are not verified as malicious, they are what Plainview lists. Package metadata, covered text and white text on slides are common in clean documents, so this is noise a user sees with `--fail-on-hidden`.
+Hidden block on ordinary public files (Set A, files Seenline read): the entries are not verified as malicious, they are what Seenline lists. Package metadata, covered text and white text on slides are common in clean documents, so this is noise a user sees with `--fail-on-hidden`.
 
 | format | files | with a hidden block |
 | --- | --- | --- |
@@ -225,7 +225,7 @@ Provider token counts of the native upload are a separate optional step (`provid
 
 Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shared with other work) and start a new JVM for every file, so their times are not comparable with the other columns.
 
-| format | plainview | plainview-verify | plainview-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
+| format | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 0.001 | - | - | 0.003 | 0.006 | 0.005 | - | 0.819 | - | - |
 | docx | 0.021 | - | - | 0.090 | 0.051 | 0.015 | - | 0.867 | - | - |
@@ -238,11 +238,11 @@ Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shar
 | pptx | 0.031 | - | - | 0.021 | 0.094 | 0.020 | - | 2.789 | - | - |
 | xlsx | 0.002 | - | - | 0.011 | 0.005 | 0.008 | - | 1.230 | - | - |
 
-Timing covers successful conversions. A `-` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. `plainview` has no OCR reader and refuses images; `plainview-ocr` reads them with a local tesseract, as docling, unstructured, marker and tika do.
+Timing covers successful conversions. A `-` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. `seenline` has no OCR reader and refuses images; `seenline-ocr` reads them with a local tesseract, as docling, unstructured, marker and tika do.
 
 ## Anchors (set D)
 
-Anchor overhead is the share of o200k tokens in Plainview's output that the anchors account for (page, slide,
+Anchor overhead is the share of o200k tokens in Seenline's output that the anchors account for (page, slide,
 sheet and row lines; the timestamp prefix of a cue). Median per file over the fixture documents and subtitle files;
 formats without anchors show 0.
 
@@ -279,7 +279,7 @@ appears with its own start and end time. A format whose fixture key states no lo
 
 ## Speed and size (set F)
 
-Plainview 0.0.0, 2026-10-18, Node v26.3.0. Hardware: darwin 25 arm64, 16 cores, 64 GiB RAM, CPU class Apple M3 Max. Measured on a clean install of the
+Seenline 0.0.0, 2026-10-18, Node v26.3.0. Hardware: darwin 25 arm64, 16 cores, 64 GiB RAM, CPU class Apple M3 Max. Measured on a clean install of the
 packed tarball (`npm pack`, then `npm install` into an empty directory), on `report.pdf` (3 pages), median of 3 runs.
 
 | measure | value |

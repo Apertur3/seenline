@@ -1,7 +1,7 @@
 // WebVTT and SubRip files to the timed lines of the timed-line format: one line per cue.
 
 import { clock, formatCue } from "./cues.ts";
-import { PlainviewError } from "./error.ts";
+import { SeenlineError } from "./error.ts";
 import { HIDDEN_BLOCK } from "./hidden.ts";
 import { cssHidden, cssRules, declarations } from "./html-style.ts";
 
@@ -71,7 +71,7 @@ function hides(block: string): boolean {
 			return cssHidden(css) || (!!color && unseen(color, ground));
 		});
 	} catch {
-		throw new PlainviewError(
+		throw new SeenlineError(
 			"invalid",
 			"could not read this file: a subtitle style that cannot be read safely",
 		);
@@ -98,7 +98,7 @@ export function subtitlesToText(raw: string): string {
 		if (text === "") continue;
 		lines.push(formatCue(clock(t.slice(1, 5)), clock(t.slice(5, 9)), text));
 	}
-	if (lines.length === 0) throw new PlainviewError("invalid", "no subtitle cues found");
+	if (lines.length === 0) throw new SeenlineError("invalid", "no subtitle cues found");
 	// A style that can hide a cue hides an unknown set of them: every cue is listed, none is shown.
 	const out = styled ? [HIDDEN_BLOCK, ...lines.map((l) => `hidden cue style: ${l}`)] : lines;
 	return `${out.join("\n")}\n`;

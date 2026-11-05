@@ -8,7 +8,7 @@ import { corpus } from "./corpus.ts";
 import { ours } from "./ours.ts";
 import { HEAD, markdown, rows, tsv } from "./report.ts";
 
-const cache = await mkdtemp(join(tmpdir(), "plainview-bench-"));
+const cache = await mkdtemp(join(tmpdir(), "seenline-bench-"));
 after(() => rm(cache, { recursive: true, force: true }));
 const entries = corpus(cache);
 
@@ -30,10 +30,10 @@ test("the corpus holds the fixtures once each, with the Unicode and PDF-hiding c
 	);
 });
 
-test("Plainview leaks no hidden payload of the control set, and the report is complete", async () => {
+test("Seenline leaks no hidden payload of the control set, and the report is complete", async () => {
 	await ours(cache, entries, 1);
 	const rs = rows(cache);
-	const mine = rs.filter((r) => r.candidate === "plainview");
+	const mine = rs.filter((r) => r.candidate === "seenline");
 	assert.equal(mine.length, entries.length);
 	// Known: reversed (bidi) and lookalike text is flagged in `flags` only and stays in the body.
 	const leaks = mine.filter((r) => r.outcome === "leaked").map((r) => r.entry.file);
