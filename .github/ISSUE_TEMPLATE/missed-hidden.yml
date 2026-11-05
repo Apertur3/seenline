@@ -1,0 +1,36 @@
+name: Missed hidden content
+description: Seenline put hidden text in the Markdown body.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the README's known limits and share a synthetic or redacted example. Remove personal data and secrets.
+        For vulnerabilities, follow [SECURITY.md](https://github.com/Apertur3/seenline/blob/main/SECURITY.md).
+  - type: input
+    id: environment
+    attributes:
+      label: Version and environment
+      description: Seenline version or checkout revision, Node version and operating system.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: File and conversion steps
+      description: Attach a small example and include the command, library options or MCP arguments.
+    validations:
+      required: true
+  - type: textarea
+    id: hidden
+    attributes:
+      label: Why the text is hidden in the original
+      description: Give its location, the hiding technique if known, viewer and version, and a screenshot if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Text that reached the Markdown body
+      description: Include the relevant output and any hidden entries or flags Seenline returned.
+    validations:
+      required: true

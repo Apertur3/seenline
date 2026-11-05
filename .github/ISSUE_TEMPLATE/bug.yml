@@ -1,0 +1,36 @@
+name: Bug report
+description: A conversion, CLI, library or MCP problem.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For vulnerabilities, follow [SECURITY.md](https://github.com/Apertur3/seenline/blob/main/SECURITY.md).
+        Use the false-flag or missed-hidden form for hidden-content detection reports.
+        Share synthetic or redacted files, logs and screenshots. Remove personal data and secrets.
+  - type: input
+    id: environment
+    attributes:
+      label: Version and environment
+      description: Seenline version or checkout revision, Node version and operating system.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the command, library call or MCP arguments and a small example file if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include output, error messages and exit code where available.
+    validations:
+      required: true

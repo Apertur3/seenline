@@ -38,3 +38,9 @@ models/
 .DS_Store
 .idea/
 *.swp
+
+# --- public brand assets (override local asset exclusions) ---
+!assets/
+!assets/brand/
+!assets/brand/social-preview.svg
+!assets/brand/social-preview.png

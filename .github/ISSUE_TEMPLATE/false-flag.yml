@@ -1,0 +1,36 @@
+name: False hidden-content flag
+description: Seenline listed text as hidden that a reader can see.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a synthetic or redacted example. Remove personal data and secrets from files, output and screenshots.
+        For vulnerabilities, follow [SECURITY.md](https://github.com/Apertur3/seenline/blob/main/SECURITY.md).
+  - type: input
+    id: environment
+    attributes:
+      label: Version and environment
+      description: Seenline version or checkout revision, Node version and operating system.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: File and conversion steps
+      description: Attach a small example and include the command, library options or MCP arguments.
+    validations:
+      required: true
+  - type: textarea
+    id: visible
+    attributes:
+      label: Where a reader sees the text
+      description: Give the page, slide, sheet or other location, viewer and version, and a screenshot if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Seenline output
+      description: Include the hidden entry and its location and kind. Use --hidden text or the structured hidden list to inspect it.
+    validations:
+      required: true
