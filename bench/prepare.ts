@@ -9,6 +9,7 @@ import { data, digest, PUBLIC, SPLITVIEW } from "./corpus.ts";
 async function download(url: string, sha256: string, name: string): Promise<Uint8Array> {
 	const response = await fetch(url, {
 		signal: AbortSignal.timeout(120_000),
+		headers: { "user-agent": "seenline-bench" }, // some hosts refuse the default client
 	});
 	if (!response.ok) throw new Error(`${name}: HTTP ${response.status}`);
 	const bytes = new Uint8Array(await response.arrayBuffer());

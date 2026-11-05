@@ -1,7 +1,7 @@
 {
 	"source": "Split-View PDF artifact for arXiv:2606.15020",
 	"record": "https://zenodo.org/records/23200230",
-	"url": "https://zenodo.org/api/records/23200230/files/artifact-update.zip/content",
+	"url": "https://zenodo.org/records/23200230/files/artifact-update.zip?download=1",
 	"file": "artifact-update.zip",
 	"sha256": "e72b46cf0cc66233dd64001ba4bf906181447bcdab9d405ef527f80b342a0cd9",
 	"license": "CC-BY-4.0",

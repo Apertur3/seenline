@@ -72,7 +72,7 @@
 			"formats": "*",
 			"requirements": [],
 			"jar": {
-				"url": "https://archive.apache.org/dist/tika/3.3.3/tika-app-3.3.3.jar",
+				"url": "https://repo1.maven.org/maven2/org/apache/tika/tika-app/3.3.3/tika-app-3.3.3.jar",
 				"sha256": "f29d4e0d2cff1fc32396f6ac5ce436dfc7b19f9303d3b899e1f56fde85711c96"
 			},
 			"configuration": "tika-app 3.3.3 text output (-t); needs a Java runtime"
