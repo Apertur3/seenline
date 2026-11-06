@@ -320,7 +320,7 @@ ${DEFINITIONS}
 
 Text counts as hidden when it sits in a \`[Hidden in the original]\` block; a scanner mark on a body line (an invisible character, hiding markup) does not count, as a model reading the output still reads that line. The Seenline columns are separate runs of one version: \`seenline\` (no OCR reader; scans and images fail closed), \`seenline-verify\` (\`--verify\`, PDFs) and \`seenline-ocr\` (\`--ocr\`, PDFs and images). A \`seenline-ocr\` image result is the output a reader gets with text recognition on: where the recognised text contains an injected string, the string reaches the body and the file scores \`leaked\`. It was visible text in the image, so a human reader sees it too, but a pipeline now holds it as ordinary body text.
 
-What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader ran elsewhere, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
+What is and is not comparable: columns of one row read the same file and are comparable in content. Speed is comparable between columns run on the same machine (Tika and OpenDataLoader start a JVM per file, see the Speed note), over files a tool converted. Each tool ran with the configuration shown in the Tools table, not tuned per file.
 
 ## Set B: Split-View canaries
 
@@ -366,7 +366,7 @@ ${provider(cache)}
 
 ## Speed (seconds per file, median of per-file medians)
 
-Tika and OpenDataLoader ran on a different Apple Silicon machine (24 cores, shared with other work) and start a new JVM for every file, so their times are not comparable with the other columns.
+Tika and OpenDataLoader start a new JVM for every file, so their times include that start-up and are not comparable with the other columns.
 
 ${byFormat(
 	rs,
