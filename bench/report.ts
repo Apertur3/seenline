@@ -347,6 +347,8 @@ ${table(["tool", "files read of offered", "facts (files read)", "rows", "order",
 
 Denominators: facts, rows, order and anchors count the files a tool read, and no others. A file it failed on or refused is left out of those four columns, so a tool that refuses hard inputs does not lose recovery there. The last column counts every fact in every file the tool was offered (a refused file recovers none), and the second column says how many files were read. Read the three together. A tool is offered a file when the format is inside its declared formats.
 
+Anchors use Seenline's own labels ([p. N], [slide N], [Sheet: name], [row N]). The adapters add page labels from each tool's own page data where it has any; a tool that emits no page breaks for a format (MarkItDown on PDFs, Tika in text mode) or no row, sheet or slide labels scores low for that reason, not for putting text on the wrong page. Across tools, compare PDF pages; the other formats show what Seenline labels, not a ranking.
+
 ## Tokens (o200k, Markdown output per file: median, p10 to p90)
 
 ${byFormat(
