@@ -161,6 +161,12 @@ different letters from their names. Both have internally consistent text metadat
 lines into the hidden block, so neither leaks in that mode. These two rows do not cover every outcome: text can also be
 removed without a signal, recovered correctly, or refused. Different files can give different results.
 
+Visible facts across all 205 benchmark files, checked by string match: Seenline found 97.8% (653 of 668) in the files it
+read and 94.1% (653 of 694) of everything offered, since it refuses files it cannot read safely, such as scans without
+the OCR option. tika found 97.1% and 96.1%, docling 96.7% and 95.4%, unstructured 96.4% and 93.4%. Each tool reads a
+different set of files, so the denominators differ; every figure and each miss are in
+[docs/BENCHMARK.md](docs/BENCHMARK.md).
+
 ## Formats
 
 | Format | Anchor | What counts as hidden |

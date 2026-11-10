@@ -10,7 +10,7 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read of offered | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| seenline | 0.0.0 | 2026-11-05 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| seenline | 0.0.0 | 2026-11-10 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
 | seenline-verify | 0.0.0 | 2026-11-05 | 102/106 |  | the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file |
 | seenline-ocr | 0.0.0 | 2026-11-05 | 117/118 |  | the same with --ocr (tesseract eng; pdftoppm for PDF pages without a text layer); one run per file |
 | markitdown | 0.1.8 | 2026-11-05 | 187/187 |  | stock; plugins disabled; no LLM |
@@ -188,7 +188,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The inject
 
 | tool | files read of offered | facts (files read) | rows | order | anchors | facts (all offered files) |
 | --- | --- | --- | --- | --- | --- | --- |
-| seenline | 189/205 | 632/668 (94.6%) | 61/61 (100.0%) | 87/93 (93.5%) | 161/162 (99.4%) | 632/694 (91.1%) |
+| seenline | 189/205 | 653/668 (97.8%) | 61/61 (100.0%) | 91/93 (97.8%) | 161/162 (99.4%) | 653/694 (94.1%) |
 | seenline-verify | 102/106 | 280/293 (95.6%) | 5/5 (100.0%) | 39/41 (95.1%) | 85/86 (98.8%) | 280/305 (91.8%) |
 | seenline-ocr | 117/118 | 300/319 (94.0%) | 9/11 (81.8%) | 40/42 (95.2%) | 86/87 (98.9%) | 300/319 (94.0%) |
 | markitdown | 187/187 | 547/654 (83.6%) | 59/66 (89.4%) | 67/94 (71.3%) | 69/149 (46.3%) | 547/654 (83.6%) |
@@ -211,7 +211,7 @@ Anchors use Seenline's own labels ([p. N], [slide N], [Sheet: name], [row N]). T
 | docx | 479 (37 to 12017) | - | - | 613 (38 to 13980) | 572 (36 to 14746) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
 | eml | 164 (78 to 296) | - | - | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
 | htm | 50 (50 to 50) | - | - | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
-| html | 553 (19 to 19761) | - | - | 560 (20 to 39756) | 569 (23 to 40138) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
+| html | 553 (19 to 34514) | - | - | 560 (20 to 39756) | 569 (23 to 40138) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
 | jpg | - | - | 34 (29 to 36) | - | 36 (22 to 38) | 37 (22 to 39) | 40 (23 to 46) | 34 (17 to 36) | - | - |
 | pdf | 46 (25 to 33622) | 52 (27 to 33622) | 48 (26 to 32373) | 38 (11 to 40546) | 43 (14 to 25535) | 43 (18 to 31970) | 35 (11 to 34291) | 40 (14 to 36790) | 39 (11 to 33243) | 42 (11 to 29219) |
 | png | - | - | 39 (14 to 57) | - | 19 (17 to 58) | 41 (14 to 60) | 19 (19 to 59) | 36 (11 to 56) | - | - |
@@ -224,7 +224,7 @@ Common files:95 public files that Seenline, MarkItDown, Docling and Unstructured
 | --- | --- | --- | --- | --- | --- | --- |
 | csv | 5 | 3396 | 2574 | 3243 | 1676 | 0.0% |
 | docx | 20 | 2385 | 2831 | 2921 | 2264 | 0.5% |
-| html | 7 | 14278 | 32786 | 26945 | 9769 | 0.0% |
+| html | 7 | 29167 | 32786 | 26945 | 9769 | 0.8% |
 | pdf | 38 | 17860 | 24010 | 15441 | 17483 | 0.0% |
 | pptx | 15 | 2526 | 2694 | 2129 | 2032 | 0.7% |
 | xlsx | 10 | 4471 | 3608 | 4171 | 2973 | 0.0% |
@@ -236,7 +236,7 @@ Hidden block on ordinary public files (Set A, files Seenline read): the entries 
 | csv | 5 | 0 |
 | docx | 20 | 15 |
 | eml | 3 | 0 |
-| html | 7 | 3 |
+| html | 7 | 7 |
 | pdf | 39 | 21 |
 | pptx | 15 | 10 |
 | xlsx | 10 | 6 |
@@ -257,7 +257,7 @@ Tika and OpenDataLoader start a new JVM for every file, so their times include t
 | jpg | - | - | 0.121 | - | 1.133 | 0.369 | 1.619 | 0.761 | - | - |
 | pdf | 0.004 | 0.793 | 0.009 | 0.006 | 0.098 | 0.003 | 0.135 | 0.825 | 0.073 | 0.201 |
 | png | - | - | 0.134 | - | 1.749 | 0.395 | 1.329 | 0.758 | - | - |
-| pptx | 0.034 | - | - | 0.025 | 0.110 | 0.021 | - | 1.496 | - | - |
+| pptx | 0.036 | - | - | 0.025 | 0.110 | 0.021 | - | 1.496 | - | - |
 | xlsx | 0.002 | - | - | 0.013 | 0.006 | 0.008 | - | 0.659 | - | - |
 
 Timing covers successful conversions. A `-` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. `seenline` has no OCR reader and refuses images; `seenline-ocr` reads them with a local tesseract, as docling, unstructured, marker and tika do.
