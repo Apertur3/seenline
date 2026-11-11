@@ -22,10 +22,34 @@ function quoted(raw: string): string[] {
 			return older && line && !/^\s*>/.test(line) ? `> ${line}` : line;
 		});
 }
-function addLeaf(part: MimePart, plain: string[], html: MailText[], out: MailText): void {
+function mergeMailText(dst: MailText, src: MailText, header?: string): void {
+	const body =
+		header === undefined ? dst.body.concat(src.body) : dst.body.concat([header], src.body);
+	const hidden = dst.hidden.concat(src.hidden);
+	const kept = src.kept && (dst.kept ?? []).concat(src.kept);
+	dst.body = body;
+	dst.hidden = hidden;
+	if (kept) dst.kept = kept;
+}
+function addLeaf(
+	part: MimePart,
+	plain: string[],
+	html: MailText[],
+	out: MailText,
+	depth: number,
+	insideAlternative = false,
+): void {
 	const disposition = mimeParams(part.headers.get("content-disposition") ?? "inline");
 	const filename =
 		disposition.params.filename ?? disposition.params["filename*"] ?? part.params.name;
+	if (part.type === "message/rfc822" && depth < 3 && !insideAlternative) {
+		try {
+			mergeMailText(out, email(part.bytes, depth + 1), "Attached message:");
+			return;
+		} catch {
+			// fall back to the attachment line below
+		}
+	}
 	if (
 		disposition.value === "attachment" ||
 		filename ||
@@ -40,7 +64,7 @@ function addLeaf(part: MimePart, plain: string[], html: MailText[], out: MailTex
 	if (part.type === "text/plain") plain.push(text);
 	else html.push(readHtml(text));
 }
-function email(bytes: Uint8Array): MailText {
+function email(bytes: Uint8Array, depth = 0): MailText {
 	const root = readMime(bytes),
 		out: MailText = { body: [], hidden: [] };
 	for (const name of ["From", "To", "Cc", "Date", "Subject"]) {
@@ -50,7 +74,7 @@ function email(bytes: Uint8Array): MailText {
 	const plain: string[] = [],
 		html: MailText[] = [],
 		attachments: MailText = { body: [], hidden: [] };
-	const walk = (part: MimePart) => {
+	const walk = (part: MimePart, insideAlternative = false) => {
 		for (const [name, raw] of part.headers) {
 			const text = headerText(raw);
 			if (
@@ -64,8 +88,9 @@ function email(bytes: Uint8Array): MailText {
 		if (part.children.length) {
 			if (mimeParams(part.headers.get("content-disposition") ?? "inline").value === "attachment")
 				throw new Error("multipart attachment unsupported");
-			for (const child of part.children) walk(child);
-		} else addLeaf(part, plain, html, attachments);
+			const childInsideAlternative = insideAlternative || part.type === "multipart/alternative";
+			for (const child of part.children) walk(child, childInsideAlternative);
+		} else addLeaf(part, plain, html, attachments, depth, insideAlternative);
 	};
 	walk(root);
 	if (plain.length) out.body.push(...plain.flatMap(quoted));
@@ -89,8 +114,8 @@ function email(bytes: Uint8Array): MailText {
 		.filter((l) => l && !shown.includes(l))
 		.join(" ");
 	if (html.length && suspect(only))
-		out.kept = [`Mail plain text the HTML alternative does not show: ${only}`];
-	out.body.push(...attachments.body);
+		out.kept = [...(out.kept ?? []), `Mail plain text the HTML alternative does not show: ${only}`];
+	mergeMailText(out, attachments);
 	if (!plain.length && !html.length && !attachments.body.length) throw new Error("no mail text");
 	return out;
 }
