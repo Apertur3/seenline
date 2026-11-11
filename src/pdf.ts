@@ -185,7 +185,10 @@ async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 				page.commonObjs.has(id) ? page.commonObjs.get(id)?.fontMatrix : undefined;
 			const { items, pictured } = walk(pdfjs.OPS, ops, page.view as Matrix, visible, fonts);
 			const shown = items.some((it) => it.why.every((w) => w === "unreadable font"));
-			pages.push({ ...arrange(n, items), scan: !shown || pictured >= SCAN_PICTURED });
+			pages.push({
+				...arrange(n, orient(items, page.rotate)),
+				scan: !shown || pictured >= SCAN_PICTURED,
+			});
 		}
 		return { pages, extras: await extras(doc) };
 	} catch (error) {
@@ -196,6 +199,25 @@ async function parse(bytes: Uint8Array): Promise<PdfDoc> {
 	} finally {
 		await task.destroy();
 	}
+}
+
+// Measure baselines in the displayed page orientation, after visibility checks in PDF coordinates.
+function orient(items: Item[], rotation: number): Item[] {
+	if (!rotation) return items;
+	const rotate = (x: number, y: number): [number, number] =>
+		rotation === 90 ? [y, -x] : rotation === 180 ? [-x, -y] : [-y, x];
+	return items.map((it) => {
+		const [x, y] = rotate(it.x, it.y);
+		const [dx, dy] = rotate(it.axis[0], it.axis[1]);
+		const [, up] = rotate(it.axis[2], it.axis[3]);
+		return {
+			...it,
+			x,
+			y,
+			end: x + ((it.end - it.x) * dx) / (Math.hypot(dx, dy) || 1),
+			upright: dx > 0 && up > 0 && Math.abs(dy) < 1e-3 * dx,
+		};
+	});
 }
 
 // Visible runs in reading order (pdf-order.ts), grouped into lines: a new line when the baseline moves or

@@ -28,6 +28,7 @@ export interface Item {
 	mid: [number, number];
 	/** Set when the run reads left to right on a level baseline: not rotated, mirrored or upside down. */
 	upright: boolean;
+	axis: Matrix; // text-to-page matrix, turned to the displayed page rotation in pdf.ts
 	why: string[];
 }
 interface Glyph {
@@ -478,7 +479,7 @@ class Walker {
 			const ground = white < 0 ? undefined : this.painted.findLast((p) => paints(p, mx, my));
 			if (ground && !light(ground.color) && s.blend === "source-over") why.splice(white, 1);
 			const upright = user[0] > 0 && user[3] > 0 && Math.abs(user[1]) < 1e-3 * user[0];
-			this.out.push({ text, x: user[4], y: user[5], size, end, mid, upright, why });
+			this.out.push({ text, x: user[4], y: user[5], size, end, mid, upright, why, axis: user });
 			if (s.mode >= 4) {
 				const [lo, hi] = [-0.25 * s.fontSize, 0.9 * s.fontSize];
 				const outline = [point(0, lo), point(advance, lo), point(advance, hi), point(0, hi)];

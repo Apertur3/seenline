@@ -112,11 +112,27 @@ for (const [name, text] of [
 	});
 }
 
+test("rotated page joins fragments and keeps separate rows", async () => {
+	const { markdown, hidden } = await run("rotated-page.pdf");
+	assert.ok(markdown.includes("Management is normal.\nNext row"), markdown);
+	assert.equal(hidden.length, 0);
+});
+
 // Runs with no usable size (0, NaN, infinite) are not measured and keep their stored place.
 test("reading order: runs without a usable size neither trigger nor break the rules, and none is lost", () => {
 	const run = (text: string, x: number, y: number, size = 12) => {
 		const end = x + 6 * text.length;
-		return { text, x, y, size, end, mid: [x, y] as [number, number], upright: true, why: [] };
+		return {
+			text,
+			x,
+			y,
+			size,
+			end,
+			mid: [x, y] as [number, number],
+			upright: true,
+			axis: [1, 0, 0, 1, 0, 0] as [number, number, number, number, number, number],
+			why: [],
+		};
 	};
 	const odd = [
 		run("zero", 400, 660, 0),
