@@ -4,6 +4,8 @@ Format: one heading per version. The anchor lines and the `[Hidden in the origin
 
 ## 0.1.0 (prepared, not yet released)
 
+- PDF pages with a `/Rotate` entry are grouped into lines in the orientation the reader sees, so table text on rotated pages (the NIS2 annexes, for example) reads as lines instead of one word fragment per line.
+- A forwarded mail (`message/rfc822` part) is converted up to three levels deep and marked `Attached message:`; its hidden content and suspect tags join the outer file's block. A forwarded mail inside an alternative a client may not show stays a `(not converted)` attachment line. Benchmark facts 653/668 to 655/668; every Set B and Set C outcome unchanged.
 - HTML whose styles cannot be read (a linked stylesheet, `var()`, an unsupported selector) keeps its text in the body instead of listing every element as hidden or failing the file. The block says `HTML linked stylesheet not read: N` or `HTML inline CSS not fully read: N`, and lines that read like an instruction to an AI move to it as `HTML text may be hidden by unread styles`. Benchmark facts 632/668 to 653/668; every Set B and Set C outcome unchanged.
 - `--verify` acts on what it finds: on a page where the rendered image does not show what the text layer says, the disputed lines leave the body and are listed as `text not drawn as written` (Split-View EG_001 and EG_024 are now flagged in that mode; on clean public files 54 of 73,694 lines moved). The default conversion is unchanged.
 - Renamed from Plainview to Seenline: package, CLI binary, MCP server name, `SeenlineError` and the `SEENLINE_` environment variables. The output contract is unchanged.

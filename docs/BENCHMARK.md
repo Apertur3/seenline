@@ -10,7 +10,7 @@ The tables here cover the tools shown as run below. A tool that was not run has 
 
 | tool | version | date | files read of offered | not run because | configuration |
 | --- | --- | --- | --- | --- | --- |
-| seenline | 0.0.0 | 2026-11-10 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
+| seenline | 0.0.0 | 2026-11-11 | 189/205 |  | convert() from src, no OCR callback (scans and images fail closed) |
 | seenline-verify | 0.0.0 | 2026-11-05 | 102/106 |  | the same with --verify (tesseract eng and pdftoppm compare each page with a text layer); one run per file |
 | seenline-ocr | 0.0.0 | 2026-11-05 | 117/118 |  | the same with --ocr (tesseract eng; pdftoppm for PDF pages without a text layer); one run per file |
 | markitdown | 0.1.8 | 2026-11-05 | 187/187 |  | stock; plugins disabled; no LLM |
@@ -188,7 +188,7 @@ Synthetic fixtures in `test/fixtures`. Same outcome classes as set B. The inject
 
 | tool | files read of offered | facts (files read) | rows | order | anchors | facts (all offered files) |
 | --- | --- | --- | --- | --- | --- | --- |
-| seenline | 189/205 | 653/668 (97.8%) | 61/61 (100.0%) | 91/93 (97.8%) | 161/162 (99.4%) | 653/694 (94.1%) |
+| seenline | 189/205 | 655/668 (98.1%) | 61/61 (100.0%) | 92/93 (98.9%) | 162/162 (100.0%) | 655/694 (94.4%) |
 | seenline-verify | 102/106 | 280/293 (95.6%) | 5/5 (100.0%) | 39/41 (95.1%) | 85/86 (98.8%) | 280/305 (91.8%) |
 | seenline-ocr | 117/118 | 300/319 (94.0%) | 9/11 (81.8%) | 40/42 (95.2%) | 86/87 (98.9%) | 300/319 (94.0%) |
 | markitdown | 187/187 | 547/654 (83.6%) | 59/66 (89.4%) | 67/94 (71.3%) | 69/149 (46.3%) | 547/654 (83.6%) |
@@ -209,7 +209,7 @@ Anchors use Seenline's own labels ([p. N], [slide N], [Sheet: name], [row N]). T
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 2854 (41 to 5957) | - | - | 2088 (40 to 5579) | 2614 (48 to 6676) | 1348 (21 to 4081) | - | 1932 (27 to 4961) | - | - |
 | docx | 479 (37 to 12017) | - | - | 613 (38 to 13980) | 572 (36 to 14746) | 420 (30 to 12199) | - | 499 (38 to 12232) | - | - |
-| eml | 164 (78 to 296) | - | - | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
+| eml | 164 (78 to 382) | - | - | - | - | 13 (11 to 15) | - | 86 (14 to 1315) | - | - |
 | htm | 50 (50 to 50) | - | - | 63 (63 to 63) | 62 (62 to 62) | 38 (38 to 38) | - | 40 (40 to 40) | - | - |
 | html | 553 (19 to 34514) | - | - | 560 (20 to 39756) | 569 (23 to 40138) | 528 (17 to 32523) | - | 531 (18 to 33761) | - | - |
 | jpg | - | - | 34 (29 to 36) | - | 36 (22 to 38) | 37 (22 to 39) | 40 (23 to 46) | 34 (17 to 36) | - | - |
@@ -250,14 +250,14 @@ Tika and OpenDataLoader start a new JVM for every file, so their times include t
 | format | seenline | seenline-verify | seenline-ocr | markitdown | docling | unstructured | marker | tika | pymupdf4llm | opendataloader |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | csv | 0.001 | - | - | 0.004 | 0.006 | 0.006 | - | 0.561 | - | - |
-| docx | 0.023 | - | - | 0.105 | 0.055 | 0.018 | - | 0.815 | - | - |
+| docx | 0.024 | - | - | 0.105 | 0.055 | 0.018 | - | 0.815 | - | - |
 | eml | 0.000 | - | - | - | - | 0.001 | - | 0.717 | - | - |
 | htm | 0.000 | - | - | 0.004 | 0.002 | 0.001 | - | 0.575 | - | - |
 | html | 0.001 | - | - | 0.004 | 0.004 | 0.001 | - | 0.617 | - | - |
 | jpg | - | - | 0.121 | - | 1.133 | 0.369 | 1.619 | 0.761 | - | - |
-| pdf | 0.004 | 0.793 | 0.009 | 0.006 | 0.098 | 0.003 | 0.135 | 0.825 | 0.073 | 0.201 |
+| pdf | 0.003 | 0.793 | 0.009 | 0.006 | 0.098 | 0.003 | 0.135 | 0.825 | 0.073 | 0.201 |
 | png | - | - | 0.134 | - | 1.749 | 0.395 | 1.329 | 0.758 | - | - |
-| pptx | 0.036 | - | - | 0.025 | 0.110 | 0.021 | - | 1.496 | - | - |
+| pptx | 0.035 | - | - | 0.025 | 0.110 | 0.021 | - | 1.496 | - | - |
 | xlsx | 0.002 | - | - | 0.013 | 0.006 | 0.008 | - | 0.659 | - | - |
 
 Timing covers successful conversions. A `-` means the tool converted no file of that format (it failed, refused or was not offered it); a refusal that returns at once is not a fast conversion. `seenline` has no OCR reader and refuses images; `seenline-ocr` reads them with a local tesseract, as docling, unstructured, marker and tika do.
@@ -294,7 +294,7 @@ appears with its own start and end time. A format whose fixture key states no lo
 | eml | 14/14 |
 | htm | 4/4 |
 | html | 7/7 |
-| pdf | 85/86 |
+| pdf | 86/86 |
 | pptx | 27/27 |
 | xlsx | 14/14 |
 | srt and vtt cues | 7/7 |
