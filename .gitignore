@@ -5,10 +5,6 @@
 *.pem
 *.key
 secrets/
-.claude/settings.local.json
-
-# --- gbrain per-worktree pin (machine-local) ---
-.gbrain-source
 
 # --- dependencies / build ---
 node_modules/

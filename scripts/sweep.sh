@@ -4,6 +4,11 @@
 set -eu
 cd "$(dirname "$0")/.."
 PATTERN='/Users/|@gmail|192\.168\.|100\.64\.|co-authored-by|generated with \[claude|anthropic\.com|\bcodex\b|(^|[^-[:alnum:]_])agent' # an HTTP user-agent header is not agent residue
+# Private names (machines, hosts, usernames) never live in the tree: one regex alternation per line in the untracked
+# file .git/info/sweep-private, or in SWEEP_PRIVATE (a CI secret). Without either, only the generic pattern runs.
+private=${SWEEP_PRIVATE:-$(cat "$(git rev-parse --git-common-dir)/info/sweep-private" 2>/dev/null || true)}
+private=$(printf '%s\n' "$private" | grep -v '^$' | paste -s -d '|' - || true)
+[ -z "$private" ] && echo "sweep: no private name list; generic pattern only" || PATTERN="$PATTERN|$private"
 OWNER='Copyright (c) 2026 Martijn Hermans'
 # src/suspect.json is detector data: its rules must name what an injection says to an AI (agent,
 # assistant), so it is the one source file left out of both greps. test/suspect.test.ts pins the list.

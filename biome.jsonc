@@ -12,7 +12,6 @@
 			"!test/fixtures",
 			"!package.json",
 			"!package-lock.json",
-			"!.claude",
 			"!.ref",
 			"!test/golden",
 			"!.factory",
