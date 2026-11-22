@@ -15,14 +15,14 @@ The port preserves PDF operators and extras, image metadata, Office XML/ZIP chec
 | documents | PDF anchors and tables, invisible text, malformed PDF, OCR routing/empty results/failure, every document canary | Inbox/archive bookkeeping, client calls, native OCR recognition accuracy |
 | office | All fact/row/anchor/hidden assertions; delimiter detection, row budgets and malformed/encrypted inputs | None |
 | office-safety | All six cases: inherited backgrounds/default styles, inherited slide formatting, ZIP integrity/XML rejection, custom attributes | None |
-| mail | All facts, structure, headers, alternatives, attachments, encodings, hidden inheritance, budgets and MSG refusal | Inbox/archive bookkeeping and vault verification |
+| mail | All facts, structure, headers, alternatives, attachments, encodings, hidden inheritance, budgets and MSG refusal | Inbox/archive bookkeeping and storage verification |
 | mail-safety | All five cases: CSS inheritance/cascade, malformed/ambiguous styles, external styles, fake markers, UTF-8 headers and colour syntax | None |
 | legacy-office | Conversion, hidden canaries, cleanup, damaged input and explicit Windows/Linux refusal | Platform-inapplicable cases retain their original skip conditions |
 | subtitles | VTT/SRT cue order, speakers, tags, entities, time anchors and empty-cue refusal | Claim time inheritance/overrides and inbox/archive bookkeeping |
 | office/mail boundary | Preservation exactly once, hidden-header position, scan flags and hidden lines; parsed hidden metadata added | Claims, acceptance policy, quarantine roles and fenced client responses |
 | office/mail mutation | Child-process source hooks must kill the boundary tests when the hidden header is removed; production files stay unchanged | None |
 
-No model harness, audio, transcription, vault, policy, claim flags or speaker scanner class is included. Speaker names in subtitles and presenter notes remain ordinary document content.
+No model harness, audio, transcription, storage, policy, claim flags or speaker scanner class is included. Speaker names in subtitles and presenter notes remain ordinary document content.
 
 ## Offline fixture generation
 
