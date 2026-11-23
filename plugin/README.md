@@ -11,3 +11,9 @@ writes no files.
 
 Seenline is a detection aid, not a security boundary: it does not catch every way of hiding text. See
 [what it does not catch](https://github.com/Apertur3/seenline#what-it-does-not-catch). MIT licence.
+
+## Privacy
+
+The plugin contains no code and collects nothing. Its skill has Claude run the `seenline` command on files you ask about.
+Seenline reads them on your computer, makes no network requests, writes no files and keeps nothing; no data goes to the
+publisher or any other party. What Claude does with the converted text is covered by your Claude plan's terms.
