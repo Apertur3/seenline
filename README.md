@@ -124,9 +124,10 @@ const result = await convert(bytes, { name: "report.pdf" });
 console.log(result.markdown);
 ```
 
-### MCP server
+### Claude Code plugin
 
-**Claude Code plugin:** the plugin starts the server with `npx` and lets it read files in the open project only.
+A skill that has Claude read documents through the `seenline` command, so the hidden block reaches Claude separately
+from the visible text. It needs the command installed (`npm install -g seenline`).
 
 ```
 /plugin install seenline --marketplace Apertur3/seenline
@@ -135,7 +136,9 @@ console.log(result.markdown);
 On Claude Code before 2.1.275, run `claude plugin marketplace add Apertur3/seenline`, then `claude plugin install
 seenline@seenline`.
 
-**Claude Code without the plugin** ([command reference](https://code.claude.com/docs/en/mcp)):
+### MCP server
+
+**Claude Code** ([command reference](https://code.claude.com/docs/en/mcp)):
 
 ```sh
 claude mcp add --transport stdio seenline -- npx -y seenline mcp --root /path/to/documents

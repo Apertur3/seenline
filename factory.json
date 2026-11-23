@@ -147,6 +147,7 @@
         ".github/*",
         "docs/*",
         "examples/*",
+        "plugin/*",
         "LICENSE",
         ".gitignore"
       ],

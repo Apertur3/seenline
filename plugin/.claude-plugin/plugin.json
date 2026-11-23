@@ -1,0 +1,11 @@
+{
+	"name": "seenline",
+	"version": "0.1.0",
+	"description": "Read PDF, Word, PowerPoint, Excel, CSV, HTML, email and subtitle files through Seenline, which converts them to Markdown locally and lists text a reader cannot see separately.",
+	"icon": "assets/icon.svg",
+	"author": { "name": "Apertur3" },
+	"homepage": "https://github.com/Apertur3/seenline",
+	"repository": "https://github.com/Apertur3/seenline",
+	"license": "MIT",
+	"keywords": ["markdown", "pdf", "document-conversion", "hidden-text", "prompt-injection"]
+}

@@ -2,6 +2,10 @@
 
 Format: one heading per version. The anchor lines and the `[Hidden in the original]` block grammar are the output contract; changing them is a new major version.
 
+## Unreleased
+
+- The Claude Code plugin is a skill in `plugin/` that runs the installed `seenline` command; it no longer starts the MCP server, which stays available through `claude mcp add` and the client configurations in the README. The plugin directory lists local MCP servers only from verified publishers.
+
 ## 0.1.0 (2026-11-23)
 
 - Published on npm as `seenline`, with a Claude Code plugin (`/plugin install seenline --marketplace Apertur3/seenline`) and an MCP Registry entry (`io.github.Apertur3/seenline`). The plugin limits the server to the open project's folder. Examples for LangChain, LlamaIndex and a GitHub Actions check are in `examples/`.

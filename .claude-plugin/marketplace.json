@@ -7,8 +7,8 @@
 	"plugins": [
 		{
 			"name": "seenline",
-			"source": "./",
-			"description": "Local document-to-Markdown conversion with hidden text listed separately."
+			"source": "./plugin",
+			"description": "Read documents through Seenline: local conversion to Markdown with hidden text listed separately."
 		}
 	]
 }
