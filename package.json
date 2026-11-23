@@ -41,7 +41,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "seenline": "./dist/cli.js"
+    "seenline": "dist/cli.js"
   },
   "exports": {
     ".": {

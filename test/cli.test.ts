@@ -196,7 +196,7 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	assert.equal(run("--version").status, 0);
 	assert.equal(run("--version").stderr, "");
 	assert.equal(run("--", fixture("report.pdf")).stdout, await golden("report.pdf"));
-	assert.equal(pkg.bin.seenline, "./dist/cli.js");
+	assert.equal(pkg.bin.seenline, "dist/cli.js");
 	assert.equal(pkg.exports["./package.json"], "./package.json");
 	assert.ok((await readFile(cli, "utf8")).startsWith("#!/usr/bin/env node\n"));
 });
