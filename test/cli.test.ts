@@ -224,3 +224,12 @@ test("plugin and MCP Registry versions match the package version", async () => {
 	assert.equal((await json("plugin/.claude-plugin/plugin.json")).version, version);
 	assert.deepEqual([server.version, server.packages[0].version], [version, version]);
 });
+
+test("the directory plugin names no MCP server and no install command", async () => {
+	const root = new URL("../plugin/", import.meta.url);
+	for (const entry of await readdir(root, { recursive: true, withFileTypes: true })) {
+		if (!entry.isFile() || !/\.(md|json)$/.test(entry.name)) continue;
+		const text = await readFile(join(entry.parentPath, entry.name), "utf8");
+		assert.doesNotMatch(text, /\bmcp\b|npm install|npx|brew install|curl /i, entry.name);
+	}
+});
