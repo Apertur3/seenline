@@ -198,7 +198,6 @@ test("CLI --help, --version, end-of-options and package bin", async () => {
 	assert.equal(run("--", fixture("report.pdf")).stdout, await golden("report.pdf"));
 	assert.equal(pkg.bin.seenline, "./dist/cli.js");
 	assert.equal(pkg.exports["./package.json"], "./package.json");
-	assert.equal(pkg.private, true);
 	assert.ok((await readFile(cli, "utf8")).startsWith("#!/usr/bin/env node\n"));
 });
 
@@ -215,4 +214,14 @@ test("CLI --hidden describe keeps hidden text out of the Markdown and in --json'
 		out.markdown,
 		/\[Sheet: Budget\], \[row 3\], A3, hidden row: \d+ characters not shown/,
 	);
+});
+
+test("plugin, MCP registry and npx pins match the package version", async () => {
+	const json = async (path: string) =>
+		JSON.parse(await readFile(new URL(`../${path}`, import.meta.url), "utf8"));
+	const { version } = await json("package.json");
+	const server = await json("server.json");
+	assert.equal((await json(".claude-plugin/plugin.json")).version, version);
+	assert.deepEqual([server.version, server.packages[0].version], [version, version]);
+	assert.equal((await json(".mcp.json")).mcpServers.seenline.args[1], `seenline@${version}`);
 });

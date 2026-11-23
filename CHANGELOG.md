@@ -2,8 +2,9 @@
 
 Format: one heading per version. The anchor lines and the `[Hidden in the original]` block grammar are the output contract; changing them is a new major version.
 
-## 0.1.0 (prepared, not yet released)
+## 0.1.0 (2026-11-23)
 
+- Published on npm as `seenline`, with a Claude Code plugin (`/plugin install seenline --marketplace Apertur3/seenline`) and an MCP Registry entry (`io.github.Apertur3/seenline`). The plugin limits the server to the open project's folder. Examples for LangChain, LlamaIndex and a GitHub Actions check are in `examples/`.
 - PDF pages with a `/Rotate` entry are grouped into lines in the orientation the reader sees, so table text on rotated pages (the NIS2 annexes, for example) reads as lines instead of one word fragment per line.
 - A forwarded mail (`message/rfc822` part) is converted up to three levels deep and marked `Attached message:`; its hidden content and suspect tags join the outer file's block. A forwarded mail inside an alternative a client may not show stays a `(not converted)` attachment line. Benchmark facts 653/668 to 655/668; every Set B and Set C outcome unchanged.
 - HTML whose styles cannot be read (a linked stylesheet, `var()`, an unsupported selector) keeps its text in the body instead of listing every element as hidden or failing the file. The block says `HTML linked stylesheet not read: N` or `HTML inline CSS not fully read: N`, and lines that read like an instruction to an AI move to it as `HTML text may be hidden by unread styles`. Benchmark facts 632/668 to 653/668; every Set B and Set C outcome unchanged.

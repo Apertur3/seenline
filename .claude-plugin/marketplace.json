@@ -1,0 +1,14 @@
+{
+	"name": "seenline",
+	"owner": {
+		"name": "Apertur3"
+	},
+	"description": "Seenline: local document-to-Markdown conversion with hidden text listed separately.",
+	"plugins": [
+		{
+			"name": "seenline",
+			"source": "./",
+			"description": "Local document-to-Markdown conversion with hidden text listed separately."
+		}
+	]
+}

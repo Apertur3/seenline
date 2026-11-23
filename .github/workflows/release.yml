@@ -1,0 +1,38 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: npm ci --ignore-scripts
+      - name: Tag matches package.json
+        run: test "${GITHUB_REF_NAME}" = "v$(node -p 'require("./package.json").version')"
+      - run: sh scripts/ci.sh full
+        env:
+          SWEEP_PRIVATE: ${{ secrets.SWEEP_PRIVATE }}
+      # npm trusted publishing: no token; npm checks this repository and workflow through GitHub's OIDC identity.
+      - name: npm publish
+        run: |
+          if npm view "seenline@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1; then
+            echo "seenline@${GITHUB_REF_NAME#v} is already on npm"
+          else
+            npm publish --provenance --access public
+          fi
+      - name: MCP Registry
+        run: |
+          curl -fsSL https://github.com/modelcontextprotocol/registry/releases/download/v1.8.16/mcp-publisher_linux_amd64.tar.gz | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish

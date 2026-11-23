@@ -1,0 +1,16 @@
+{
+	"$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+	"name": "io.github.Apertur3/seenline",
+	"description": "Local document-to-Markdown conversion that lists text a reader cannot see separately.",
+	"repository": { "url": "https://github.com/Apertur3/seenline", "source": "github" },
+	"version": "0.1.0",
+	"packages": [
+		{
+			"registryType": "npm",
+			"identifier": "seenline",
+			"version": "0.1.0",
+			"transport": { "type": "stdio" },
+			"packageArguments": [{ "type": "positional", "value": "mcp" }]
+		}
+	]
+}

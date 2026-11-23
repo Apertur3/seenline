@@ -1,0 +1,16 @@
+{
+	"name": "seenline",
+	"version": "0.1.0",
+	"description": "Convert PDF, Word, PowerPoint, Excel, CSV, HTML, email and subtitle files to Markdown locally, with text a reader cannot see listed separately under [Hidden in the original].",
+	"icon": "assets/brand/seenline-mark-on-light.svg",
+	"author": {
+		"name": "Apertur3"
+	},
+	"homepage": "https://github.com/Apertur3/seenline",
+	"repository": "https://github.com/Apertur3/seenline",
+	"license": "MIT",
+	"keywords": ["markdown", "pdf", "document-conversion", "hidden-text", "prompt-injection"],
+	"network": {
+		"hosts": ["registry.npmjs.org"]
+	}
+}

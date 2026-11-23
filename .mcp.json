@@ -1,0 +1,8 @@
+{
+	"mcpServers": {
+		"seenline": {
+			"command": "npx",
+			"args": ["-y", "seenline@0.1.0", "mcp", "--root", "${CLAUDE_PROJECT_DIR}"]
+		}
+	}
+}

@@ -1,7 +1,7 @@
 {
   "name": "seenline",
-  "version": "0.0.0",
-  "private": true,
+  "mcpName": "io.github.Apertur3/seenline",
+  "version": "0.1.0",
   "description": "Local document-to-Markdown converter with built-in hidden-content flagging",
   "license": "MIT",
   "repository": {

@@ -2,34 +2,34 @@
   "release": "0.1.0",
   "units": {
     "bench": {
-      "bytes": 64763,
-      "files": 16,
-      "loc": 1591
+      "bytes": 121373,
+      "files": 20,
+      "loc": 2902
     },
     "config": {
-      "bytes": 16134,
-      "files": 10,
-      "loc": 462
+      "bytes": 62991,
+      "files": 21,
+      "loc": 1029
     },
     "kit": {
-      "bytes": 21657,
-      "files": 7,
-      "loc": 329
+      "bytes": 76009,
+      "files": 10,
+      "loc": 767
     },
     "scripts": {
-      "bytes": 98067,
+      "bytes": 111894,
       "files": 23,
-      "loc": 2276
+      "loc": 2497
     },
     "src": {
-      "bytes": 120507,
-      "files": 31,
-      "loc": 3041
+      "bytes": 233828,
+      "files": 35,
+      "loc": 5038
     },
     "test": {
-      "bytes": 97040,
-      "files": 23,
-      "loc": 2343
+      "bytes": 158500,
+      "files": 29,
+      "loc": 3766
     }
   }
 }

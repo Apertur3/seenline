@@ -146,6 +146,7 @@
         "*.jsonc",
         ".github/*",
         "docs/*",
+        "examples/*",
         "LICENSE",
         ".gitignore"
       ],
